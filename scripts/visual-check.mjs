@@ -17,7 +17,9 @@ function argValue(flag, fallback) {
   const i = args.indexOf(flag);
   return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
 }
-const URL_UNDER_TEST = argValue("--url", "http://localhost:4173/");
+const testURL = new URL(argValue("--url", "http://localhost:4173/"));
+testURL.searchParams.set("mode", "creative");
+const URL_UNDER_TEST = testURL.href;
 const OUT_DIR = argValue("--out", "visual-check");
 mkdirSync(OUT_DIR, { recursive: true });
 

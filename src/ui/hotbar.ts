@@ -1,94 +1,59 @@
-import { BlockId, PLACEABLE_BLOCKS } from "../world/blocks";
-import { ATLAS_TILE_SIZE, tileForBlockFace, tileGridPosition } from "../render/atlas-layout";
+import type { SurvivalSession } from "../survival/session";
+import { ITEMS } from "../items/catalog";
+import { BlockId } from "../world/blocks";
+import { paintItem } from "./inventory";
 
-const ICON_SIZE = 40;
-
-function blockAtIndex(index: number): BlockId {
-  const block = PLACEABLE_BLOCKS[index];
-  if (block === undefined) throw new Error(`hotbar index ${index.toString()} out of range`);
-  return block;
-}
-
-function renderTileIcon(atlasCanvas: HTMLCanvasElement, blockId: BlockId): HTMLCanvasElement {
-  const icon = document.createElement("canvas");
-  icon.width = ICON_SIZE;
-  icon.height = ICON_SIZE;
-  const ctx = icon.getContext("2d");
-  if (!ctx) throw new Error("2D canvas context is unavailable");
-  ctx.imageSmoothingEnabled = false;
-
-  const { col, row } = tileGridPosition(tileForBlockFace(blockId, "east"));
-  ctx.drawImage(
-    atlasCanvas,
-    col * ATLAS_TILE_SIZE,
-    row * ATLAS_TILE_SIZE,
-    ATLAS_TILE_SIZE,
-    ATLAS_TILE_SIZE,
-    0,
-    0,
-    ICON_SIZE,
-    ICON_SIZE,
-  );
-  icon.style.width = "100%";
-  icon.style.height = "100%";
-  return icon;
-}
-
-/** The 9-slot block picker: click, number keys 1-9, or scroll to select. */
 export class Hotbar {
-  private readonly container: HTMLElement;
-  private selectedIndex = 0;
-  private selectedBlockId: BlockId = blockAtIndex(0);
-
-  constructor(container: HTMLElement, atlasCanvas: HTMLCanvasElement) {
+  private container: HTMLElement;
+  private session: SurvivalSession;
+  private signature = "";
+  constructor(container: HTMLElement, session: SurvivalSession) {
     this.container = container;
-
-    PLACEABLE_BLOCKS.forEach((blockId, i) => {
-      const slot = document.createElement("div");
+    this.session = session;
+    for (let i = 0; i < 9; i++) {
+      const slot = document.createElement("button");
+      slot.type = "button";
       slot.className = "hotbar-slot";
-
-      const key = document.createElement("span");
-      key.className = "hotbar-key";
-      key.textContent = (i + 1).toString();
-      slot.appendChild(key);
-      slot.appendChild(renderTileIcon(atlasCanvas, blockId));
-
+      slot.setAttribute("aria-label", `ホットバー ${i + 1}`);
       slot.addEventListener("click", () => {
-        this.select(i);
+        session.data.selected = i;
+        this.refresh();
       });
-      this.container.appendChild(slot);
-    });
-
-    this.applySelectionStyle();
-
+      container.append(slot);
+    }
     window.addEventListener("keydown", (e) => {
-      const n = Number(e.key);
-      if (Number.isInteger(n) && n >= 1 && n <= PLACEABLE_BLOCKS.length) {
-        this.select(n - 1);
+      if (e.target instanceof Element && e.target.matches("input,select,textarea")) return;
+      const match = /^Digit([1-9])$/.exec(e.code);
+      if (match) {
+        session.data.selected = Number(match[1]) - 1;
+        this.refresh();
       }
     });
-
     window.addEventListener("wheel", (e) => {
-      const direction = e.deltaY > 0 ? 1 : -1;
-      this.select(
-        (this.selectedIndex + direction + PLACEABLE_BLOCKS.length) % PLACEABLE_BLOCKS.length,
-      );
+      if (document.querySelector("#inventory-panel:not([hidden])")) return;
+      session.data.selected = (session.data.selected + (e.deltaY > 0 ? 1 : 8)) % 9;
+      this.refresh();
+    });
+    this.refresh();
+  }
+  refresh(): void {
+    const sig = JSON.stringify([
+      this.session.data.inventory.slice(0, 9),
+      this.session.data.selected,
+    ]);
+    if (sig === this.signature) return;
+    this.signature = sig;
+    Array.from(this.container.children).forEach((el, i) => {
+      paintItem(el as HTMLElement, this.session.data.inventory[i] ?? null);
+      el.classList.toggle("selected", i === this.session.data.selected);
+      const key = document.createElement("span");
+      key.className = "hotbar-key";
+      key.textContent = String(i + 1);
+      el.append(key);
     });
   }
-
-  private select(index: number): void {
-    this.selectedIndex = index;
-    this.selectedBlockId = blockAtIndex(index);
-    this.applySelectionStyle();
-  }
-
-  private applySelectionStyle(): void {
-    Array.from(this.container.children).forEach((child, i) => {
-      child.classList.toggle("selected", i === this.selectedIndex);
-    });
-  }
-
   get selectedBlock(): BlockId {
-    return this.selectedBlockId;
+    const item = this.session.held;
+    return item ? (ITEMS[item.id]?.block ?? BlockId.AIR) : BlockId.AIR;
   }
 }

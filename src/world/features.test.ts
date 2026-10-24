@@ -196,6 +196,7 @@ describe("trees stamped into generated chunks", () => {
         expect([
           BlockId.LEAVES,
           BlockId.WOOD,
+          BlockId.BIRCH,
           BlockId.DIRT,
           BlockId.STONE,
           BlockId.GRASS,

@@ -1,4 +1,4 @@
-import { BlockId, isTransparent } from "../world/blocks";
+import { BlockId, isTransparent, isSmallBlock } from "../world/blocks";
 import type { Chunk } from "../world/chunk";
 import { CHUNK_HEIGHT, CHUNK_SIZE } from "../world/coords";
 import { type Face, tileForBlockFace } from "./atlas-layout";
@@ -233,7 +233,7 @@ export function meshChunk(chunk: Chunk, neighbors: NeighborLookup): MeshData {
           local[uAxis] = i;
           local[vAxis] = j;
           const self = block(local[0], local[1], local[2]);
-          if (self === BlockId.AIR) continue;
+          if (self === BlockId.AIR || isSmallBlock(self)) continue;
           open[0] = local[0];
           open[1] = local[1];
           open[2] = local[2];
@@ -340,6 +340,45 @@ export function meshChunk(chunk: Chunk, neighbors: NeighborLookup): MeshData {
       }
     }
   }
+
+  // Non-colliding vegetation and torches have actual narrow geometry rather
+  // than looking like full cubes. They share the existing chunk draw call.
+  for (let x = 0; x < CHUNK_SIZE; x++)
+    for (let z = 0; z < CHUNK_SIZE; z++)
+      for (let y = 0; y < CHUNK_HEIGHT; y++) {
+        const id = chunk.getBlock(x, y, z);
+        if (!isSmallBlock(id)) continue;
+        const boxes =
+          id === BlockId.TORCH
+            ? [[0.43, 0, 0.43, 0.57, 0.75, 0.57]]
+            : id === BlockId.SAPLING
+              ? [
+                  [0.45, 0, 0.45, 0.55, 0.65, 0.55],
+                  [0.15, 0.4, 0.15, 0.85, 0.9, 0.85],
+                ]
+              : [
+                  [0.15, 0, 0.15, 0.25, 0.75, 0.25],
+                  [0.65, 0, 0.2, 0.75, 0.85, 0.3],
+                  [0.2, 0, 0.65, 0.3, 0.7, 0.75],
+                  [0.65, 0, 0.65, 0.75, 0.9, 0.75],
+                ];
+        for (const bounds of boxes)
+          for (const face of FACES) {
+            const base = positions.length / 3;
+            for (const corner of face.corners) {
+              positions.push(
+                x + (bounds[0] ?? 0) + corner[0] * ((bounds[3] ?? 1) - (bounds[0] ?? 0)),
+                y + (bounds[1] ?? 0) + corner[1] * ((bounds[4] ?? 1) - (bounds[1] ?? 0)),
+                z + (bounds[2] ?? 0) + corner[2] * ((bounds[5] ?? 1) - (bounds[2] ?? 0)),
+              );
+              normals.push(...face.normal);
+              uvs.push(corner[face.tangents[0]], corner[face.tangents[1]]);
+              layers.push(tileForBlockFace(id, face.face));
+              colors.push(face.shade, face.shade, face.shade);
+            }
+            indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+          }
+      }
 
   return {
     positions: new Float32Array(positions),

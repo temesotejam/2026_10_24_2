@@ -87,6 +87,7 @@ function fillColumn(
   worldZ: number,
   profile: ColumnProfile,
   isCave: CaveQuery,
+  seed: number,
 ): void {
   const { terrainHeight } = profile;
   const underwater = terrainHeight <= SEA_LEVEL;
@@ -118,6 +119,19 @@ function fillColumn(
       id = BlockId.AIR;
     }
 
+    if (id === BlockId.STONE) {
+      // Integer-position hash: deterministic across chunks and workers.
+      const hash =
+        deriveSeed(
+          seed,
+          Math.imul(worldX, 73856093) ^ Math.imul(worldZ, 19349663) ^ Math.imul(y, 83492791),
+        ) >>> 0;
+      if (y < 14 && hash % 113 === 0) id = BlockId.DIAMOND_ORE;
+      else if (y < 24 && hash % 83 === 0) id = BlockId.GOLD_ORE;
+      else if (y < 42 && hash % 41 === 0) id = BlockId.IRON_ORE;
+      else if (hash % 29 === 0) id = BlockId.COAL_ORE;
+    }
+    if (id === BlockId.AIR && y < 5 && y > 0 && isCave(worldX, y, worldZ)) id = BlockId.LAVA;
     chunk.setBlock(lx, y, lz, id);
   }
 }
@@ -148,7 +162,14 @@ function stampTrees(
       if (lx < 0 || lx >= CHUNK_SIZE || lz < 0 || lz >= CHUNK_SIZE) continue;
       if (block.y < 1 || block.y >= CHUNK_HEIGHT) continue;
       if (block.kind === "trunk") {
-        chunk.setBlock(lx, block.y, lz, BlockId.WOOD);
+        chunk.setBlock(
+          lx,
+          block.y,
+          lz,
+          deriveSeed(seed, tree.x ^ Math.imul(tree.z, 7919)) % 4 === 0
+            ? BlockId.BIRCH
+            : BlockId.WOOD,
+        );
       } else if (chunk.getBlock(lx, block.y, lz) === BlockId.AIR) {
         chunk.setBlock(lx, block.y, lz, BlockId.LEAVES);
       }
@@ -168,7 +189,7 @@ export function generateChunk(cx: number, cz: number, seed: number): Chunk {
       const worldX = originX + lx;
       const worldZ = originZ + lz;
       const profile = sampleColumn(worldX, worldZ);
-      fillColumn(chunk, lx, lz, worldX, worldZ, profile, isCave);
+      fillColumn(chunk, lx, lz, worldX, worldZ, profile, isCave, seed);
     }
   }
 

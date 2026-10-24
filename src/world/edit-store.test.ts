@@ -86,3 +86,21 @@ describe("persistence across instances", () => {
     expect(store.totalEdits).toBe(0);
   });
 });
+
+it("can accumulate edits for an atomic save without serializing every block", () => {
+  let writes = 0;
+  const store = new EditStore(
+    {
+      getItem: () => null,
+      setItem: () => {
+        writes++;
+      },
+    },
+    42,
+    false,
+  );
+  for (let x = 0; x < 16; x++) store.record(x, 5, 1, BlockId.DIRT);
+  expect(writes).toBe(0);
+  expect(store.totalEdits).toBe(16);
+  expect(Object.values(store.snapshot())[0]).toBeDefined();
+});

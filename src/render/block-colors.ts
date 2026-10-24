@@ -14,6 +14,24 @@ const uniform = (r: number, g: number, b: number): BlockColor => ({
 });
 
 export const BLOCK_COLORS: Readonly<Record<BlockId, BlockColor>> = {
+  [BlockId.PLANKS]: uniform(174, 135, 79),
+  [BlockId.COBBLE]: uniform(111, 116, 121),
+  [BlockId.TABLE]: uniform(137, 95, 47),
+  [BlockId.FURNACE]: uniform(79, 84, 92),
+  [BlockId.CHEST]: uniform(183, 127, 45),
+  [BlockId.BED]: uniform(179, 61, 57),
+  [BlockId.TORCH]: uniform(255, 204, 83),
+  [BlockId.COAL_ORE]: uniform(72, 76, 85),
+  [BlockId.IRON_ORE]: uniform(163, 138, 113),
+  [BlockId.GOLD_ORE]: uniform(200, 172, 73),
+  [BlockId.DIAMOND_ORE]: uniform(69, 188, 191),
+  [BlockId.FARMLAND]: uniform(99, 67, 42),
+  [BlockId.CROP]: uniform(83, 140, 50),
+  [BlockId.RIPE_CROP]: uniform(207, 181, 72),
+  [BlockId.WOOL]: uniform(220, 218, 204),
+  [BlockId.SAPLING]: uniform(72, 134, 47),
+  [BlockId.LAVA]: uniform(232, 92, 22),
+  [BlockId.BIRCH]: uniform(211, 211, 189),
   [BlockId.AIR]: uniform(0, 0, 0), // never drawn — rays pass through air
   [BlockId.GRASS]: { top: [86, 140, 58], side: [122, 84, 51] },
   [BlockId.DIRT]: uniform(122, 84, 51),

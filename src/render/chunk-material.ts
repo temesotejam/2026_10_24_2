@@ -17,9 +17,11 @@ const vertexShader = /* glsl */ `
   out vec3 vShade;
   out vec3 vNormal;
   out float vFogDepth;
+  out vec3 vWorld;
 
   void main() {
     vUv = uv;
+    vWorld = (modelMatrix * vec4(position,1.0)).xyz;
     vLayer = layer;
     vShade = shadeColor;
     // Chunk meshes are translation-only, so the object-space normal is
@@ -36,6 +38,9 @@ const fragmentShader = /* glsl */ `
   precision highp sampler2DArray;
 
   uniform sampler2DArray uAtlas;
+  uniform highp sampler3D uLightField;
+  uniform vec3 uLightOrigin;
+  uniform float uDayLight;
   uniform vec3 uSunDir;
   uniform float uSunIntensity;
   uniform float uAmbient;
@@ -48,6 +53,7 @@ const fragmentShader = /* glsl */ `
   in vec3 vShade;
   in vec3 vNormal;
   in float vFogDepth;
+  in vec3 vWorld;
 
   out vec4 fragColor;
 
@@ -55,7 +61,11 @@ const fragmentShader = /* glsl */ `
     vec4 tex = texture(uAtlas, vec3(fract(vUv), vLayer));
     if (tex.a < 0.05) discard;
     float diffuse = uAmbient + uSunIntensity * max(dot(normalize(vNormal), uSunDir), 0.0);
-    vec3 rgb = tex.rgb * vShade * diffuse;
+    vec3 lightPos = (vWorld + vNormal * 0.02 - uLightOrigin) / 32.0;
+    vec2 light = texture(uLightField, clamp(lightPos, vec3(0.001), vec3(0.999))).rg;
+    bool inLight = all(greaterThanEqual(lightPos,vec3(0.0))) && all(lessThan(lightPos,vec3(1.0)));
+    float localLight = inLight ? max(light.r * uDayLight, light.g) : 0.7 + 0.3 * uDayLight;
+    vec3 rgb = tex.rgb * vShade * diffuse * (0.035 + localLight);
     float fog = clamp((vFogDepth - uFogNear) / (uFogFar - uFogNear), 0.0, 1.0);
     rgb = mix(rgb, uFogColor, fog);
     fragColor = vec4(rgb, tex.a);
@@ -68,6 +78,9 @@ export function createChunkMaterial(atlasArray: THREE.DataArrayTexture): THREE.S
     transparent: true,
     uniforms: {
       uAtlas: { value: atlasArray },
+      uLightField: { value: null },
+      uLightOrigin: { value: new THREE.Vector3() },
+      uDayLight: { value: 1 },
       uSunDir: { value: new THREE.Vector3(0.4, 0.85, 0.28).normalize() },
       uSunIntensity: { value: 0.85 },
       uAmbient: { value: 0.55 },
@@ -93,6 +106,7 @@ export function updateChunkMaterial(material: THREE.ShaderMaterial, sky: CpuSkyS
   // adds the moving directional highlight on top, scaled down so faces
   // never blow out at noon.
   const day = sky.sunIntensity / 1.7;
+  if (u.uDayLight) u.uDayLight.value = 0.08 + day * 0.92;
   if (u.uSunIntensity) u.uSunIntensity.value = 0.3 + 0.22 * day;
   if (u.uAmbient) u.uAmbient.value = 0.5 + 0.28 * day;
   const fog = u.uFogColor?.value as THREE.Color | undefined;

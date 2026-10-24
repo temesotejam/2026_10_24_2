@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PlayerController } from "./controller";
-import { CROUCH_EYE_HEIGHT, PLAYER_EYE_HEIGHT } from "./physics";
+import { CROUCH_EYE_HEIGHT, PLAYER_EYE_HEIGHT, MOVE_SPEED, SPRINT_MULTIPLIER } from "./physics";
 import { BlockId } from "../world/blocks";
 
 function setup(coarse = true) {
@@ -45,11 +45,11 @@ describe("classic keyboard controls", () => {
       key("KeyW");
       advance();
       const walked = 0.5 - player.position.z;
-      expect(walked).toBeCloseTo(5.2);
+      expect(walked).toBeCloseTo(MOVE_SPEED);
       key(`Control${side}`);
       advance();
       const sprinted = 0.5 - player.position.z - walked;
-      expect(sprinted / walked).toBeCloseTo(1.6);
+      expect(sprinted / walked).toBeCloseTo(SPRINT_MULTIPLIER);
       expect(key(`Shift${side}`).defaultPrevented).toBe(true);
       advance();
       const crouched = 0.5 - player.position.z - walked - sprinted;
@@ -113,4 +113,25 @@ it("does not resume from a stale pointer-lock rejection or watchdog after blur",
     await vi.advanceTimersByTimeAsync(1000);
     expect(player.mode).toBe("idle");
   }
+});
+
+it("F5 cycles behind/front/first person without moving the physical player or aim", () => {
+  const { player, camera, play, key } = setup();
+  play.dispatchEvent(new Event("click"));
+  const start = { ...player.position };
+  const aim = player.lookDirection;
+  expect(key("F5").defaultPrevented).toBe(true);
+  player.update(1 / 60);
+  expect(player.perspective).toBe(1);
+  expect(camera.position.z).toBeCloseTo(start.z + 3.5);
+  key("F5");
+  player.update(1 / 60);
+  expect(player.perspective).toBe(2);
+  expect(camera.position.z).toBeCloseTo(start.z - 3.5);
+  key("F5");
+  player.update(1 / 60);
+  expect(player.perspective).toBe(0);
+  expect(camera.position.z).toBeCloseTo(start.z);
+  expect(player.position.x).toBe(start.x);
+  expect(player.lookDirection).toEqual(aim);
 });

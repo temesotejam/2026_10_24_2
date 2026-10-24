@@ -19,17 +19,21 @@ export class Hud {
   constructor(parent: HTMLElement) {
     this.el = document.createElement("div");
     this.el.id = "fps";
+    this.lastReport = performance.now();
     parent.appendChild(this.el);
   }
 
   frame(nowMs: number, info: HudInfo): void {
     this.frames++;
     if (nowMs - this.lastReport < REPORT_INTERVAL_MS) return;
-    const fps = Math.round((this.frames * 1000) / (nowMs - this.lastReport));
+    const frameMs = (nowMs - this.lastReport) / this.frames;
+    const fps = Math.round(1000 / frameMs);
     this.frames = 0;
     this.lastReport = nowMs;
     const pos = `${Math.floor(info.x).toString()}, ${Math.floor(info.y).toString()}, ${Math.floor(info.z).toString()}`;
     const note = info.note ? ` · ${info.note}` : "";
-    this.el.textContent = `${fps.toString()} fps · (${pos}) · ${info.chunks.toString()} chunks · seed ${info.seed.toString()}${note}`;
+    const memory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    const heap = memory ? ` · ${Math.round(memory.usedJSHeapSize / 1048576)} MB heap` : "";
+    this.el.textContent = `${fps.toString()} fps · ${frameMs.toFixed(1)} ms${heap} · (${pos}) · ${info.chunks.toString()} chunks · seed ${info.seed.toString()}${note}`;
   }
 }

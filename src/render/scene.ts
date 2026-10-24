@@ -1,8 +1,8 @@
 import * as THREE from "three";
 
 export const SKY_COLOR = 0x87ceeb;
-export const FOG_NEAR = 78;
-export const FOG_FAR = 140;
+export const FOG_NEAR = 32;
+export const FOG_FAR = 56;
 const SUN_DISTANCE = 180;
 
 export interface GameScene {
@@ -24,6 +24,7 @@ export interface GameScene {
    * ladder to hold a fluid frame rate on fill-rate-bound (mobile) GPUs. */
   tickAdaptive: (frameMs: number) => void;
   readonly pixelRatio: () => number;
+  setViewDistance: (radius: number) => void;
   dispose: () => void;
 }
 
@@ -143,6 +144,12 @@ export function createGameScene(parent: HTMLElement): GameScene {
     applySky,
     tickAdaptive,
     pixelRatio: () => renderer.getPixelRatio(),
+    setViewDistance: (radius) => {
+      fog.near = radius * 8;
+      fog.far = radius * 14;
+      camera.far = radius * 16 + 60;
+      camera.updateProjectionMatrix();
+    },
     dispose,
   };
 }

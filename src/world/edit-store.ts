@@ -19,9 +19,11 @@ type SerializedEdits = Record<string, Record<string, number>>;
 export class EditStore {
   private readonly storage: KeyValueStorage;
   private readonly key: string;
+  private readonly persistOnRecord: boolean;
   private readonly edits = new Map<string, Map<number, BlockId>>();
 
-  constructor(storage: KeyValueStorage, seed: number) {
+  constructor(storage: KeyValueStorage, seed: number, persistOnRecord = true) {
+    this.persistOnRecord = persistOnRecord;
     this.storage = storage;
     this.key = EditStore.storageKey(seed);
     this.load();
@@ -39,7 +41,7 @@ export class EditStore {
       this.edits.set(key, chunkEdits);
     }
     chunkEdits.set(Chunk.index(worldToLocal(worldX), worldY, worldToLocal(worldZ)), id);
-    this.save();
+    if (this.persistOnRecord) this.save();
   }
 
   /** Re-applies recorded edits onto a freshly generated chunk. */
@@ -59,6 +61,12 @@ export class EditStore {
     let total = 0;
     for (const chunkEdits of this.edits.values()) total += chunkEdits.size;
     return total;
+  }
+
+  snapshot(): Record<string, Record<string, number>> {
+    const out: Record<string, Record<string, number>> = {};
+    for (const [key, cells] of this.edits) out[key] = Object.fromEntries(cells);
+    return out;
   }
 
   private load(): void {

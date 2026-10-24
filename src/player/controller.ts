@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { raycastVoxels } from "./raycast";
 import { FixedStepClock } from "../core/fixed-step";
 import { BlockId, isSolid } from "../world/blocks";
 import { CHUNK_HEIGHT } from "../world/coords";
@@ -50,6 +51,10 @@ export class PlayerController {
   private state: PlayerPhysicsState;
   private readonly clock = new FixedStepClock();
   private crouching = false;
+  canSprint: () => boolean = () => true;
+  perspective: 0 | 1 | 2 = 0;
+  thirdPersonEnabled = true;
+  onMenu: (() => void) | undefined;
   private yaw = 0;
   private pitch = 0;
   private readonly pressed = new Set<string>();
@@ -134,11 +139,22 @@ export class PlayerController {
     });
 
     document.addEventListener("keydown", (e) => {
+      if (e.code === "KeyE" && !e.repeat) {
+        e.preventDefault();
+        this.onMenu?.();
+        return;
+      }
       if (e.code === "Escape" && this.controlMode === "drag") {
         this.enterMode("idle");
         return;
       }
       if (this.controlMode === "idle") return;
+      if (e.code === "F5") {
+        e.preventDefault();
+        if (!e.repeat && this.thirdPersonEnabled)
+          this.perspective = ((this.perspective + 1) % 3) as 0 | 1 | 2;
+        return;
+      }
       this.pressed.add(e.code);
       // The page must not scroll or focus-hop while playing.
       if (e.code in KEY_BINDINGS || e.code.startsWith("Arrow")) {
@@ -236,14 +252,38 @@ export class PlayerController {
     return { forward, right, jump, sprint, crouch };
   }
 
+  get eyePosition() {
+    return {
+      ...this.state.position,
+      y: this.state.position.y + (this.crouching ? CROUCH_EYE_HEIGHT : PLAYER_EYE_HEIGHT),
+    };
+  }
+  get lookDirection() {
+    const cos = Math.cos(this.pitch);
+    return { x: -Math.sin(this.yaw) * cos, y: Math.sin(this.pitch), z: -Math.cos(this.yaw) * cos };
+  }
   private syncCamera(): void {
-    this.camera.position.set(
-      this.state.position.x,
-      this.state.position.y + (this.crouching ? CROUCH_EYE_HEIGHT : PLAYER_EYE_HEIGHT),
-      this.state.position.z,
-    );
+    const eye = this.eyePosition;
+    this.camera.position.set(eye.x, eye.y, eye.z);
     this.camera.rotation.x = this.pitch;
     this.camera.rotation.y = this.yaw;
+    if (this.perspective !== 0) {
+      const dir = this.lookDirection;
+      const sign = this.perspective === 1 ? -1 : 1;
+      const behind = { x: dir.x * sign, y: dir.y * sign, z: dir.z * sign };
+      const obstacle = raycastVoxels(eye, behind, 3.5, (x, y, z) =>
+        isSolid(this.world.getBlock(x, y, z)),
+      );
+      const distance = obstacle ? Math.max(0.2, obstacle.distance - 0.2) : 3.5;
+      this.camera.position.addScaledVector(
+        new THREE.Vector3(behind.x, behind.y, behind.z),
+        distance,
+      );
+      if (this.perspective === 2) {
+        this.camera.rotation.y += Math.PI;
+        this.camera.rotation.x = -this.pitch;
+      }
+    }
   }
 
   update(dt: number): void {
@@ -253,7 +293,7 @@ export class PlayerController {
       this.clock.advance(dt, (step) => {
         this.state = stepPhysics(
           this.state,
-          { forward, right, jump, sprint, crouch, yaw: this.yaw },
+          { forward, right, jump, sprint: sprint && this.canSprint(), crouch, yaw: this.yaw },
           step,
           (x, y, z) => isSolid(this.world.getBlock(x, y, z)),
           (x, y, z) => this.world.getBlock(x, y, z) === BlockId.WATER,
@@ -261,6 +301,27 @@ export class PlayerController {
       });
     }
     this.syncCamera();
+  }
+
+  pause(): void {
+    this.enterMode("idle");
+    if (document.pointerLockElement === this.domElement) document.exitPointerLock();
+  }
+
+  resume(): void {
+    this.requestControl();
+  }
+
+  restore(position: { x: number; y: number; z: number }, yaw = 0, pitch = 0): void {
+    this.state = { position: { ...position }, velocity: { x: 0, y: 0, z: 0 }, onGround: false };
+    this.yaw = yaw;
+    this.pitch = pitch;
+    this.clock.reset();
+    this.syncCamera();
+  }
+
+  get onGround(): boolean {
+    return this.state.onGround;
   }
 
   get mode(): ControlMode {
