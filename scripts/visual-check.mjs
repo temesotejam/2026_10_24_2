@@ -26,6 +26,13 @@ mkdirSync(OUT_DIR, { recursive: true });
 const results = [];
 function report(name, ok, detail = "") {
   results.push({ name, ok });
+  if (!ok && process.env.GITHUB_ACTIONS) {
+    const message = `${name}: ${detail}`
+      .replaceAll("%", "%25")
+      .replaceAll("\r", "%0D")
+      .replaceAll("\n", "%0A");
+    console.log(`::error title=Browser assertion failed::${message}`);
+  }
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
