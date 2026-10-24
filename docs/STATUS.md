@@ -60,5 +60,7 @@ P2の村・構造物・釣り・エンチャント・ポーション・ネザー
 ## GitHubでの確認
 
 機能ブランチへのpushでも全検査を実行し、mainだけをデプロイするワークフローを用意した。
-開発環境からGitHub APIへの要求が `Forbidden` となったため、PR作成・Actionsの結果照会は
-API接続が使える状態になってから行う。Gitによるブランチpushは別途利用可能。
+初回のGitHub API要求は `Forbidden` だったが、後続の接続でAPIが利用でき、
+[PR #1](https://github.com/temesotejam/2026_10_24_2/pull/1) を作成した。
+PagesのSourceは既にGitHub Actionsに設定されている。
+mainへの取り込みと公開は、計画書にある公開内容の確認後に行う。
