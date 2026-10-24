@@ -1,0 +1,50 @@
+name: Stability report
+
+on:
+  workflow_run:
+    workflows: ["Published world stability"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Published world stability run ID
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rendered-soak
+          path: report
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id || github.event.workflow_run.id }}
+      - name: Summarize measured results
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const report = JSON.parse(readFileSync('report/results.json', 'utf8'));
+          const samples = report.samples ?? [];
+          const number = value => Number.isFinite(value) ? value : null;
+          const result = {
+            completed: report.completed === true,
+            harnessVersion: number(report.harnessVersion) ?? 1,
+            elapsedSeconds: number(report.elapsedSeconds),
+            durationRequested: number(report.durationRequested),
+            reloads: number(report.reloads),
+            edits: number(report.edits),
+            samples: samples.length,
+            maxHeapBytes: Math.max(0, ...samples.map(s => number(s.heap) ?? 0)),
+            maxLoadedChunks: Math.max(0, ...samples.map(s => number(s.loaded) ?? 0)),
+          };
+          const text = JSON.stringify(result);
+          console.log(`::notice title=Rendered stability results::${text}`);
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Measured stability report\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\`\n`);
+          if (!result.completed) throw new Error('Rendered stability test did not complete');
+          JS
