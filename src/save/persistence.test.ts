@@ -41,6 +41,14 @@ describe("versioned save validation", () => {
       expect(() => validateSave(d)).toThrow();
     }
   });
+  it.each(["__proto__", "constructor", "toString"])(
+    "rejects inherited object name %s as an imported item",
+    (id) => {
+      const d = fresh();
+      d.inventory[0] = { id, count: 1 };
+      expect(() => parseSave(JSON.stringify(d))).toThrow("inventory");
+    },
+  );
   it("does not mutate the source object and rejects incompatible versions", () => {
     const d = fresh();
     const safe = validateSave(d);
