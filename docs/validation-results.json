@@ -1,0 +1,674 @@
+{
+  "game_commit": "75490858534b4b5b5c68de128a5cc73c1fd643e2",
+  "unit_tests": {
+    "files": 27,
+    "passed": 335
+  },
+  "local_browser": {
+    "visual_checks": 27,
+    "survival_checks": 18,
+    "natural_survival_journey": "passed; native inputs from empty inventory to diamond, torch illumination and save/reload"
+  },
+  "local_rendered_soak": {
+    "harnessVersion": 2,
+    "url": "http://127.0.0.1:4173/2026_10_24_2/?seed=2026&mode=creative",
+    "durationRequested": 1800,
+    "mode": "creative",
+    "viewport": [1280, 720],
+    "startedAt": "2026-10-24T17:05:39.578Z",
+    "samples": [
+      {
+        "elapsedSeconds": 5.3060000000186846e-5,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 35.34444444444444,
+          "z": 0.10427500000000009
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 38011838,
+        "time": 180.24166666666645
+      },
+      {
+        "elapsedSeconds": 60.356241460999996,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 32.58000064425836,
+          "z": -82.69999950286605
+        },
+        "loaded": 90,
+        "meshed": 90,
+        "heap": 38664605,
+        "time": 240.45833333327835
+      },
+      {
+        "elapsedSeconds": 120.69813590599999,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 28.866666700573447,
+          "z": -82.29990004035696
+        },
+        "loaded": 90,
+        "meshed": 90,
+        "heap": 34668651,
+        "time": 300.84166666655676
+      },
+      {
+        "elapsedSeconds": 180.857992252,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 25.78000003390678,
+          "z": -82.29990004035696
+        },
+        "loaded": 90,
+        "meshed": 90,
+        "heap": 37809638,
+        "time": 361.0083333331687
+      },
+      {
+        "elapsedSeconds": 241.184803909,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 21.906666700573446,
+          "z": -82.69999950286605
+        },
+        "loaded": 90,
+        "meshed": 90,
+        "heap": 38928735,
+        "time": 421.3166666664472
+      },
+      {
+        "elapsedSeconds": 304.866975109,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 17.406666700573446,
+          "z": -82.69999950286605
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 42835495,
+        "time": 481.3333333330593
+      },
+      {
+        "elapsedSeconds": 365.21011167999995,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 13.58000003390697,
+          "z": -82.29990004035696
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 41233075,
+        "time": 541.5249999996712
+      },
+      {
+        "elapsedSeconds": 425.66470620800004,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 11.866666700573635,
+          "z": -82.29990004035696
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 33223686,
+        "time": 601.9916666662829
+      },
+      {
+        "elapsedSeconds": 485.73965514599996,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 10.906666700573634,
+          "z": -82.69999950286605
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 32975379,
+        "time": 662.0916666662282
+      },
+      {
+        "elapsedSeconds": 545.764402596,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 10.906666700573634,
+          "z": -82.69999950286605
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 31755622,
+        "time": 722.0833333328403
+      },
+      {
+        "elapsedSeconds": 609.882750881,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 10.733333367240306,
+          "z": -82.29990004035696
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 34466630,
+        "time": 780.274999999454
+      },
+      {
+        "elapsedSeconds": 670.173444221,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 10.213333367240306,
+          "z": -82.29990004035696
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 35707971,
+        "time": 840.391666666066
+      },
+      {
+        "elapsedSeconds": 730.43685635,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 5.200099283852636,
+          "z": -83.69999976607997
+        },
+        "loaded": 90,
+        "meshed": 90,
+        "heap": 34697811,
+        "time": 900.7249999993445
+      },
+      {
+        "elapsedSeconds": 790.858747586,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 4.233333367240147,
+          "z": -83.69999976607997
+        },
+        "loaded": 90,
+        "meshed": 90,
+        "heap": 35290850,
+        "time": 961.058333332623
+      },
+      {
+        "elapsedSeconds": 851.254171809,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.5800000339068134,
+          "z": -83.29990030357088
+        },
+        "loaded": 90,
+        "meshed": 90,
+        "heap": 36689025,
+        "time": 1021.433333332568
+      },
+      {
+        "elapsedSeconds": 913.226917737,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.6844444783512578,
+          "z": -83.29990030357088
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 39371155,
+        "time": 1078.3666666665913
+      },
+      {
+        "elapsedSeconds": 973.3360620880001,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.000000033906814,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 35767075,
+        "time": 1138.2750000006874
+      },
+      {
+        "elapsedSeconds": 1033.403441159,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.073333367240147,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 34190342,
+        "time": 1198.3916666681196
+      },
+      {
+        "elapsedSeconds": 1093.4893886549999,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.013333367240146,
+          "z": -83.29990030357088
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 35437953,
+        "time": 1258.4916666688848
+      },
+      {
+        "elapsedSeconds": 1153.738471837,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.2244444783512574,
+          "z": -83.29990030357088
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 37672650,
+        "time": 1318.7000000029848
+      },
+      {
+        "elapsedSeconds": 1218.061584333,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 1.9444444783512573,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 32090433,
+        "time": 1377.000000003727
+      },
+      {
+        "elapsedSeconds": 1278.5435835829999,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 1.280000033906813,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 33271762,
+        "time": 1437.2916666711615
+      },
+      {
+        "elapsedSeconds": 1338.949311582,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.2444444783512574,
+          "z": -83.29990030357088
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 32935846,
+        "time": 1497.64166667193
+      },
+      {
+        "elapsedSeconds": 1399.179361239,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.1844444783512573,
+          "z": -83.29990030357088
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 33177170,
+        "time": 1557.891666672697
+      },
+      {
+        "elapsedSeconds": 1459.3033749810002,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 1.9444444783512573,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 33654516,
+        "time": 1618.0666666734633
+      },
+      {
+        "elapsedSeconds": 1521.4790385449999,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 1.7333333672401463,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 38552605,
+        "time": 1674.87500000752
+      },
+      {
+        "elapsedSeconds": 1581.6027172360002,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 1.6844444783512573,
+          "z": -83.29990030357088
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 39119481,
+        "time": 1734.8250000082833
+      },
+      {
+        "elapsedSeconds": 1641.846829353,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 1.0000000339068131,
+          "z": -83.29990030357088
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 32435137,
+        "time": 1795.0416666757167
+      },
+      {
+        "elapsedSeconds": 1701.864121242,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.1844444783512573,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 32112457,
+        "time": 1855.0750000098144
+      },
+      {
+        "elapsedSeconds": 1762.080747544,
+        "mode": "pointer",
+        "contextLost": false,
+        "position": {
+          "x": 0.5,
+          "y": 2.1666667005734794,
+          "z": -83.69999976607997
+        },
+        "loaded": 81,
+        "meshed": 81,
+        "heap": 31879636,
+        "time": 1915.2833333439144
+      }
+    ],
+    "reloads": 5,
+    "edits": 20,
+    "completed": true,
+    "elapsedSeconds": 1802.995051911,
+    "finishedAt": "2026-10-24T17:35:45.119Z"
+  },
+  "native_exploration": {
+    "completed": true,
+    "distanceEachWay": 256,
+    "origin": {
+      "x": 0.5,
+      "y": 35,
+      "z": 0.5
+    },
+    "samples": [
+      {
+        "label": "outbound 64",
+        "position": {
+          "x": 64.41229981235172,
+          "y": 35,
+          "z": 0.4999086971488868
+        },
+        "loaded": 90,
+        "heap": 46139191
+      },
+      {
+        "label": "outbound 128",
+        "position": {
+          "x": 128.39853996904537,
+          "y": 35,
+          "z": 0.4997700385539604
+        },
+        "loaded": 90,
+        "heap": 43638207
+      },
+      {
+        "label": "outbound 192",
+        "position": {
+          "x": 192.55732530464425,
+          "y": 35,
+          "z": 0.49982355244783766
+        },
+        "loaded": 90,
+        "heap": 50340395
+      },
+      {
+        "label": "outbound 256",
+        "position": {
+          "x": 256.5711148467446,
+          "y": 35,
+          "z": 0.49999728154451195
+        },
+        "loaded": 90,
+        "heap": 37527770
+      },
+      {
+        "label": "returned home after save/reload",
+        "position": {
+          "x": 0.5370431515253203,
+          "y": 35,
+          "z": 0.4995131383525217
+        },
+        "loaded": 90,
+        "heap": 48033503
+      }
+    ]
+  },
+  "synthetic_load": {
+    "completed": true,
+    "editCount": 101734,
+    "loot": 10000,
+    "reloads": 3,
+    "samples": [
+      {
+        "loaded": 81,
+        "time": 181.7166666666651,
+        "mode": "pointer",
+        "heap": 88614207
+      },
+      {
+        "loaded": 81,
+        "time": 183.22499999999707,
+        "mode": "pointer",
+        "heap": 79025663
+      },
+      {
+        "loaded": 81,
+        "time": 184.758333333329,
+        "mode": "pointer",
+        "heap": 74269267
+      },
+      {
+        "loaded": 81,
+        "time": 186.2749999999943,
+        "mode": "pointer",
+        "heap": 85138223
+      },
+      {
+        "loaded": 81,
+        "time": 187.82499999999288,
+        "mode": "pointer",
+        "heap": 80480039
+      },
+      {
+        "loaded": 81,
+        "time": 189.35833333332482,
+        "mode": "pointer",
+        "heap": 77528555
+      },
+      {
+        "loaded": 81,
+        "time": 190.8749999999901,
+        "mode": "pointer",
+        "heap": 85154603
+      },
+      {
+        "loaded": 81,
+        "time": 192.40833333332205,
+        "mode": "pointer",
+        "heap": 74725979
+      },
+      {
+        "loaded": 81,
+        "time": 193.92499999998734,
+        "mode": "pointer",
+        "heap": 90651695
+      },
+      {
+        "loaded": 81,
+        "time": 195.44166666665262,
+        "mode": "pointer",
+        "heap": 84005771
+      },
+      {
+        "loaded": 81,
+        "time": 196.97499999998456,
+        "mode": "pointer",
+        "heap": 106361339
+      },
+      {
+        "loaded": 81,
+        "time": 198.49166666664985,
+        "mode": "pointer",
+        "heap": 93888055
+      }
+    ]
+  },
+  "software_rendering_measurement": {
+    "viewport": [1280, 720],
+    "radius": 4,
+    "renderer": "Chromium / SwiftShader",
+    "results": [
+      {
+        "seed": 1,
+        "readyMs": 1071.81324,
+        "seconds": 20.04519999999851,
+        "fps": 27.18855386825976,
+        "frameMsMedian": 33.39999999999782,
+        "frameMsP95": 50.100000000000364,
+        "loaded": 81,
+        "meshed": 81,
+        "position": {
+          "x": 0.5,
+          "y": 35,
+          "z": 0.5
+        },
+        "heapBytes": 38970789
+      },
+      {
+        "seed": 2026,
+        "readyMs": 1015.4581060000019,
+        "seconds": 20.000799999999998,
+        "fps": 25.29898804047838,
+        "frameMsMedian": 33.399999999999636,
+        "frameMsP95": 50.100000000000364,
+        "loaded": 81,
+        "meshed": 81,
+        "position": {
+          "x": 0.5,
+          "y": 35,
+          "z": 0.5
+        },
+        "heapBytes": 40295149
+      },
+      {
+        "seed": -987654321,
+        "readyMs": 1026.6454259999955,
+        "seconds": 20.041600000000372,
+        "fps": 26.24540954813938,
+        "frameMsMedian": 33.399999999999636,
+        "frameMsP95": 50.100000000000364,
+        "loaded": 81,
+        "meshed": 81,
+        "position": {
+          "x": 0.5,
+          "y": 35,
+          "z": 0.5
+        },
+        "heapBytes": 36853845
+      }
+    ]
+  },
+  "provenance": {
+    "published_game_commit": "75490858534b4b5b5c68de128a5cc73c1fd643e2",
+    "software_measurement_commit": "2acb2c64425e65bb3d910844d5c5b752704450d2",
+    "local_rendered_soak_scope": "Final gameplay/rendering changes; the read-only yaw debug getter was added between reloads. No gameplay rules changed during this run.",
+    "synthetic_load_scope": "Explicit imported fixture; approximately 18 seconds rendered plus save and three reloads. These items were not gathered through ordinary play."
+  },
+  "published_browser": {
+    "commit": "75490858534b4b5b5c68de128a5cc73c1fd643e2",
+    "url": "https://temesotejam.github.io/2026_10_24_2/",
+    "javascript_asset": "index-BQG-EhK_.js",
+    "checks": 45,
+    "ci_run": "https://github.com/temesotejam/2026_10_24_2/actions/runs/40116421566",
+    "checks_job": "success",
+    "deploy_job": "success",
+    "published_checks_job": "success",
+    "tls": "Chromium default certificate validation on GitHub-hosted runner"
+  },
+  "published_initial_version_rendered_soak": {
+    "completed": true,
+    "harnessVersion": 1,
+    "elapsedSeconds": 7201.531729980999,
+    "durationRequested": 7200,
+    "reloads": 23,
+    "edits": 15,
+    "samples": 119,
+    "maxHeapBytes": 73488355,
+    "maxLoadedChunks": 90,
+    "workflow_run": "https://github.com/temesotejam/2026_10_24_2/actions/runs/40108197148",
+    "report_run": "https://github.com/temesotejam/2026_10_24_2/actions/runs/40117370814",
+    "scope": "Initially published survival version and harness version 1; distinct from the final gameplay local 30-minute test with harness version 2."
+  }
+}
