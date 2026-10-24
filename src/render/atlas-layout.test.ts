@@ -15,11 +15,10 @@ describe("tileGridPosition", () => {
   });
 
   it("wraps to the next row after ATLAS_GRID_SIZE tiles", () => {
-    // With a 4-wide grid, tile index 4 (SAND) is the first tile of row 1,
-    // and tile index 5 (WATER) is the second.
-    expect(TileKind.SAND).toBe(ATLAS_GRID_SIZE);
-    expect(tileGridPosition(TileKind.SAND)).toEqual({ col: 0, row: 1 });
-    expect(tileGridPosition(TileKind.WATER)).toEqual({ col: 1, row: 1 });
+    // The expanded atlas has eight tiles per row.
+    expect(TileKind.LEAVES).toBe(ATLAS_GRID_SIZE);
+    expect(tileGridPosition(TileKind.LEAVES)).toEqual({ col: 0, row: 1 });
+    expect(tileGridPosition(TileKind.BEDROCK)).toEqual({ col: 1, row: 1 });
   });
 });
 

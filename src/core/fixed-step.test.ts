@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { FixedStepClock, PHYSICS_STEP_SECONDS } from "./fixed-step";
-import { type PlayerPhysicsState, stepPhysics, TERMINAL_VELOCITY } from "../player/physics";
+import {
+  type PlayerPhysicsState,
+  stepPhysics,
+  TERMINAL_VELOCITY,
+  MOVE_SPEED,
+} from "../player/physics";
 
 function simulate(fps: number) {
   const clock = new FixedStepClock();
@@ -32,10 +37,11 @@ describe("fixed physics clock", () => {
   it("preserves movement distance, jump apex and landing time at 30, 60 and 144 FPS", () => {
     const baseline = simulate(60);
     expect(baseline.steps).toBe(240);
-    expect(baseline.state.position.z).toBeCloseTo(0.5 - 5.2 * 2, 6);
-    expect(baseline.apex).toBeGreaterThan(2.4);
-    expect(baseline.landedAt).toBeGreaterThan(0.6);
-    expect(baseline.landedAt).toBeLessThan(0.7);
+    expect(baseline.state.position.z).toBeCloseTo(0.5 - MOVE_SPEED * 2, 6);
+    expect(baseline.apex).toBeGreaterThan(2.2);
+    expect(baseline.apex).toBeLessThan(2.3);
+    expect(baseline.landedAt).toBeGreaterThan(0.5);
+    expect(baseline.landedAt).toBeLessThan(0.6);
     expect(simulate(30)).toEqual(baseline);
     expect(simulate(144)).toEqual(baseline);
   });

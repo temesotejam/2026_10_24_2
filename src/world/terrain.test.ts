@@ -143,9 +143,15 @@ describe("generateChunk layering", () => {
         for (let y = 1; y < profile.terrainHeight; y++) {
           const block = chunk.getBlock(lx, y, lz);
           if (y <= carveCeiling && isCave(worldX(lx), y, worldZ(lz))) {
-            expect(block).toBe(BlockId.AIR);
+            expect(block).toBe(y < 5 ? BlockId.LAVA : BlockId.AIR);
           } else if (y < profile.terrainHeight - DIRT_DEPTH) {
-            expect(block).toBe(BlockId.STONE);
+            expect([
+              BlockId.STONE,
+              BlockId.COAL_ORE,
+              BlockId.IRON_ORE,
+              BlockId.GOLD_ORE,
+              BlockId.DIAMOND_ORE,
+            ]).toContain(block);
           } else {
             expect([BlockId.DIRT, BlockId.SAND]).toContain(block);
           }
@@ -163,10 +169,37 @@ describe("generateChunk layering", () => {
           if (y <= SEA_LEVEL) {
             expect(block).toBe(BlockId.WATER);
           } else {
-            expect([BlockId.AIR, BlockId.WOOD, BlockId.LEAVES]).toContain(block);
+            expect([BlockId.AIR, BlockId.WOOD, BlockId.BIRCH, BlockId.LEAVES]).toContain(block);
           }
         }
       }
     }
+  });
+});
+
+describe("ore distribution", () => {
+  it("generates all progression ores deterministically within their depth limits", () => {
+    const seen = new Set<number>();
+    const limits = new Map<number, number>([
+      [BlockId.DIAMOND_ORE, 14],
+      [BlockId.GOLD_ORE, 24],
+      [BlockId.IRON_ORE, 42],
+      [BlockId.COAL_ORE, 96],
+    ]);
+    for (let cx = -1; cx <= 1; cx++)
+      for (let cz = -1; cz <= 1; cz++) {
+        const chunk = generateChunk(cx, cz, 2026);
+        for (let x = 0; x < 16; x++)
+          for (let z = 0; z < 16; z++)
+            for (let y = 1; y < 96; y++) {
+              const id = chunk.getBlock(x, y, z);
+              const limit = limits.get(id);
+              if (limit !== undefined) {
+                expect(y).toBeLessThan(limit);
+                seen.add(id);
+              }
+            }
+      }
+    expect(seen).toEqual(new Set(limits.keys()));
   });
 });

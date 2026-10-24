@@ -20,6 +20,18 @@
     <div id="app">
       <div id="crosshair" aria-hidden="true"></div>
       <div id="hotbar"></div>
+      <div id="survival-hud">
+        <span class="hearts" id="hearts"></span><span class="hunger" id="hunger"></span>
+      </div>
+      <div id="objective"></div>
+      <div id="save-status"></div>
+      <div id="mining-meter"><div id="mining-fill"></div></div>
+      <div id="toast" hidden role="status"></div>
+      <div id="death-panel" hidden>
+        <h1>倒れてしまった</h1>
+        <p>落とした所持品は10分以内に回収できます。</p>
+        <button id="respawn" type="button">復活する</button>
+      </div>
       <div id="overlay">
         <div id="overlay-content">
           <h1>Classic Voxel Survival</h1>
@@ -27,14 +39,40 @@
             WASD：移動 &middot; マウス：視点 &middot; Space：ジャンプ<br />
             左クリック：採掘 &middot; 右クリック：設置 &middot; Ctrl：ダッシュ &middot;
             Shift：しゃがみ<br />
-            1〜9 / ホイール：ブロック選択 &middot; Esc：操作解除
+            1〜9 / ホイール：ブロック選択 &middot; F5：視点切替 &middot; Esc：操作解除
           </p>
           <p class="controls-touch">
             左側：移動 &middot; 右側ドラッグ：視点<br />
             タップ：採掘 &middot; ボタン：ジャンプ・設置<br />
             スロットをタップ：ブロック選択
           </p>
+          <div class="world-settings">
+            <label>Seed <input id="world-seed" type="number" step="1" /></label>
+            <select id="world-mode" aria-label="ゲームモード">
+              <option value="survival">サバイバル</option>
+              <option value="creative">クリエイティブ</option>
+            </select>
+            <button id="open-world" type="button">ワールドを開く</button>
+            <label
+              >視界
+              <select id="view-distance">
+                <option value="4">4チャンク</option>
+                <option value="6">6チャンク</option>
+                <option value="9">9チャンク</option>
+                <option value="12">12チャンク</option>
+              </select></label
+            >
+          </div>
+          <p>E：所持品・レシピ集 · 作業台やベッドは右クリックで使用</p>
           <button id="play-button" type="button">プレイする</button>
+          <div class="menu-actions">
+            <button id="save-button" type="button">保存する</button>
+            <button id="export-button" type="button">バックアップ書き出し</button>
+            <label
+              >読み込み<input id="import-file" type="file" accept="application/json,.json" hidden
+            /></label>
+            <button id="recover-button" type="button">前回の保存に戻す</button>
+          </div>
         </div>
       </div>
     </div>

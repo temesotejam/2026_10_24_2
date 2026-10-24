@@ -30,7 +30,7 @@ export interface StreamerOptions {
  * *which* chunks are dirty; main drains that queue with a per-frame budget. */
 export class ChunkStreamer {
   private readonly world: World;
-  private readonly radius: number;
+  private radius: number;
   private readonly editStore: EditStore | undefined;
   private readonly onUnload: ((cx: number, cz: number) => void) | undefined;
   private generator: ChunkGenerator | undefined;
@@ -43,6 +43,10 @@ export class ChunkStreamer {
     this.radius = options.radius;
     this.editStore = options.editStore;
     this.onUnload = options.onUnload;
+  }
+
+  setRadius(radius: number): void {
+    if (Number.isInteger(radius) && radius >= 4 && radius <= 12) this.radius = radius;
   }
 
   /** The generator needs the streamer's receive() as its callback, so it's

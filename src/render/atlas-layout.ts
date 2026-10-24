@@ -7,7 +7,7 @@ import { BlockId } from "../world/blocks";
  * table instead of being scattered through the meshing loop. */
 
 export const ATLAS_TILE_SIZE = 16;
-export const ATLAS_GRID_SIZE = 4;
+export const ATLAS_GRID_SIZE = 8;
 export const ATLAS_PIXELS = ATLAS_TILE_SIZE * ATLAS_GRID_SIZE;
 
 export const TileKind = {
@@ -22,6 +22,24 @@ export const TileKind = {
   LEAVES: 8,
   BEDROCK: 9,
   SNOW: 10,
+  PLANKS: 11,
+  COBBLE: 12,
+  TABLE: 13,
+  FURNACE: 14,
+  CHEST: 15,
+  BED: 16,
+  TORCH: 17,
+  COAL_ORE: 18,
+  IRON_ORE: 19,
+  GOLD_ORE: 20,
+  DIAMOND_ORE: 21,
+  FARMLAND: 22,
+  CROP: 23,
+  RIPE_CROP: 24,
+  WOOL: 25,
+  SAPLING: 26,
+  LAVA: 27,
+  BIRCH: 28,
 } as const;
 
 export type TileKind = (typeof TileKind)[keyof typeof TileKind];
@@ -66,6 +84,42 @@ export function tileForBlockFace(id: BlockId, face: Face): TileKind {
       return TileKind.BEDROCK;
     case BlockId.SNOW:
       return TileKind.SNOW;
+    case BlockId.PLANKS:
+      return TileKind.PLANKS;
+    case BlockId.COBBLE:
+      return TileKind.COBBLE;
+    case BlockId.TABLE:
+      return TileKind.TABLE;
+    case BlockId.FURNACE:
+      return TileKind.FURNACE;
+    case BlockId.CHEST:
+      return TileKind.CHEST;
+    case BlockId.BED:
+      return TileKind.BED;
+    case BlockId.TORCH:
+      return TileKind.TORCH;
+    case BlockId.COAL_ORE:
+      return TileKind.COAL_ORE;
+    case BlockId.IRON_ORE:
+      return TileKind.IRON_ORE;
+    case BlockId.GOLD_ORE:
+      return TileKind.GOLD_ORE;
+    case BlockId.DIAMOND_ORE:
+      return TileKind.DIAMOND_ORE;
+    case BlockId.FARMLAND:
+      return TileKind.FARMLAND;
+    case BlockId.CROP:
+      return TileKind.CROP;
+    case BlockId.RIPE_CROP:
+      return TileKind.RIPE_CROP;
+    case BlockId.WOOL:
+      return TileKind.WOOL;
+    case BlockId.SAPLING:
+      return TileKind.SAPLING;
+    case BlockId.LAVA:
+      return TileKind.LAVA;
+    case BlockId.BIRCH:
+      return face === "top" || face === "bottom" ? TileKind.WOOD_TOP : TileKind.BIRCH;
     case BlockId.AIR:
       return TileKind.STONE; // never sampled — the mesher skips air outright
   }

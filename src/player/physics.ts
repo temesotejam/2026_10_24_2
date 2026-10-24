@@ -22,11 +22,11 @@ export const PLAYER_EYE_HEIGHT = 1.62;
 export const CROUCH_EYE_HEIGHT = 1.42;
 export const CROUCH_SPEED_FACTOR = 0.3;
 
-export const GRAVITY = 28;
-export const JUMP_SPEED = 9;
+export const GRAVITY = 32;
+export const JUMP_SPEED = 8.8;
 export const TERMINAL_VELOCITY = -40;
-export const MOVE_SPEED = 5.2;
-export const SPRINT_MULTIPLIER = 1.6;
+export const MOVE_SPEED = 4.317;
+export const SPRINT_MULTIPLIER = 1.3;
 
 const COLLISION_EPSILON = 1e-4;
 const BISECTION_ITERATIONS = 16;

@@ -15,6 +15,25 @@ interface TileStyle {
 }
 
 const TILE_STYLES: Record<TileKind, TileStyle> = {
+  [TileKind.BIRCH]: { base: [211, 211, 189], alpha: 255, speckleAmount: 16 },
+  [TileKind.PLANKS]: { base: [174, 135, 79], alpha: 255, speckleAmount: 24 },
+  [TileKind.COBBLE]: { base: [111, 116, 121], alpha: 255, speckleAmount: 24 },
+  [TileKind.TABLE]: { base: [137, 95, 47], alpha: 255, speckleAmount: 24 },
+  [TileKind.FURNACE]: { base: [79, 84, 92], alpha: 255, speckleAmount: 24 },
+  [TileKind.CHEST]: { base: [183, 127, 45], alpha: 255, speckleAmount: 24 },
+  [TileKind.BED]: { base: [179, 61, 57], alpha: 255, speckleAmount: 24 },
+  [TileKind.TORCH]: { base: [255, 204, 83], alpha: 255, speckleAmount: 24 },
+  [TileKind.COAL_ORE]: { base: [72, 76, 85], alpha: 255, speckleAmount: 24 },
+  [TileKind.IRON_ORE]: { base: [163, 138, 113], alpha: 255, speckleAmount: 24 },
+  [TileKind.GOLD_ORE]: { base: [200, 172, 73], alpha: 255, speckleAmount: 24 },
+  [TileKind.DIAMOND_ORE]: { base: [69, 188, 191], alpha: 255, speckleAmount: 24 },
+  [TileKind.FARMLAND]: { base: [99, 67, 42], alpha: 255, speckleAmount: 24 },
+  [TileKind.CROP]: { base: [83, 140, 50], alpha: 255, speckleAmount: 24 },
+  [TileKind.RIPE_CROP]: { base: [207, 181, 72], alpha: 255, speckleAmount: 24 },
+  [TileKind.WOOL]: { base: [220, 218, 204], alpha: 255, speckleAmount: 24 },
+  [TileKind.SAPLING]: { base: [72, 134, 47], alpha: 255, speckleAmount: 24 },
+  [TileKind.LAVA]: { base: [232, 92, 22], alpha: 255, speckleAmount: 24 },
+
   [TileKind.GRASS_TOP]: { base: [86, 140, 58], alpha: 255, speckleAmount: 18 },
   [TileKind.GRASS_SIDE]: { base: [122, 84, 51], alpha: 255, speckleAmount: 14 },
   [TileKind.DIRT]: { base: [122, 84, 51], alpha: 255, speckleAmount: 16 },
@@ -79,6 +98,49 @@ function paintTileAt(
     }
   }
 
+  if (
+    tile === TileKind.PLANKS ||
+    tile === TileKind.COBBLE ||
+    tile === TileKind.FURNACE ||
+    tile === TileKind.TABLE ||
+    tile === TileKind.CHEST
+  ) {
+    ctx.fillStyle = "rgba(35, 27, 19, 0.45)";
+    for (let line = 0; line < 16; line += 4) ctx.fillRect(x, y + line, 16, 1);
+    if (tile !== TileKind.PLANKS)
+      for (let line = 0; line < 16; line += 5) ctx.fillRect(x + line, y, 1, 16);
+    if (tile === TileKind.FURNACE) {
+      ctx.fillStyle = "#1c1b1e";
+      ctx.fillRect(x + 3, y + 8, 10, 5);
+    }
+    if (tile === TileKind.CHEST) {
+      ctx.fillStyle = "#e9c45f";
+      ctx.fillRect(x + 7, y + 6, 3, 5);
+    }
+  }
+  if (
+    [TileKind.COAL_ORE, TileKind.IRON_ORE, TileKind.GOLD_ORE, TileKind.DIAMOND_ORE].includes(
+      tile as typeof TileKind.COAL_ORE,
+    )
+  ) {
+    ctx.fillStyle = "#777b81";
+    ctx.fillRect(x, y, 16, 16);
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    for (let i = 0; i < 12; i++)
+      ctx.fillRect(x + Math.floor(rng() * 14), y + Math.floor(rng() * 14), 2, 2);
+  }
+  if (tile === TileKind.TORCH) {
+    ctx.fillStyle = "#6c4d32";
+    ctx.fillRect(x, y + 5, 16, 11);
+    ctx.fillStyle = "#fff4ad";
+    ctx.fillRect(x + 4, y, 8, 5);
+  }
+
+  if (tile === TileKind.BIRCH) {
+    ctx.fillStyle = "#343936";
+    for (let i = 0; i < 8; i++)
+      ctx.fillRect(x + Math.floor(rng() * 13), y + Math.floor(rng() * 15), 3, 1);
+  }
   if (tile === TileKind.WOOD_TOP) {
     ctx.strokeStyle = "rgba(120, 90, 55, 0.9)";
     ctx.lineWidth = 1;

@@ -342,3 +342,16 @@ function normalize(v: [number, number, number]): [number, number, number] {
   const len = Math.hypot(v[0], v[1], v[2]);
   return len === 0 ? v : [v[0] / len, v[1] / len, v[2] / len];
 }
+
+describe("small survival block geometry", () => {
+  it("renders a torch as a narrow post rather than a full cube", () => {
+    const chunk = new Chunk(0, 0);
+    chunk.setBlock(4, 2, 4, BlockId.TORCH);
+    const mesh = meshChunk(chunk, { getBlock: () => BlockId.AIR });
+    expect(mesh.indices.length).toBe(36);
+    const xs = Array.from(mesh.positions).filter((_v, i) => i % 3 === 0);
+    const ys = Array.from(mesh.positions).filter((_v, i) => i % 3 === 1);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(0.14);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(0.75);
+  });
+});

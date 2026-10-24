@@ -1,3 +1,5 @@
+> 上流リポジトリの導入時点の記録です。現在の検証は [STATUS.md](STATUS.md) を参照。
+
 # Execution record
 
 Source revision: `b226ea305837eb566b8b9946ce9fff281225928e`.
