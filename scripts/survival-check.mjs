@@ -299,6 +299,14 @@ try {
     errors.filter((e) => !e.includes("injected quota failure")).length === 0,
   );
   console.log(`\n${passed}/${passed} survival checks passed`);
+} catch (error) {
+  const detail = String(error?.stack ?? error)
+    .replaceAll("%", "%25")
+    .replaceAll("\r", "%0D")
+    .replaceAll("\n", "%0A");
+  if (process.env.GITHUB_ACTIONS)
+    console.log(`::error title=Browser verification failed::${detail}`);
+  throw error;
 } finally {
   await browser.close();
 }

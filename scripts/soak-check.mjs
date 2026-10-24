@@ -175,6 +175,14 @@ try {
   console.log(
     `PASS rendered soak: ${report.elapsedSeconds.toFixed(1)}s, ${reloads} reloads, ${edits} edits`,
   );
+} catch (error) {
+  const detail = String(error?.stack ?? error)
+    .replaceAll("%", "%25")
+    .replaceAll("\r", "%0D")
+    .replaceAll("\n", "%0A");
+  if (process.env.GITHUB_ACTIONS)
+    console.log(`::error title=Browser verification failed::${detail}`);
+  throw error;
 } finally {
   persist();
   await browser.close();

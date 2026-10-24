@@ -503,6 +503,14 @@ try {
   const failed = results.filter((r) => !r.ok).length;
   console.log(`\n${results.length - failed}/${results.length} checks passed`);
   process.exitCode = failed === 0 ? 0 : 1;
+} catch (error) {
+  const detail = String(error?.stack ?? error)
+    .replaceAll("%", "%25")
+    .replaceAll("\r", "%0D")
+    .replaceAll("\n", "%0A");
+  if (process.env.GITHUB_ACTIONS)
+    console.log(`::error title=Browser verification failed::${detail}`);
+  throw error;
 } finally {
   await browser.close();
 }
