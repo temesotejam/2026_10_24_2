@@ -23,6 +23,9 @@ const URL_UNDER_TEST = testURL.href;
 const OUT_DIR = argValue("--out", "visual-check");
 mkdirSync(OUT_DIR, { recursive: true });
 
+// Fluid updates may refill a successfully excavated cell before observation.
+// Targeting excludes these IDs, so an unchanged solid target cannot pass.
+const isExcavated = (id) => id === 0 || id === 5 || id === 26;
 const results = [];
 function report(name, ok, detail = "") {
   results.push({ name, ok });
@@ -41,8 +44,13 @@ const browser = await puppeteer.launch({
   args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--window-size=1280,720"],
 });
 
+async function freshPage() {
+  const context = await browser.createBrowserContext();
+  const page = await context.newPage();
+  return page;
+}
 try {
-  const page = await browser.newPage();
+  const page = await freshPage();
   await page.setViewport({ width: 1280, height: 720 });
   const consoleErrors = [];
   page.on("console", (msg) => {
@@ -211,7 +219,7 @@ try {
       const afterBreak = await page.evaluate((t) => window.__mc.blockAt(t.x, t.y, t.z), target);
       report(
         "left click breaks the targeted block",
-        afterBreak === 0,
+        isExcavated(afterBreak),
         `block ${JSON.stringify(target)} is now id ${afterBreak}`,
       );
     }
@@ -234,11 +242,13 @@ try {
     await page.screenshot({ path: path.join(OUT_DIR, "03-playing.png") });
   }
 
+  await page.browserContext().close();
+
   // ---- pointer-lock-blocked fallback (a fresh page, lock sabotaged) ----
   // Simulates browsers/extensions that silently refuse pointer lock — the
   // exact "I click play and nothing happens" failure. The game must fall
   // back to drag-look and still be fully playable.
-  const fallbackPage = await browser.newPage();
+  const fallbackPage = await freshPage();
   await fallbackPage.setViewport({ width: 1280, height: 720 });
   await fallbackPage.evaluateOnNewDocument(() => {
     Element.prototype.requestPointerLock = () => Promise.reject(new Error("blocked by test"));
@@ -301,17 +311,23 @@ try {
         (t) => window.__mc.blockAt(t.x, t.y, t.z),
         tapTarget,
       );
-      report("tap breaks a block in fallback mode", afterTap === 0, `block is now id ${afterTap}`);
+      report(
+        "tap breaks a block in fallback mode",
+        isExcavated(afterTap),
+        `block is now id ${afterTap}`,
+      );
+    } else {
+      report("tap breaks a block in fallback mode", false, "no block targeted");
     }
     await fallbackPage.screenshot({ path: path.join(OUT_DIR, "04-fallback-mode.png") });
   }
-  await fallbackPage.close();
+  await fallbackPage.browserContext().close();
 
   // ---- zero-WebGL fallback (a fresh page, getContext('webgl*') sabotaged) ----
   // Simulates machines where WebGL is unavailable entirely — a real player
   // hit exactly this. The game must boot into the CPU raycaster and be
   // fully playable: render, move, break.
-  const cpuPage = await browser.newPage();
+  const cpuPage = await freshPage();
   await cpuPage.setViewport({ width: 1280, height: 720 });
   await cpuPage.evaluateOnNewDocument(() => {
     const original = HTMLCanvasElement.prototype.getContext;
@@ -384,7 +400,7 @@ try {
       );
       report(
         "breaking works on the CPU renderer",
-        afterCpuBreak === 0,
+        isExcavated(afterCpuBreak),
         `block is now id ${afterCpuBreak}`,
       );
     } else {
@@ -392,12 +408,12 @@ try {
     }
     await cpuPage.screenshot({ path: path.join(OUT_DIR, "06-cpu-playing.png") });
   }
-  await cpuPage.close();
+  await cpuPage.browserContext().close();
 
   // ---- mobile / touch (emulated phone with a touchscreen) ----
   // Proves the game detects a touch device, shows on-screen controls, and
   // is fully playable with thumb + drag + tap — no keyboard, no mouse.
-  const mobilePage = await browser.newPage();
+  const mobilePage = await freshPage();
   await mobilePage.setViewport({
     width: 390,
     height: 844,
@@ -496,12 +512,16 @@ try {
       (t) => window.__mc.blockAt(t.x, t.y, t.z),
       mobileTarget,
     );
-    report("tap breaks the targeted block on touch", afterTap === 0, `block is now id ${afterTap}`);
+    report(
+      "tap breaks the targeted block on touch",
+      isExcavated(afterTap),
+      `block is now id ${afterTap}`,
+    );
   } else {
     report("tap breaks the targeted block on touch", false, "no target under crosshair");
   }
   await mobilePage.screenshot({ path: path.join(OUT_DIR, "07-mobile.png") });
-  await mobilePage.close();
+  await mobilePage.browserContext().close();
 
   // ---- console stayed clean ----
   const realErrors = consoleErrors.filter((e) => !e.includes("favicon"));
