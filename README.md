@@ -79,6 +79,7 @@ npm run preview -- --host 127.0.0.1 --port 4173 --strictPort --base /2026_10_24_
 node scripts/visual-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/survival-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/journey-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+node scripts/load-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/performance-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --seconds 20
 ```
 
