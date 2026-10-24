@@ -4,6 +4,8 @@
 Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サーバーは不要です。
 公式 Minecraft の素材は同梱せず、テクスチャ・アイコン・モデルを手続き生成します。
 
+**[ブラウザで遊ぶ](https://temesotejam.github.io/2026_10_24_2/)**
+
 ![作業台で木のツルハシを作成したサバイバル画面](docs/screenshots/survival-crafting.png)
 
 ## 遊び方
@@ -76,6 +78,9 @@ npm run preview -- --host 127.0.0.1 --port 4173 --strictPort --base /2026_10_24_
 # 別ターミナルで実行
 node scripts/visual-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/survival-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+node scripts/journey-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+node scripts/load-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+node scripts/explore-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --distance 256
 node scripts/performance-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --seconds 20
 ```
 
@@ -103,14 +108,16 @@ GitHub Settings → Pages の Source を **GitHub Actions** に設定する必�
 
 ## 実装範囲と残る評価
 
-現在は基本サバイバルの最初の統合版です。Minecraft と同一のゲームや完成版とはしていません。
-視界は4〜12チャンクで調整でき、HUD に FPS・平均フレーム時間・チャンク数を表示します。
+基本サバイバルをGitHub Pagesで公開しています。Minecraft と同一仕様ではありません。
+視界は4〜12チャンクで調整でき、描画解像度は自動または25〜100%の手動指定を選べます。
+HUD に FPS・平均フレーム時間・チャンク数を表示します。
 松明・日光はプレイヤー周辺の32ブロック立方領域で伝播計算します。
 流体は近くの変更から処理数を制限して広げる簡易方式で、完全な流体シミュレーションではありません。
 CPU 代替描画ではモデル・照明を簡略化し、三人称視点を無効にしています。
 
-実機での操作感比較、低スペック PC の30 FPS / 標準 PC の60 FPS、
-30分・2時間の描画付きプレイ、公開 URL の動作確認は最終評価として残っています。
+自然の木からダイヤ採掘、松明設置、保存と再読込までを実際のブラウザ操作で検証します。
+実機での操作感比較、低スペック PC の30 FPS / 標準 PC の60 FPSは未評価です。
+描画付き2時間試験の結果と公開検証の記録は進捗資料に記載します。
 村、ネザー、エンチャントなど計画書の P2 機能は基本サバイバル安定後の追加候補です。
 詳しくは [進捗と検証記録](docs/STATUS.md) を参照してください。
 

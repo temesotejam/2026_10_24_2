@@ -84,6 +84,7 @@ export function stack(id: string, count = 1): Stack {
 export function validStack(value: unknown): value is Stack {
   if (!value || typeof value !== "object") return false;
   const s = value as Stack;
+  if (typeof s.id !== "string" || !Object.hasOwn(ITEMS, s.id)) return false;
   const def = ITEMS[s.id];
   return (
     !!def &&

@@ -28,6 +28,7 @@ const samples = [];
 let reloads = 0;
 let edits = 0;
 const report = {
+  harnessVersion: 2,
   url: url.href,
   durationRequested: duration,
   mode: "creative",
@@ -134,6 +135,11 @@ try {
     }
     if (elapsed - lastSample >= 60000) {
       const metrics = await page.evaluate(() => ({
+        mode: window.__mc.mode(),
+        contextLost:
+          window.__mc.renderer() === "webgl"
+            ? document.querySelector("#app > canvas").getContext("webgl2").isContextLost()
+            : false,
         position: window.__mc.position(),
         loaded: window.__mc.loadedChunks(),
         meshed: window.__mc.meshedChunks(),
@@ -147,6 +153,10 @@ try {
       assert.ok(metrics.loaded <= 196, "loaded chunks stay bounded");
       if (metrics.heap !== null)
         assert.ok(metrics.heap < 256 * 1024 * 1024, "JS heap stays below 256 MB");
+      assert.notEqual(metrics.mode, "idle", "game remains active");
+      assert.equal(metrics.contextLost, false, "graphics context remains usable");
+      if (samples.length)
+        assert.ok(metrics.time > samples.at(-1).time, "game time advances between checkpoints");
       const sample = { elapsedSeconds: elapsed / 1000, ...metrics };
       samples.push(sample);
       console.log(JSON.stringify(sample));

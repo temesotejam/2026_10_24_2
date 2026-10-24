@@ -355,3 +355,26 @@ describe("small survival block geometry", () => {
     expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(0.75);
   });
 });
+
+// DataArrayTexture row zero is the top of each canvas tile: the torch flame
+// and the green edge of grass must appear at the top of vertical faces.
+it.each([BlockId.TORCH, BlockId.GRASS])(
+  "keeps vertical tile artwork upright for block %i",
+  (id) => {
+    const chunk = new Chunk(0, 0);
+    chunk.setBlock(4, 2, 4, id);
+    const mesh = meshChunk(chunk, allAir);
+    let sides = 0;
+    for (let v = 0; v < mesh.positions.length / 3; v += 4) {
+      if (mesh.normals[v * 3 + 1] !== 0) continue;
+      const vertices = Array.from({ length: 4 }, (_, n) => ({
+        y: mesh.positions[(v + n) * 3 + 1] ?? 0,
+        textureY: mesh.uvs[(v + n) * 2 + 1] ?? 0,
+      }));
+      const top = Math.max(...vertices.map((p) => p.y));
+      for (const vertex of vertices) expect(vertex.textureY).toBe(vertex.y === top ? 0 : 1);
+      sides++;
+    }
+    expect(sides).toBe(4);
+  },
+);

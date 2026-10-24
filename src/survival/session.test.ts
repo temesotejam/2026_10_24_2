@@ -256,3 +256,33 @@ it("finds a clear supported respawn when construction blocks the saved spawn", (
   expect(w.getBlock(Math.floor(p.x), p.y + 1, Math.floor(p.z))).toBe(BlockId.AIR);
   expect(w.getBlock(Math.floor(p.x), p.y - 1, Math.floor(p.z))).not.toBe(BlockId.AIR);
 });
+
+it("an existing animal herd cannot suppress all night enemy spawns", () => {
+  const { w, d, game } = fixture();
+  for (let cx = -2; cx <= 2; cx++)
+    for (let cz = -2; cz <= 2; cz++) {
+      const chunk = new Chunk(cx, cz);
+      for (let x = 0; x < 16; x++)
+        for (let z = 0; z < 16; z++) chunk.setBlock(x, 1, z, BlockId.GRASS);
+      w.setChunk(chunk);
+    }
+  d.mode = "creative";
+  d.time = 900;
+  d.position = { x: 8.5, y: 2, z: 8.5 };
+  d.creatures = Array.from({ length: 24 }, (_v, i) => ({
+    id: i + 1,
+    species: "pig" as const,
+    position: { x: 8.5 + (i % 4), y: 2, z: 8.5 },
+    velocity: { x: 0, y: 0, z: 0 },
+    onGround: true,
+    hp: 8,
+    age: 0,
+    cooldown: 0,
+    intent: 0,
+    love: 0,
+  }));
+  d.nextId = 25;
+  tick(game, 6);
+  expect(d.creatures.some((m) => m.species !== "pig")).toBe(true);
+  expect(d.creatures.length).toBeLessThanOrEqual(28);
+});

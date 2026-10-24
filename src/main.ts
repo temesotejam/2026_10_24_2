@@ -30,7 +30,8 @@ import { SurvivalSession, newSession, type SessionState } from "./survival/sessi
 import { SaveRepository, saveKey, parseSave, encodeSave } from "./save/persistence";
 import { InventoryView } from "./ui/inventory";
 import { EntityView, createAvatar } from "./entities/view";
-import { ITEMS } from "./items/catalog";
+import { SkyBodies } from "./render/sky-bodies";
+import { HeldItemView } from "./render/held-item";
 import { buildLightField, LIGHT_SIZE } from "./world/light";
 const DEFAULT_SEED = 2026;
 const STREAM_RADIUS_WEBGL = 4; // greedy meshing makes the extra draw distance affordable
@@ -54,6 +55,7 @@ declare global {
         z: number;
       } | null;
       pitch: () => number;
+      yaw: () => number;
       eyeHeight: () => number;
       mode: () => string;
       renderer: () => "webgl" | "cpu";
@@ -103,6 +105,7 @@ interface GameView {
   /** A short label for the HUD describing the current quality target. */
   qualityNote(): string;
   setViewDistance?(radius: number): void;
+  setRenderScale?(scale: number | null): void;
 }
 async function boot(): Promise<void> {
   const app = document.querySelector<HTMLDivElement>("#app");
@@ -150,6 +153,7 @@ async function boot(): Promise<void> {
   let cpuView: CpuRenderer | null = null;
   try {
     const gameScene = createGameScene(app);
+    const skyBodies = new SkyBodies(gameScene.scene);
     entityScene = gameScene.scene;
     const chunkMaterial = createChunkMaterial(createBlockTextureArray(SEED));
     terrainMaterial = chunkMaterial;
@@ -163,9 +167,11 @@ async function boot(): Promise<void> {
       resize: gameScene.resize,
       applySky: (state) => {
         gameScene.applySky(state);
+        skyBodies.update(gameScene.camera, state);
         updateChunkMaterial(chunkMaterial, state);
       },
       tickAdaptive: gameScene.tickAdaptive,
+      setRenderScale: gameScene.setRenderScale,
       setViewDistance: (radius) => {
         gameScene.setViewDistance(radius);
         must(chunkMaterial.uniforms.uFogNear).value = radius * 8;
@@ -464,6 +470,11 @@ async function boot(): Promise<void> {
     streamer.setRadius(radius);
     view.setViewDistance?.(radius);
   });
+  const scaleSelect = must(document.querySelector<HTMLSelectElement>("#render-scale"));
+  scaleSelect.disabled = !view.setRenderScale;
+  scaleSelect.addEventListener("change", () => {
+    view.setRenderScale?.(scaleSelect.value === "auto" ? null : Number(scaleSelect.value));
+  });
   const survivalHud = must(document.querySelector<HTMLElement>("#survival-hud"));
   survivalHud.hidden = session.creative;
   setInterval(() => {
@@ -501,18 +512,8 @@ async function boot(): Promise<void> {
     lightTexture.unpackAlignment = 1;
     must(terrainMaterial.uniforms.uLightField).value = lightTexture;
   }
-  const hand = entityScene
-    ? new THREE.Mesh(
-        new THREE.BoxGeometry(0.18, 0.35, 0.18),
-        new THREE.MeshBasicMaterial({ color: 0xcba67d }),
-      )
-    : null;
-  if (hand && entityScene) {
-    entityScene.add(view.camera);
-    view.camera.add(hand);
-    hand.position.set(0.43, -0.4, -0.7);
-    hand.rotation.z = -0.25;
-  }
+  const hand = entityScene ? new HeldItemView(view.camera) : null;
+  if (entityScene) entityScene.add(view.camera);
   // On-screen controls for touch devices — joystick, look-drag, jump/place.
   const touchControls = isTouchDevice()
     ? new TouchControls(app, {
@@ -544,6 +545,7 @@ async function boot(): Promise<void> {
       return hit ? { x: hit.blockX, y: hit.blockY, z: hit.blockZ } : null;
     },
     pitch: () => player.eyePitch,
+    yaw: () => player.eyeYaw,
     eyeHeight: () => view.camera.position.y - player.position.y,
     mode: () => player.mode,
     renderer: () => view.kind,
@@ -602,7 +604,7 @@ async function boot(): Promise<void> {
       avatar.position.set(player.position.x, player.position.y, player.position.z);
       avatar.rotation.y = player.eyeYaw;
     }
-    if (hand) hand.visible = player.perspective === 0;
+    hand?.update(session.held, player.perspective === 0, player.position);
     interaction.update(dt);
     if (player.isActive || inventory.isOpen) {
       fluids.tick(dt);
@@ -634,8 +636,6 @@ async function boot(): Promise<void> {
         : data.inventory.some((s) => s?.id === "diamond")
           ? "ダイヤモンド発見！ 建築と探索を続けよう"
           : "原木 → 作業台 → 木・石・鉄のツルハシ → ダイヤ · E：所持品 / レシピ集 · 右クリック：使用";
-      if (hand)
-        hand.material.color.set(session.held ? must(ITEMS[session.held.id]).color : 0xcba67d);
     }
     let meshBudget = MESH_BUDGET_PER_FRAME;
     for (const [key, c] of editedChunks) {

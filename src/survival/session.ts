@@ -27,7 +27,7 @@ import {
   type Loot,
   type Species,
 } from "../entities/creatures";
-import { DAY_LENGTH_SECONDS, STARTUP_PHASE } from "../render/sky";
+import { DAY_LENGTH_SECONDS, STARTUP_PHASE, isNightAt } from "../render/sky";
 import { deriveSeed, mulberry32 } from "../world/rng";
 export type GameMode = "survival" | "creative";
 export interface SessionState {
@@ -259,8 +259,7 @@ export class SurvivalSession {
     this.onChange?.();
   }
   get isNight(): boolean {
-    const phase = (this.data.time / DAY_LENGTH_SECONDS) % 1;
-    return phase < 0.05 || phase > 0.5;
+    return isNightAt(this.data.time);
   }
   hitCreature(id: number): void {
     if (this.attackCooldown > 0 || this.dead) return;
@@ -492,7 +491,11 @@ export class SurvivalSession {
         }
       }
       if (m.species === "mossling" && dist >= 1.8) m.fuse = Math.max(0, (m.fuse ?? 0) - dt);
-      if (m.love > 0 && d.creatures.length < 28) {
+      if (
+        m.love > 0 &&
+        d.creatures.length < 28 &&
+        d.creatures.filter((animal) => !hostile(animal)).length < 16
+      ) {
         const partner = d.creatures.find(
           (other) =>
             other !== m &&
@@ -554,7 +557,9 @@ export class SurvivalSession {
   }
   private spawnCreature(): void {
     const d = this.data;
-    if (d.creatures.length >= 24) return;
+    if (d.creatures.length >= 28) return;
+    // Keep room for night enemies even when a daytime herd is nearby.
+    if (d.creatures.filter((m) => hostile(m) === this.isNight).length >= 12) return;
     const angle = this.random() * Math.PI * 2;
     const radius = 10 + this.random() * 14;
     const x = Math.floor(d.position.x + Math.cos(angle) * radius),

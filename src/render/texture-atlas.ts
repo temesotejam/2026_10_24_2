@@ -22,6 +22,7 @@ const TILE_STYLES: Record<TileKind, TileStyle> = {
   [TileKind.FURNACE]: { base: [79, 84, 92], alpha: 255, speckleAmount: 24 },
   [TileKind.CHEST]: { base: [183, 127, 45], alpha: 255, speckleAmount: 24 },
   [TileKind.BED]: { base: [179, 61, 57], alpha: 255, speckleAmount: 24 },
+  [TileKind.TORCH_TOP]: { base: [255, 238, 144], alpha: 255, speckleAmount: 10 },
   [TileKind.TORCH]: { base: [255, 204, 83], alpha: 255, speckleAmount: 24 },
   [TileKind.COAL_ORE]: { base: [72, 76, 85], alpha: 255, speckleAmount: 24 },
   [TileKind.IRON_ORE]: { base: [163, 138, 113], alpha: 255, speckleAmount: 24 },
