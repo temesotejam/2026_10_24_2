@@ -26,6 +26,13 @@ mkdirSync(OUT_DIR, { recursive: true });
 const results = [];
 function report(name, ok, detail = "") {
   results.push({ name, ok });
+  if (!ok && process.env.GITHUB_ACTIONS) {
+    const message = `${name}: ${detail}`
+      .replaceAll("%", "%25")
+      .replaceAll("\r", "%0D")
+      .replaceAll("\n", "%0A");
+    console.log(`::error title=Browser assertion failed::${message}`);
+  }
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
@@ -503,6 +510,14 @@ try {
   const failed = results.filter((r) => !r.ok).length;
   console.log(`\n${results.length - failed}/${results.length} checks passed`);
   process.exitCode = failed === 0 ? 0 : 1;
+} catch (error) {
+  const detail = String(error?.stack ?? error)
+    .replaceAll("%", "%25")
+    .replaceAll("\r", "%0D")
+    .replaceAll("\n", "%0A");
+  if (process.env.GITHUB_ACTIONS)
+    console.log(`::error title=Browser verification failed::${detail}`);
+  throw error;
 } finally {
   await browser.close();
 }
