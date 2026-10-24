@@ -16,6 +16,8 @@ export interface SkyState {
   /** Sun arc position: 0 = rising on the horizon, PI/2 = overhead, PI = set.
    * Held at the ends during the night portion of the cycle. */
   readonly sunAngle: number;
+  /** -1 in daytime; 0..PI while the moon crosses the night sky. */
+  readonly moonAngle: number;
 }
 
 interface Keyframe {
@@ -74,5 +76,11 @@ export function skyStateAt(timeSeconds: number): SkyState {
     sunIntensity: lerp(before.sun, after.sun, t),
     ambientIntensity: lerp(before.ambient, after.ambient, t),
     sunAngle: arcT * Math.PI,
+    moonAngle: phase >= DAYTIME_END ? ((phase - DAYTIME_END) / (1 - DAYTIME_END)) * Math.PI : -1,
   };
+}
+
+export function isNightAt(timeSeconds: number): boolean {
+  const phase = (((timeSeconds / DAY_LENGTH_SECONDS) % 1) + 1) % 1;
+  return phase >= 0.62 || phase < 0.02;
 }

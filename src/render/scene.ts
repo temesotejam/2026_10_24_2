@@ -25,13 +25,15 @@ export interface GameScene {
   tickAdaptive: (frameMs: number) => void;
   readonly pixelRatio: () => number;
   setViewDistance: (radius: number) => void;
+  setRenderScale: (scale: number | null) => void;
   dispose: () => void;
 }
 
 /** Render-scale ladder for the adaptive quality controller, as fractions
  * of the device pixel ratio (capped at 2). */
-const SCALE_LADDER = [0.5, 0.65, 0.8, 1.0] as const;
-const ADAPT_WINDOW_FRAMES = 70;
+const SCALE_LADDER = [0.25, 0.35, 0.5, 0.65, 0.8, 1.0] as const;
+const ADAPT_DOWN_FRAMES = 20;
+const ADAPT_UP_FRAMES = 120;
 // Biased toward frame rate: step the render scale down before frames drift
 // past ~20ms (~50fps), so phones stay fluid.
 const ADAPT_SLOW_MS = 20;
@@ -76,23 +78,28 @@ export function createGameScene(parent: HTMLElement): GameScene {
 
   const basePixelRatio = Math.min(window.devicePixelRatio, 2);
   let scaleIndex = SCALE_LADDER.length - 1;
+  let fixedScale: number | null = null;
   let frameMsEma = 16;
   let framesSinceChange = 0;
 
   function applyScale(): void {
-    renderer.setPixelRatio(basePixelRatio * (SCALE_LADDER[scaleIndex] ?? 1));
+    renderer.setPixelRatio(basePixelRatio * (fixedScale ?? SCALE_LADDER[scaleIndex] ?? 1));
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   function tickAdaptive(frameMs: number): void {
+    if (fixedScale !== null) return;
     frameMsEma = frameMsEma * 0.9 + frameMs * 0.1;
     framesSinceChange++;
-    if (framesSinceChange < ADAPT_WINDOW_FRAMES) return;
-    if (frameMsEma > ADAPT_SLOW_MS && scaleIndex > 0) {
+    if (frameMsEma > ADAPT_SLOW_MS && scaleIndex > 0 && framesSinceChange >= ADAPT_DOWN_FRAMES) {
       scaleIndex--;
       applyScale();
       framesSinceChange = 0;
-    } else if (frameMsEma < ADAPT_FAST_MS && scaleIndex < SCALE_LADDER.length - 1) {
+    } else if (
+      frameMsEma < ADAPT_FAST_MS &&
+      scaleIndex < SCALE_LADDER.length - 1 &&
+      framesSinceChange >= ADAPT_UP_FRAMES
+    ) {
       scaleIndex++;
       applyScale();
       framesSinceChange = 0;
@@ -144,6 +151,12 @@ export function createGameScene(parent: HTMLElement): GameScene {
     applySky,
     tickAdaptive,
     pixelRatio: () => renderer.getPixelRatio(),
+    setRenderScale: (scale) => {
+      fixedScale =
+        scale !== null && Number.isFinite(scale) && scale >= 0.25 && scale <= 1 ? scale : null;
+      framesSinceChange = 0;
+      applyScale();
+    },
     setViewDistance: (radius) => {
       fog.near = radius * 8;
       fog.far = radius * 14;

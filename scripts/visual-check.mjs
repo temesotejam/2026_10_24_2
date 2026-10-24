@@ -89,6 +89,31 @@ try {
     `y=${grounded.y.toFixed(2)}, block below=${grounded.below}, block at feet=${grounded.at}`,
   );
 
+  await page.select("#render-scale", "0.5");
+  await new Promise((r) => setTimeout(r, 1500));
+  const fixedScale = await page.evaluate(() => ({
+    width: document.querySelector("#app > canvas").width,
+    expected: Math.floor(window.innerWidth * Math.min(window.devicePixelRatio, 2) * 0.5),
+  }));
+  report(
+    "manual resolution remains fixed",
+    fixedScale.width === fixedScale.expected,
+    JSON.stringify(fixedScale),
+  );
+  await page.select("#render-scale", "0.75");
+  await page.select("#render-scale", "auto");
+  await new Promise((r) => setTimeout(r, 6000));
+  const autoScale = await page.evaluate(
+    () =>
+      document.querySelector("#app > canvas").width /
+      (window.innerWidth * Math.min(window.devicePixelRatio, 2)),
+  );
+  report(
+    "automatic resolution resumes",
+    autoScale >= 0.25 && autoScale <= 1 && autoScale !== 0.75,
+    `scale=${autoScale}`,
+  );
+
   await page.screenshot({ path: path.join(OUT_DIR, "01-menu.png") });
 
   // ---- the world is actually visible behind the overlay ----

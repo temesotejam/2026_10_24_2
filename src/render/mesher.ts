@@ -372,7 +372,11 @@ export function meshChunk(chunk: Chunk, neighbors: NeighborLookup): MeshData {
                 z + (bounds[2] ?? 0) + corner[2] * ((bounds[5] ?? 1) - (bounds[2] ?? 0)),
               );
               normals.push(...face.normal);
-              uvs.push(corner[face.tangents[0]], corner[face.tangents[1]]);
+              // Canvas texture rows start at the top; world Y grows upward.
+              uvs.push(
+                corner[face.tangents[0] === 1 ? face.tangents[1] : face.tangents[0]],
+                face.dAxis !== 1 ? 1 - corner[1] : corner[face.tangents[1]],
+              );
               layers.push(tileForBlockFace(id, face.face));
               colors.push(face.shade, face.shade, face.shade);
             }
@@ -427,7 +431,9 @@ function emitQuad(
     pos[vAxis] = j + corner[vAxis] * h;
     positions.push(pos[0], pos[1], pos[2]);
     normals.push(nx, ny, nz);
-    uvs.push(corner[uAxis] * w, corner[vAxis] * h);
+    // East/west sweep along Y first; texture V must still run down Y.
+    if (uAxis === 1) uvs.push(corner[vAxis] * h, (1 - corner[uAxis]) * w);
+    else uvs.push(corner[uAxis] * w, (vAxis === 1 ? 1 - corner[vAxis] : corner[vAxis]) * h);
     layers.push(layer);
     const brightness = shade * (AO_BRIGHTNESS[aoQuad[c] ?? 3] ?? 1);
     colors.push(brightness, brightness, brightness);

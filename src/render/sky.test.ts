@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DAY_LENGTH_SECONDS, skyStateAt } from "./sky";
+import { DAY_LENGTH_SECONDS, skyStateAt, isNightAt } from "./sky";
 
 describe("skyStateAt", () => {
   it("is periodic: one full day later, the sky is identical", () => {
@@ -60,4 +60,12 @@ describe("skyStateAt", () => {
     const b = skyStateAt(DAY_LENGTH_SECONDS - 10);
     expect(a.sunIntensity).toBeCloseTo(b.sunIntensity, 10);
   });
+});
+
+it("shows the moon at night and keeps hostile time out of the bright afternoon", () => {
+  expect(skyStateAt(DAY_LENGTH_SECONDS * 0.3).moonAngle).toBe(-1);
+  expect(skyStateAt(DAY_LENGTH_SECONDS * 0.8).moonAngle).toBeCloseTo(Math.PI / 2);
+  expect(isNightAt(DAY_LENGTH_SECONDS * 0.45)).toBe(false);
+  expect(isNightAt(DAY_LENGTH_SECONDS * 0.55)).toBe(false);
+  expect(isNightAt(DAY_LENGTH_SECONDS * 0.75)).toBe(true);
 });
