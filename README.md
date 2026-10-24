@@ -82,6 +82,15 @@ node scripts/performance-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --s
 Puppeteer の Chromium を使用します。システム Chromium がある場合は、インストール時に
 `PUPPETEER_SKIP_DOWNLOAD=true npm ci`、ブラウザ検証時に
 `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` を指定できます。
+描画付き長時間試験は、公開後に Actions の **Published world stability** から実行できます。
+既定の7200秒で実時間2時間、移動・ジャンプ・採掘を続け、5分ごとに保存と再読込を照合します。
+最初の30分も途中経過として記録し、結果JSONと画像をArtifactsへ保存します。
+ローカルで短い動作確認をする場合は次のコマンドを使います。
+
+```sh
+node scripts/soak-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --seconds 70 --reload-seconds 30
+```
+
 スクリーンショット・計測値・テスト用バックアップは Git 対象外の `visual-check/` に生成します。
 性能計測は他のブラウザ検証と同時に走らせず、同じ端末・解像度・描画設定で比較してください。
 

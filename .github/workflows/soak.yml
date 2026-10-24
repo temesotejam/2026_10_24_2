@@ -1,0 +1,45 @@
+name: Published world stability
+
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: Real elapsed seconds (30 to 7200)
+        default: "7200"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: read
+
+concurrency:
+  group: published-soak
+  cancel-in-progress: false
+
+jobs:
+  soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Resolve published site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          site_url=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .html_url)
+          echo "SITE_URL=$site_url" >> "$GITHUB_ENV"
+      - name: Render, explore, mine, save and restore
+        env:
+          SOAK_SECONDS: ${{ inputs.seconds }}
+        run: node scripts/soak-check.mjs --url "$SITE_URL" --seconds "$SOAK_SECONDS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rendered-soak
+          path: visual-check/soak/
