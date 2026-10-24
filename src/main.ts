@@ -55,6 +55,7 @@ declare global {
         z: number;
       } | null;
       pitch: () => number;
+      yaw: () => number;
       eyeHeight: () => number;
       mode: () => string;
       renderer: () => "webgl" | "cpu";
@@ -544,6 +545,7 @@ async function boot(): Promise<void> {
       return hit ? { x: hit.blockX, y: hit.blockY, z: hit.blockZ } : null;
     },
     pitch: () => player.eyePitch,
+    yaw: () => player.eyeYaw,
     eyeHeight: () => view.camera.position.y - player.position.y,
     mode: () => player.mode,
     renderer: () => view.kind,

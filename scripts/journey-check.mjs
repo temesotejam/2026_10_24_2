@@ -16,7 +16,6 @@ const browser = await puppeteer.launch({
 });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 let activePage;
-let yaw = 0;
 const events = [];
 try {
   const page = await browser.newPage();
@@ -29,6 +28,7 @@ try {
       position: window.__mc.position(),
       eye: window.__mc.eyeHeight(),
       pitch: window.__mc.pitch(),
+      yaw: window.__mc.yaw(),
       inventory: window.__mc.inventory(),
       health: window.__mc.health(),
     }));
@@ -50,9 +50,8 @@ try {
     await page.evaluate(
       ({ x, y }) =>
         document.dispatchEvent(new MouseEvent("mousemove", { movementX: x, movementY: y })),
-      { x: -(nextYaw - yaw) / 0.0022, y: -(pitch - s.pitch) / 0.0022 },
+      { x: -(nextYaw - s.yaw) / 0.0022, y: -(pitch - s.pitch) / 0.0022 },
     );
-    yaw = nextYaw;
     await wait(120);
   }
   async function open() {

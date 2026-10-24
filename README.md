@@ -80,6 +80,7 @@ node scripts/visual-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/survival-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/journey-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/load-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+node scripts/explore-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --distance 256
 node scripts/performance-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --seconds 20
 ```
 
