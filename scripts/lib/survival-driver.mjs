@@ -437,6 +437,12 @@ export function createDriver(page, out) {
         } else await walk(nx + 0.5, nz + 0.5);
       }
     }
+    const endPosition = (await info()).position;
+    const x = Math.floor(endPosition.x),
+      z = Math.floor(endPosition.z),
+      y = Math.round(endPosition.y);
+    if ([0, 5, 26, 31, 40, 43].includes(await block({ x, y: y - 1, z }))) await bridge(x, y, z);
+    await walk(p.x + 0.5, p.z + 0.5, false, 0.2, 80);
   }
   async function findOre(id) {
     return page.evaluate((id) => {

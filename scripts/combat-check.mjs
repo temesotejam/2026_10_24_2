@@ -171,6 +171,26 @@ try {
   console.log(`PASS continuous walking: ${pauses}/${interior.length - 1} stationary samples`);
   await page.evaluate(() => document.exitPointerLock());
   await page.waitForFunction(() => window.__mc.mode() === "idle");
+  for (let x = -12; x < 0; x++) for (let z = -12; z <= 12; z++) put(x, 33, z, 0);
+  fixture.position = { x: -0.2919, y: 34, z: 4.5 };
+  await load("supported-ledge", []);
+  const planksBefore = await d.count("planks");
+  await d.tunnelTo({ x: -1, z: 4 });
+  assert.equal(
+    await d.block({ x: -1, y: 33, z: 4 }),
+    10,
+    "build the missing block under an overhanging center",
+  );
+  assert.equal(await d.count("planks"), planksBefore - 1, "consume a real building block");
+  assert.ok(Math.abs((await d.info()).position.x + 0.5) < 0.21);
+  assert.ok((await d.info()).health > 0);
+  console.log(
+    "PASS bridge from the actual supporting ledge even when the center is already over the target cell",
+  );
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  fixture.position = { x: 0.5, y: 34, z: 4.5 };
+  for (let x = -12; x < 0; x++) for (let z = -12; z <= 12; z++) put(x, 33, z, 3);
   fixture.inventory[2].count = 10;
   for (let x = 2; x <= 5; x++)
     for (let z = 3; z <= 6; z++) {
