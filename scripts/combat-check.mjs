@@ -144,14 +144,19 @@ try {
   await load("continuous-walking", []);
   await page.evaluate(() => {
     window.__walkingTrace = [];
-    window.__walkingTimer = window.setInterval(
-      () => window.__walkingTrace.push(window.__mc.position()),
-      50,
-    );
+    let last = 0;
+    const sample = (time) => {
+      if (time - last >= 40) {
+        window.__walkingTrace.push(window.__mc.position());
+        last = time;
+      }
+      window.__walkingTimer = window.requestAnimationFrame(sample);
+    };
+    window.__walkingTimer = window.requestAnimationFrame(sample);
   });
   await d.walk(10.5, 4.5, false, 0.3, 0);
   const trace = await page.evaluate(() => {
-    window.clearInterval(window.__walkingTimer);
+    window.cancelAnimationFrame(window.__walkingTimer);
     return window.__walkingTrace;
   });
   const interior = trace.slice(3, -2);
