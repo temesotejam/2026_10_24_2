@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { DEFAULT_FOV } from "./view-settings";
 import { createNoise2D } from "simplex-noise";
 import { BlockId } from "../world/blocks";
 import { CHUNK_HEIGHT } from "../world/coords";
@@ -123,7 +124,7 @@ export class CpuRenderer {
     this.cloudNoise = createNoise2D(mulberry32(deriveSeed(seed, CLOUD_SALT)));
 
     this.camera = new THREE.PerspectiveCamera(
-      75,
+      DEFAULT_FOV,
       window.innerWidth / window.innerHeight,
       0.1,
       MAX_DISTANCE,

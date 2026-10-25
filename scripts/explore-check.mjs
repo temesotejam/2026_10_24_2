@@ -157,6 +157,10 @@ try {
     assert.ok(passable(await block({ x, y, z })), "streamed excavation retained");
   }
   await sample("returned home after save/reload");
+  assert.ok(
+    await page.evaluate(() => window.__mc.effects().soundCounts.step > 0),
+    "walking back over the constructed route produces footsteps",
+  );
   await save();
   await page.screenshot({ path: `${out}/returned.png` });
   writeFileSync(

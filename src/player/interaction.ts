@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { BlockId, BLOCKS, isSolid } from "../world/blocks";
 import type { World } from "../world/world";
 import type { Hotbar } from "../ui/hotbar";
-import { aabbFromFeetPosition, aabbIntersectsSolid } from "./physics";
+import { aabbFromFeetPosition, aabbIntersectsSolid, type Vec3 } from "./physics";
 import type { PlayerController } from "./controller";
 import { raycastVoxels } from "./raycast";
 import type { SurvivalSession } from "../survival/session";
@@ -18,8 +18,11 @@ export class BlockInteraction {
   private held = false;
   private progress = 0;
   private targetKey = "";
+  private nextCreativeBreak = 0;
   onUseBlock: ((x: number, y: number, z: number, id: BlockId) => boolean) | undefined;
   onProgress: ((fraction: number) => void) | undefined;
+  onBreak: ((position: Vec3, block: BlockId) => void) | undefined;
+  onPlace: ((position: Vec3, block: BlockId) => void) | undefined;
   constructor(
     _camera: THREE.PerspectiveCamera,
     domElement: HTMLElement,
@@ -43,6 +46,7 @@ export class BlockInteraction {
       if (e.button !== 0) return;
       if (controller.isLocked) {
         this.held = true;
+        this.nextCreativeBreak = 0;
         this.breakTargetedBlock(false);
       } else tap = { x: e.clientX, y: e.clientY, time: performance.now() };
     });
@@ -70,6 +74,7 @@ export class BlockInteraction {
     this.held = false;
     this.progress = 0;
     this.targetKey = "";
+    this.nextCreativeBreak = 0;
     this.onProgress?.(0);
   }
   raycastFromCamera(maxDistance = 6) {
@@ -118,15 +123,22 @@ export class BlockInteraction {
     }
     const seconds = this.session.duration(id);
     if (seconds === 0) {
-      this.session.mine(hit.blockX, hit.blockY, hit.blockZ);
+      if (!tap && performance.now() < this.nextCreativeBreak) return;
+      if (this.mine(hit.blockX, hit.blockY, hit.blockZ, id))
+        this.nextCreativeBreak = performance.now() + 200;
       return;
     }
     if (tap) this.progress += 0.3;
     if (this.progress >= seconds) {
-      this.session.mine(hit.blockX, hit.blockY, hit.blockZ);
+      this.mine(hit.blockX, hit.blockY, hit.blockZ, id);
       this.progress = 0;
     }
     this.onProgress?.(this.progress / seconds);
+  }
+  private mine(x: number, y: number, z: number, block: BlockId): boolean {
+    if (!this.session.mine(x, y, z)) return false;
+    this.onBreak?.({ x, y, z }, block);
+    return true;
   }
   update(dt: number): void {
     if (!this.controller.isActive || this.session.dead) {
@@ -153,7 +165,8 @@ export class BlockInteraction {
     const block = this.hotbar.selectedBlock;
     if (block === BlockId.AIR) return;
     if (isSolid(block) && this.overlapsPlayer(hit.placeX, hit.placeY, hit.placeZ)) return;
-    this.session.place(hit.placeX, hit.placeY, hit.placeZ);
+    if (this.session.place(hit.placeX, hit.placeY, hit.placeZ))
+      this.onPlace?.({ x: hit.placeX, y: hit.placeY, z: hit.placeZ }, block);
   }
   private overlapsPlayer(x: number, y: number, z: number): boolean {
     return aabbIntersectsSolid(

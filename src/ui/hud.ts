@@ -19,8 +19,13 @@ export class Hud {
   constructor(parent: HTMLElement) {
     this.el = document.createElement("div");
     this.el.id = "fps";
+    this.el.hidden = true;
     this.lastReport = performance.now();
     parent.appendChild(this.el);
+  }
+
+  setVisible(visible: boolean): void {
+    this.el.hidden = !visible;
   }
 
   frame(nowMs: number, info: HudInfo): void {
