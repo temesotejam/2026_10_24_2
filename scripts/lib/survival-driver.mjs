@@ -136,6 +136,7 @@ export function createDriver(page, out) {
             `mining target changed or blocked ${JSON.stringify(hit)}`,
           );
           await wait(100);
+          await aim({ x: hit.x + 0.5, y: hit.y + 0.5, z: hit.z + 0.5 }, 0);
           const start = Date.now();
           if (await checkThreat()) {
             deadline += Date.now() - start;
@@ -575,7 +576,8 @@ export async function initialJourney(d, page, url, onReady) {
       const b = await block(obstacle);
       if (b !== 0 && b !== 5) await mine(obstacle);
     }
-    await walk(point.x + 0.5, point.z + 0.5, point.h > current.y + 0.1);
+    const climbing = point.h > current.y + 0.1;
+    await walk(point.x + 0.5, point.z + 0.5, climbing, 0.3, climbing ? 650 : 0);
   }
   for (let dy = 0; dy < 4; dy++) await mine({ x: tree.x, y: tree.y + dy, z: tree.z });
   await walk(tree.x + 0.5, tree.z + 0.5, false, 0.12);
