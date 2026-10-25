@@ -138,7 +138,10 @@ export function createAdventureDriver(page, d) {
               k = key(x, z);
             if (prev.has(k) || Math.abs(x - sx) > 24 || Math.abs(z - sz) > 24) continue;
             const h = height(x, z);
-            if (h === null || node.h === null || h - node.h > 2 || node.h - h > 3) continue;
+            if (h === null || node.h === null || h - node.h > 2) continue;
+            const drop = node.h - h,
+              waterLanding = mc.blockAt(x, h - 1, z) === 5;
+            if (drop > 3 && (!waterLanding || drop > 8)) continue;
             const n = { x, z, h };
             prev.set(k, node);
             queue.push(n);
@@ -152,7 +155,17 @@ export function createAdventureDriver(page, d) {
         }
         return result.reverse().slice(1, 17);
       }, target);
-      assert.ok(route.length, "find a surface route");
+      if (!route.length) {
+        d.narrate("急な地形なので、掘って通り道を作ります。", 1);
+        const dx = target.x - Math.floor(s.position.x),
+          dz = target.z - Math.floor(s.position.z);
+        const next = { x: Math.floor(s.position.x), z: Math.floor(s.position.z) };
+        if (Math.abs(dx) >= Math.abs(dz)) next.x += Math.sign(dx);
+        else next.z += Math.sign(dz);
+        if (await d.count("iron_pick")) await d.equip("iron_pick");
+        await d.tunnelTo(next);
+        continue;
+      }
       for (let index = 0; index < route.length; index++) {
         const p = route[index];
         const current = await d.info(),
@@ -166,6 +179,7 @@ export function createAdventureDriver(page, d) {
           }
         }
         const water = (await d.block({ x: p.x, y: p.h - 1, z: p.z })) === 5;
+        if (water && current.position.y - p.h > 3) d.narrate("水へ降りて、先へ進みます。", 1);
         let end = index;
         if (p.h <= current.position.y + 0.1) {
           const dx = Math.sign(p.x - Math.floor(current.position.x)),
@@ -209,6 +223,13 @@ export function createAdventureDriver(page, d) {
     } else {
       // Approach the open end of the stair tunnel, rather than its roof.
       await surfaceTo({ x: entrance.x, z: entrance.z + 2 });
+      for (let step = 0; step < 6 && (await d.info()).position.y > entrance.y + 1; step++) {
+        await d.center();
+        const p = (await d.info()).position;
+        await d.equip("iron_pick");
+        await d.mine({ x: Math.floor(p.x), y: Math.round(p.y) - 1, z: Math.floor(p.z) });
+        await wait(700);
+      }
       await move(entrance.x + 0.5, entrance.z + 1.5, true);
       await move(entrance.x + 0.5, entrance.z + 0.5, true);
       for (let t = entrance.y - c.y - 1; t >= 0; t--) await move(c.x + 0.5, c.z + 4 + t + 0.5);

@@ -424,8 +424,14 @@ try {
     await chapter("育った小麦を村人と交換し、4個のエンダーアイを作成", 5);
   }
   if (resume <= 5) {
-    await stockArrows(village);
-    await stockFood(village);
+    const here = (await d.info()).position;
+    if (Math.hypot(here.x - village.x, here.z - village.z) < 24) {
+      await stockArrows(village);
+      await stockFood(village);
+    } else {
+      await craftArrows(8);
+      if ((await d.count("bread")) < 3) await stockFood(village);
+    }
     d.setGoal("エンダーアイを持って、地下遺跡へ向かいます。");
     const c = (await a.adventure()).stronghold;
     await a.enterStronghold();
