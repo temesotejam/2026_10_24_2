@@ -4,6 +4,28 @@ import { writeFileSync } from "node:fs";
 export const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 export function createDriver(page, out) {
   const events = [];
+  let narrator = null,
+    goal = "";
+  const setNarrator = (fn) => {
+    narrator = fn;
+  };
+  const narrate = (text, priority = 0) => {
+    if (text) narrator?.(text, priority);
+  };
+  const setGoal = (text) => {
+    goal = text;
+    narrate(text, 1);
+  };
+  const milestoneGoals = {
+    "Gathered four natural logs with empty hands": "作業台を置いて、最初の道具を作ります。",
+    "Crafted wooden pickaxe at a placed table": "石を集めて、石の道具とかまどを準備します。",
+    "Mined stone and crafted stone tools plus a furnace": "石炭と鉄鉱石を探して掘り進めます。",
+    "Collected coal and three iron ore using a stone pickaxe":
+      "鉄を精錬して、地下へ進む道具を作ります。",
+    "Smelted iron with fuel and crafted an iron pickaxe":
+      "鉄のツルハシで、自然のダイヤを探します。",
+    "Collected a naturally generated diamond": "ダイヤを採掘できました。地上へ戻ります。",
+  };
   let threatHandler = null,
     handlingThreat = false;
   const setThreatHandler = (fn) => {
@@ -34,6 +56,8 @@ export function createDriver(page, out) {
   const report = async (text) => {
     events.push({ text, ...(await info()) });
     writeFileSync(`${out}/progress.json`, JSON.stringify(events, null, 2));
+    if (milestoneGoals[text]) setGoal(milestoneGoals[text]);
+    else if (/[ぁ-んァ-ヶ一-龯]/u.test(text)) narrate(text, 2);
     console.log(text);
   };
   async function releaseAttack() {
@@ -43,7 +67,7 @@ export function createDriver(page, out) {
       if (!String(error).includes("'left' is not pressed")) throw error;
     }
   }
-  async function aim(p) {
+  async function aim(p, settle = 120) {
     const s = await info();
     const dx = p.x - s.position.x,
       dy = p.y - s.position.y - s.eye,
@@ -53,9 +77,12 @@ export function createDriver(page, out) {
     await page.evaluate(
       ({ x, y }) =>
         document.dispatchEvent(new MouseEvent("mousemove", { movementX: x, movementY: y })),
-      { x: -(nextYaw - s.yaw) / 0.0022, y: -(pitch - s.pitch) / 0.0022 },
+      {
+        x: -Math.atan2(Math.sin(nextYaw - s.yaw), Math.cos(nextYaw - s.yaw)) / 0.0022,
+        y: -(pitch - s.pitch) / 0.0022,
+      },
     );
-    await wait(120);
+    if (settle) await wait(settle);
   }
   async function open() {
     await page.keyboard.press("KeyE");
@@ -82,6 +109,17 @@ export function createDriver(page, out) {
       await checkThreat();
       const original = await block(p);
       if ([0, 5, 26, 31, 40].includes(original)) return;
+      narrate(
+        {
+          6: "木を切って、道具の材料を集めます。",
+          3: "石を掘って、丸石を集めます。",
+          17: "石炭を採掘。精錬と明かりに使います。",
+          18: "鉄鉱石を採掘します。",
+          19: "自然のダイヤ鉱石を見つけました。採掘します。",
+          23: "育った小麦を収穫しています。",
+          29: "ネザーの地形を掘り、通り道を作ります。",
+        }[original],
+      );
       assert.notEqual(original, 8, "do not mine bedrock");
       assert.ok((await info()).health > 0, "survive mining");
       await aim({ x: p.x + 0.5, y: p.y + 0.5, z: p.z + 0.5 });
@@ -98,6 +136,7 @@ export function createDriver(page, out) {
             `mining target changed or blocked ${JSON.stringify(hit)}`,
           );
           await wait(100);
+          await aim({ x: hit.x + 0.5, y: hit.y + 0.5, z: hit.z + 0.5 }, 0);
           const start = Date.now();
           if (await checkThreat()) {
             deadline += Date.now() - start;
@@ -113,43 +152,75 @@ export function createDriver(page, out) {
     }
     throw new Error(`Cannot reach ${JSON.stringify(p)}`);
   }
-  async function walk(x, z, jump = false, tolerance = 0.3, settle = 1000) {
+  async function walk(x, z, jump = false, tolerance = 0.3, settle = 80) {
+    narrate(goal);
     const start = Date.now();
-    let combatTime = 0;
-    let lastProgress = Date.now(),
+    let combatTime = 0,
+      lastProgress = Date.now(),
       previous = null;
-    while (true) {
-      const checkedAt = Date.now();
-      if (await checkThreat()) combatTime += Date.now() - checkedAt;
-      const s = await info();
-      assert.ok(s.health > 0, "survive travel");
-      const distance = Math.hypot(x - s.position.x, z - s.position.z);
-      if (distance < tolerance) break;
-      assert.ok(
-        Date.now() - start - combatTime < 60000,
-        `travel to ${x},${z}; position=${JSON.stringify(s.position)}`,
-      );
-      if (previous && Math.hypot(s.position.x - previous.x, s.position.z - previous.z) > 0.04)
-        lastProgress = Date.now();
-      if (Date.now() - lastProgress > 1500) {
+    try {
+      const initial = await info(),
+        wanted = Math.atan2(initial.position.x - x, initial.position.z - z);
+      const turn = Math.atan2(Math.sin(wanted - initial.yaw), Math.cos(wanted - initial.yaw));
+      if (Math.abs(turn) > 0.45) {
         await page.keyboard.up("KeyW");
-        await page.keyboard.up("Space");
-        for (let yy = Math.floor(s.position.y); yy <= Math.floor(s.position.y) + 3; yy++) {
-          const cell = { x: Math.floor(x), y: yy, z: Math.floor(z) },
-            id = await block(cell);
-          if (id !== 0 && id !== 5 && id !== 8) await mine(cell);
+        const steps = Math.ceil(Math.abs(turn) / 0.22);
+        for (let i = 1; i <= steps; i++) {
+          const yaw = initial.yaw + (turn * i) / steps;
+          await aim(
+            {
+              x: initial.position.x - Math.sin(yaw) * 4,
+              y: initial.position.y + initial.eye,
+              z: initial.position.z - Math.cos(yaw) * 4,
+            },
+            0,
+          );
+          await wait(16);
         }
-        lastProgress = Date.now();
       }
-      previous = { ...s.position };
-      await aim({ x, y: s.position.y + s.eye, z });
-      await page.keyboard.down("KeyW");
-      if (jump) await page.keyboard.down("Space");
-      await wait(Math.max(40, Math.min(180, (distance / 4.317) * 700)));
+      while (true) {
+        const checkedAt = Date.now();
+        if (await checkThreat()) combatTime += Date.now() - checkedAt;
+        const s = await info();
+        assert.ok(s.health > 0, "survive travel");
+        const distance = Math.hypot(x - s.position.x, z - s.position.z);
+        if (distance < tolerance) break;
+        assert.ok(
+          Date.now() - start - combatTime < 60000,
+          `travel to ${x},${z}; position=${JSON.stringify(s.position)}`,
+        );
+        if (previous && Math.hypot(s.position.x - previous.x, s.position.z - previous.z) > 0.04)
+          lastProgress = Date.now();
+        if (Date.now() - lastProgress > 1500) {
+          await page.keyboard.up("KeyW");
+          await page.keyboard.up("Space");
+          const frontX =
+            distance < 1.5
+              ? Math.floor(x)
+              : Math.floor(s.position.x + ((x - s.position.x) / distance) * 0.8);
+          const frontZ =
+            distance < 1.5
+              ? Math.floor(z)
+              : Math.floor(s.position.z + ((z - s.position.z) / distance) * 0.8);
+          for (let yy = Math.floor(s.position.y); yy <= Math.floor(s.position.y) + 3; yy++) {
+            const cell = { x: frontX, y: yy, z: frontZ },
+              id = await block(cell);
+            if (id !== 0 && id !== 5 && id !== 8) await mine(cell);
+          }
+          lastProgress = Date.now();
+        }
+        previous = { ...s.position };
+        await aim({ x, y: s.position.y + s.eye, z }, 0);
+        await page.keyboard.down("KeyW");
+        if (jump) await page.keyboard.down("Space");
+        else await page.keyboard.up("Space");
+        await wait(Math.max(20, Math.min(100, (distance / 4.317) * 500)));
+      }
+    } finally {
       await page.keyboard.up("KeyW");
       await page.keyboard.up("Space");
     }
-    await wait(settle);
+    if (settle) await wait(settle);
   }
   async function center() {
     const p = (await info()).position;
@@ -163,6 +234,24 @@ export function createDriver(page, out) {
   }
   async function make(id) {
     await checkThreat();
+    const names = {
+      planks: "木材",
+      sticks: "棒",
+      table: "作業台",
+      wood_pick: "木のツルハシ",
+      stone_pick: "石のツルハシ",
+      furnace: "かまど",
+      iron_pick: "鉄のツルハシ",
+      torch: "松明",
+      iron_sword: "鉄の剣",
+      bow: "弓",
+      arrow: "矢",
+      bread: "パン",
+      flintSteel: "火打ち石と打ち金",
+      blazePowder: "ブレイズパウダー",
+      enderEye: "エンダーアイ",
+    };
+    if (names[id]) narrate(`${names[id]}を作っています。`, 1);
     await page.evaluate(() => {
       const book = document.querySelector("#inventory-panel details");
       if (book) book.open = true;
@@ -259,48 +348,73 @@ export function createDriver(page, out) {
     throw new Error("No gathered building material remains");
   }
   async function bridge(nx, cy, nz) {
-    const before = await info(),
-      cx = Math.floor(before.position.x),
-      cz = Math.floor(before.position.z);
-    const dx = Math.sign(nx - cx),
+    const before = await info();
+    // A player's body can overlap a ledge while its center is above air.
+    const support = await page.evaluate(
+      ({ p, cy }) => {
+        const options = [];
+        for (let x = Math.floor(p.x) - 1; x <= Math.floor(p.x) + 1; x++)
+          for (let z = Math.floor(p.z) - 1; z <= Math.floor(p.z) + 1; z++) {
+            const id = window.__mc.blockAt(x, cy - 1, z);
+            if (
+              ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id) &&
+              p.x + 0.3 > x &&
+              p.x - 0.3 < x + 1 &&
+              p.z + 0.3 > z &&
+              p.z - 0.3 < z + 1
+            )
+              options.push({ x, z, d: Math.hypot(p.x - x - 0.5, p.z - z - 0.5) });
+          }
+        return options.sort((a, b) => a.d - b.d)[0];
+      },
+      { p: before.position, cy },
+    );
+    assert.ok(support, "find the block actually supporting the player");
+    const cx = support.x,
+      cz = support.z,
+      dx = Math.sign(nx - cx),
       dz = Math.sign(nz - cz);
+    nx = cx + dx;
+    nz = cz + dz;
     const selected = await page.$eval(
       "#hotbar .selected .hotbar-key",
       (el) => Number(el.textContent) - 1,
     );
-    const previous = before.inventory[selected]?.id;
-    const material = await chooseMaterial();
+    const previous = before.inventory[selected]?.id,
+      material = await chooseMaterial();
+    narrate("足場を作って、安全に渡ります。", 1);
     await equip(material.id);
     await page.keyboard.down("ShiftLeft");
-    await aim({
-      x: cx + 0.5 + dx * 2,
-      y: (await info()).position.y + (await info()).eye,
-      z: cz + 0.5 + dz * 2,
-    });
-    await page.keyboard.down("KeyW");
     try {
+      await aim({
+        x: cx + 0.5 + dx * 2,
+        y: (await info()).position.y + (await info()).eye,
+        z: cz + 0.5 + dz * 2,
+      });
+      await page.keyboard.down("KeyW");
       const start = Date.now();
       while (true) {
         const pos = (await info()).position;
-        const progress = (pos.x - cx - 0.5) * dx + (pos.z - cz - 0.5) * dz;
-        if (progress >= 0.6) break;
+        if ((pos.x - cx - 0.5) * dx + (pos.z - cz - 0.5) * dz >= 0.6) break;
         assert.ok(Date.now() - start < 10000, "crouch to bridge edge");
         await wait(100);
       }
+      await page.keyboard.up("KeyW");
+      await aim({ x: cx + 0.5 + dx * 0.48, y: cy - 0.5, z: cz + 0.5 + dz * 0.48 });
+      await page.mouse.down({ button: "right" });
+      await page.mouse.up({ button: "right" });
+      await wait(300);
+      assert.equal(
+        await block({ x: nx, y: cy - 1, z: nz }),
+        material.block,
+        "placed a real bridge block",
+      );
     } finally {
       await page.keyboard.up("KeyW");
+      await page.keyboard.up("ShiftLeft");
     }
-    await aim({ x: cx + 0.5 + dx * 0.48, y: cy - 0.5, z: cz + 0.5 + dz * 0.48 });
-    await page.mouse.down({ button: "right" });
-    await page.mouse.up({ button: "right" });
-    await wait(300);
-    assert.equal(
-      await block({ x: nx, y: cy - 1, z: nz }),
-      material.block,
-      "placed a real bridge block",
-    );
-    await page.keyboard.up("ShiftLeft");
     if (previous && (await count(previous))) await equip(previous);
+    return { x: nx, z: nz };
   }
   async function tunnelTo(p) {
     for (const axis of ["x", "z"]) {
@@ -317,10 +431,18 @@ export function createDriver(page, out) {
           nz = cz + (axis === "z" ? step : 0);
         for (const y of [cy + 1, cy])
           if ((await block({ x: nx, y, z: nz })) !== 0) await mine({ x: nx, y, z: nz });
-        if ((await block({ x: nx, y: cy - 1, z: nz })) === 0) await bridge(nx, cy, nz);
-        await walk(nx + 0.5, nz + 0.5);
+        if ([0, 5, 26, 31, 40, 43].includes(await block({ x: nx, y: cy - 1, z: nz }))) {
+          const built = await bridge(nx, cy, nz);
+          await walk(built.x + 0.5, built.z + 0.5);
+        } else await walk(nx + 0.5, nz + 0.5);
       }
     }
+    const endPosition = (await info()).position;
+    const x = Math.floor(endPosition.x),
+      z = Math.floor(endPosition.z),
+      y = Math.round(endPosition.y);
+    if ([0, 5, 26, 31, 40, 43].includes(await block({ x, y: y - 1, z }))) await bridge(x, y, z);
+    await walk(p.x + 0.5, p.z + 0.5, false, 0.2, 80);
   }
   async function findOre(id) {
     return page.evaluate((id) => {
@@ -359,6 +481,9 @@ export function createDriver(page, out) {
     tunnelTo,
     findOre,
     light,
+    setNarrator,
+    narrate,
+    setGoal,
     setThreatHandler,
     checkThreat,
     chooseMaterial,
@@ -484,7 +609,8 @@ export async function initialJourney(d, page, url, onReady) {
       const b = await block(obstacle);
       if (b !== 0 && b !== 5) await mine(obstacle);
     }
-    await walk(point.x + 0.5, point.z + 0.5, point.h > current.y + 0.1);
+    const climbing = point.h > current.y + 0.1;
+    await walk(point.x + 0.5, point.z + 0.5, climbing, 0.3, climbing ? 650 : 0);
   }
   for (let dy = 0; dy < 4; dy++) await mine({ x: tree.x, y: tree.y + dy, z: tree.z });
   await walk(tree.x + 0.5, tree.z + 0.5, false, 0.12);

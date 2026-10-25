@@ -1,4 +1,4 @@
-import { canMelee, chooseThreat, safeRetreat, solid } from "./combat-policy.mjs";
+import { canMelee, chooseThreat, hostile, safeRetreat, solid } from "./combat-policy.mjs";
 /** Read-only world inspection plus normal keyboard/mouse/UI actions. */
 import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
@@ -27,7 +27,7 @@ export function createAdventureDriver(page, d) {
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
   async function move(x, z, jump = false, tolerance = 0.3) {
-    await d.walk(x, z, jump, tolerance, jump ? 800 : 180);
+    await d.walk(x, z, jump, tolerance, jump ? 800 : 60);
   }
   async function pillarTo(target) {
     await d.center();
@@ -138,7 +138,10 @@ export function createAdventureDriver(page, d) {
               k = key(x, z);
             if (prev.has(k) || Math.abs(x - sx) > 24 || Math.abs(z - sz) > 24) continue;
             const h = height(x, z);
-            if (h === null || node.h === null || h - node.h > 2 || node.h - h > 3) continue;
+            if (h === null || node.h === null || h - node.h > 2) continue;
+            const drop = node.h - h,
+              waterLanding = mc.blockAt(x, h - 1, z) === 5;
+            if (drop > 3 && (!waterLanding || drop > 8)) continue;
             const n = { x, z, h };
             prev.set(k, node);
             queue.push(n);
@@ -152,8 +155,19 @@ export function createAdventureDriver(page, d) {
         }
         return result.reverse().slice(1, 17);
       }, target);
-      assert.ok(route.length, "find a surface route");
-      for (const p of route) {
+      if (!route.length) {
+        d.narrate("急な地形なので、掘って通り道を作ります。", 1);
+        const dx = target.x - Math.floor(s.position.x),
+          dz = target.z - Math.floor(s.position.z);
+        const next = { x: Math.floor(s.position.x), z: Math.floor(s.position.z) };
+        if (Math.abs(dx) >= Math.abs(dz)) next.x += Math.sign(dx);
+        else next.z += Math.sign(dz);
+        if (await d.count("iron_pick")) await d.equip("iron_pick");
+        await d.tunnelTo(next);
+        continue;
+      }
+      for (let index = 0; index < route.length; index++) {
+        const p = route[index];
         const current = await d.info(),
           foot = Math.min(p.h, Math.floor(current.position.y) + 1);
         for (let y = foot; y <= Math.max(foot + 2, Math.floor(current.position.y) + 2); y++) {
@@ -164,11 +178,33 @@ export function createAdventureDriver(page, d) {
             await d.mine(cell);
           }
         }
-        await move(
-          p.x + 0.5,
-          p.z + 0.5,
-          p.h > current.position.y + 0.1 || (await d.block({ x: p.x, y: p.h - 1, z: p.z })) === 5,
+        const water = (await d.block({ x: p.x, y: p.h - 1, z: p.z })) === 5;
+        if (water && current.position.y - p.h > 3) d.narrate("水へ降りて、先へ進みます。", 1);
+        let end = index;
+        if (p.h <= current.position.y + 0.1) {
+          const dx = Math.sign(p.x - Math.floor(current.position.x)),
+            dz = Math.sign(p.z - Math.floor(current.position.z));
+          while (end + 1 < route.length && end - index < 7) {
+            const a = route[end],
+              b = route[end + 1];
+            if (
+              b.h !== p.h ||
+              b.x - a.x !== dx ||
+              b.z - a.z !== dz ||
+              ((await d.block({ x: b.x, y: b.h - 1, z: b.z })) === 5) !== water
+            )
+              break;
+            end++;
+          }
+        }
+        await d.walk(
+          route[end].x + 0.5,
+          route[end].z + 0.5,
+          p.h > current.position.y + 0.1 || water,
+          0.25,
+          0,
         );
+        index = end;
       }
     }
     throw new Error("surface route limit");
@@ -187,6 +223,13 @@ export function createAdventureDriver(page, d) {
     } else {
       // Approach the open end of the stair tunnel, rather than its roof.
       await surfaceTo({ x: entrance.x, z: entrance.z + 2 });
+      for (let step = 0; step < 6 && (await d.info()).position.y > entrance.y + 1; step++) {
+        await d.center();
+        const p = (await d.info()).position;
+        await d.equip("iron_pick");
+        await d.mine({ x: Math.floor(p.x), y: Math.round(p.y) - 1, z: Math.floor(p.z) });
+        await wait(700);
+      }
       await move(entrance.x + 0.5, entrance.z + 1.5, true);
       await move(entrance.x + 0.5, entrance.z + 0.5, true);
       for (let t = entrance.y - c.y - 1; t >= 0; t--) await move(c.x + 0.5, c.z + 4 + t + 0.5);
@@ -232,7 +275,7 @@ export function createAdventureDriver(page, d) {
   }
   let guarding = false;
   const combatStats = { interruptions: 0, melee: 0, ranged: 0, retreats: 0 };
-  async function threat() {
+  async function threat(meleeRange = 5) {
     const s = await d.info(),
       mobs = (await adventure()).creatures;
     const points = [];
@@ -254,7 +297,12 @@ export function createAdventureDriver(page, d) {
       points,
     );
     const blocks = new Map(entries);
-    return chooseThreat(s.position, mobs, (x, y, z) => blocks.get(`${x},${y},${z}`) ?? 0);
+    return chooseThreat(
+      s.position,
+      mobs,
+      (x, y, z) => blocks.get(`${x},${y},${z}`) ?? 0,
+      meleeRange,
+    );
   }
   async function guard() {
     if (guarding) return false;
@@ -290,6 +338,7 @@ export function createAdventureDriver(page, d) {
     }
     guarding = true;
     combatStats.interruptions++;
+    d.narrate("敵が近づいたので、作業を中断して応戦します。", 2);
     const saved = await d.info(),
       ui = await page.evaluate(() => ({
         open: !document.querySelector("#inventory-panel").hidden,
@@ -304,16 +353,26 @@ export function createAdventureDriver(page, d) {
     if (ui.open) await d.close();
     try {
       const until = Date.now() + 45000;
+      let defended = false;
       while (target && Date.now() < until) {
-        const s = await d.info();
+        let s = await d.info();
         assert.ok(s.health > 0, "survive reactive combat");
-        if (s.health <= 6) {
+        const nearby = (await adventure()).creatures.filter(
+          (m) =>
+            hostile(m) &&
+            Math.hypot(
+              m.position.x - s.position.x,
+              m.position.y - s.position.y,
+              m.position.z - s.position.z,
+            ) < 4.5,
+        ).length;
+        if (s.health <= 14 || nearby >= 2) {
           const cells = await page.evaluate(() => {
             const p = window.__mc.position(),
               r = [];
             for (let x = Math.floor(p.x) - 3; x <= Math.floor(p.x) + 3; x++)
               for (let z = Math.floor(p.z) - 3; z <= Math.floor(p.z) + 3; z++)
-                for (let y = Math.floor(p.y) - 1; y <= Math.floor(p.y) + 1; y++)
+                for (let y = Math.floor(p.y) - 3; y <= Math.floor(p.y) + 3; y++)
                   r.push([`${x},${y},${z}`, window.__mc.blockAt(x, y, z)]);
             return r;
           });
@@ -324,14 +383,21 @@ export function createAdventureDriver(page, d) {
               (x, y, z) => map.get(`${x},${y},${z}`) ?? 0,
             );
           if (retreat) {
-            await d.aim({ x: retreat.x, y: s.position.y + s.eye, z: retreat.z });
+            await d.aim({ x: retreat.x, y: s.position.y + s.eye, z: retreat.z }, 0);
             await page.keyboard.down("ControlLeft");
             await page.keyboard.down("KeyW");
+            if (retreat.jump) await page.keyboard.down("Space");
             await wait(350);
             await page.keyboard.up("KeyW");
             await page.keyboard.up("ControlLeft");
+            await page.keyboard.up("Space");
+            defended = true;
             combatStats.retreats++;
+            d.narrate("囲まれる前に、距離を取って応戦します。", 2);
             await eat();
+            s = await d.info();
+            target = await threat(14);
+            if (!target) break;
           }
         }
         if (canMelee(s.position, s.eye, target.position)) {
@@ -341,26 +407,31 @@ export function createAdventureDriver(page, d) {
             const pick = s.inventory.findIndex((item) => item?.id === "stone_pick");
             if (pick >= 0) await d.equip("stone_pick");
           }
-          await d.aim({ ...target.position, y: target.position.y + 1 });
+          await d.aim({ ...target.position, y: target.position.y + 1 }, 0);
           await page.mouse.down();
           await wait(420);
           await page.mouse.up();
           combatStats.melee++;
+          d.narrate("近づいた敵を、近接攻撃で倒します。", 1);
         } else if (
           (await d.count("bow")) &&
           (await d.count("arrow")) > 0 &&
-          ((await d.count("arrow")) > 10 || target.distance < 5)
+          ((await d.count("arrow")) > 10 || target.distance < 5 || defended)
         ) {
           await d.equip("bow");
           const t = target.distance / 22;
-          await d.aim({
-            x: target.position.x + target.velocity.x * t,
-            y: target.position.y + 1 + 1.2 * t * t,
-            z: target.position.z + target.velocity.z * t,
-          });
+          await d.aim(
+            {
+              x: target.position.x + target.velocity.x * t,
+              y: target.position.y + 1 + 1.2 * t * t,
+              z: target.position.z + target.velocity.z * t,
+            },
+            0,
+          );
           await right();
           await wait(550);
           combatStats.ranged++;
+          d.narrate("近接攻撃の届かない敵には、弓を使います。", 1);
         } else {
           await d.aim({ ...target.position, y: target.position.y + 1 });
           const front = await page.evaluate(() => {
@@ -384,9 +455,10 @@ export function createAdventureDriver(page, d) {
           await page.keyboard.up("Space");
           await page.keyboard.up("ControlLeft");
         }
-        target = await threat();
+        target = await threat(defended ? 14 : 5);
       }
       assert.ok(!(await threat()), "finish or safely escape the current combat encounter");
+      d.narrate("敵への対応を終えたので、元の作業に戻ります。", 2);
       await d.walk(saved.position.x, saved.position.z, false, 0.35, 150);
       if (ui.open) {
         if (ui.title !== "所持品" && ui.target) {
@@ -405,10 +477,11 @@ export function createAdventureDriver(page, d) {
     const until = Date.now() + ms;
     while (Date.now() < until) {
       await d.checkThreat();
-      await wait(Math.min(200, until - Date.now()));
+      await wait(Math.max(1, Math.min(200, until - Date.now())));
     }
   }
   async function recover(target = 18) {
+    if ((await d.info()).health < target) d.narrate("食料を補給して、体力の回復を待ちます。", 1);
     const until = Date.now() + 100000;
     while ((await d.info()).health < target && Date.now() < until) {
       await guard();
@@ -426,7 +499,11 @@ export function createAdventureDriver(page, d) {
           const p = { x: village.x + x, y: village.y, z: village.z + z };
           if ((await d.block(p)) !== 23) continue;
           await guard();
-          await move(p.x + 0.5, p.z + 0.5, true);
+          const current = (await d.info()).position;
+          const crossesWater =
+            (current.x < village.x && p.x > village.x) ||
+            (current.x > village.x + 1 && p.x < village.x);
+          await move(p.x + 0.5, p.z + 0.5, current.y < village.y - 0.1 || crossesWater);
           if (await d.count("stick")) await d.equip("stick");
           await d.mine(p);
           await wait(350);
@@ -441,6 +518,7 @@ export function createAdventureDriver(page, d) {
     }
   }
   async function tradePearls(village) {
+    d.setGoal("村人を探し、小麦と交換してパールを手に入れます。");
     await surfaceTo({ x: village.x + 3, z: village.z });
     for (let attempt = 0; attempt < 40; attempt++) {
       const mobs = (await adventure()).creatures.filter((m) => m.species === "villager");
@@ -478,6 +556,14 @@ export function createAdventureDriver(page, d) {
     assert.ok((await d.count("enderPearl")) >= 4, "trade for four ender pearls");
   }
   async function travel(destination, p) {
+    d.narrate(
+      {
+        nether: "ゲートを使って、ネザーへ入ります。",
+        end: "ゲートを開けました。エンドへ進みます。",
+        overworld: "帰還ゲートを使って、通常世界へ戻ります。",
+      }[destination],
+      2,
+    );
     await d.equip((await d.count("iron_sword")) ? "iron_sword" : "iron_pick");
     await useAt(p);
     await page.waitForFunction(
@@ -491,6 +577,7 @@ export function createAdventureDriver(page, d) {
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
   async function shootCrystal(p) {
+    d.narrate("塔のクリスタルを狙って、矢を放ちます。", 1);
     await d.equip("bow");
     for (let attempt = 0; attempt < 4; attempt++) {
       if ((await d.block(p)) === 0) return;
@@ -530,6 +617,7 @@ export function createAdventureDriver(page, d) {
       await d.report(`Destroyed end crystal at ${p.x},${p.y},${p.z}`);
     }
     await eat();
+    d.setGoal("クリスタルを6個破壊。降りてきたドラゴンを剣で攻撃します。");
     await move(0.5, 4);
     await d.equip("iron_sword");
     for (let i = 0; i < 120; i++) {

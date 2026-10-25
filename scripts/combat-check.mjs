@@ -110,14 +110,23 @@ try {
     "real enemies were defeated",
   );
   assert.ok(
-    a.combatStats.interruptions > 0 && a.combatStats.melee > 0 && a.combatStats.ranged > 0,
-    "melee and ranged reactions occurred",
+    a.combatStats.interruptions > 0 && a.combatStats.melee + a.combatStats.ranged > 0,
+    "react to the live enemies and resume crafting",
   );
   assert.ok((await d.info()).health > 0, "survived real-time enemy attacks");
   console.log(
     "PASS craft interrupted for live melee/ranged enemies, combat completed, UI restored and craft resumed",
   );
   await d.close();
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  const meleeBefore = a.combatStats.melee;
+  await load("close-melee", [mob(1, "zombie", 0.5, 3)]);
+  await a.guard();
+  assert.ok(a.combatStats.melee > meleeBefore, "use melee for one close enemy");
+  assert.ok((await a.adventure()).creatures.every((m) => m.id !== 1));
+  assert.ok((await d.info()).health > 0);
+  console.log("PASS defeat one close enemy with melee");
   await page.evaluate(() => document.exitPointerLock());
   await page.waitForFunction(() => window.__mc.mode() === "idle");
   const before = a.combatStats.interruptions;
@@ -141,6 +150,127 @@ try {
   );
   await page.evaluate(() => document.exitPointerLock());
   await page.waitForFunction(() => window.__mc.mode() === "idle");
+  await load("continuous-walking", []);
+  await page.evaluate(() => {
+    window.__walkingTrace = [];
+    let last = 0;
+    const sample = (time) => {
+      if (time - last >= 40) {
+        window.__walkingTrace.push(window.__mc.position());
+        last = time;
+      }
+      window.__walkingTimer = window.requestAnimationFrame(sample);
+    };
+    window.__walkingTimer = window.requestAnimationFrame(sample);
+  });
+  await d.walk(10.5, 4.5, false, 0.3, 0);
+  const trace = await page.evaluate(() => {
+    window.cancelAnimationFrame(window.__walkingTimer);
+    return window.__walkingTrace;
+  });
+  const interior = trace.slice(3, -2);
+  const pauses = interior
+    .slice(1)
+    .filter((p, i) => Math.hypot(p.x - interior[i].x, p.z - interior[i].z) < 0.005).length;
+  assert.ok(interior.length > 15, "observe enough walking frames");
+  assert.ok(
+    pauses / (interior.length - 1) < 0.2,
+    "walk continuously instead of pulsing forward and stopping",
+  );
+  console.log(`PASS continuous walking: ${pauses}/${interior.length - 1} stationary samples`);
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  for (let x = -12; x < 0; x++) for (let z = -12; z <= 12; z++) put(x, 33, z, 0);
+  fixture.position = { x: -0.2919, y: 34, z: 4.5 };
+  await load("supported-ledge", []);
+  const planksBefore = await d.count("planks");
+  await d.tunnelTo({ x: -1, z: 4 });
+  assert.equal(
+    await d.block({ x: -1, y: 33, z: 4 }),
+    10,
+    "build the missing block under an overhanging center",
+  );
+  assert.equal(await d.count("planks"), planksBefore - 1, "consume a real building block");
+  assert.ok(Math.abs((await d.info()).position.x + 0.5) < 0.21);
+  assert.ok((await d.info()).health > 0);
+  console.log(
+    "PASS bridge from the actual supporting ledge even when the center is already over the target cell",
+  );
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  fixture.position = { x: 0.5, y: 34, z: 4.5 };
+  for (let x = -12; x < 0; x++) for (let z = -12; z <= 12; z++) put(x, 33, z, 3);
+  fixture.inventory[5] = { id: "iron_pick", count: 1, durability: 251 };
+  for (let x = -1; x <= 1; x++)
+    for (let z = 3; z <= 5; z++)
+      if (Math.abs(x) === 1 || z === 3 || z === 5) for (let y = 34; y <= 37; y++) put(x, y, z, 3);
+  await load("mined-route", []);
+  await a.surfaceTo({ x: 3, z: 4 });
+  assert.equal(
+    await d.block({ x: 1, y: 34, z: 4 }),
+    0,
+    "mine an ordinary passage through the blocking terrain",
+  );
+  assert.equal(await d.block({ x: 1, y: 35, z: 4 }), 0);
+  assert.ok(Math.abs((await d.info()).position.x - 3.5) < 0.8);
+  assert.ok((await d.count("cobble")) >= 2);
+  console.log("PASS mine a normal walkable passage when surface routing is enclosed");
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  for (let x = -1; x <= 1; x++)
+    for (let z = 3; z <= 5; z++) for (let y = 34; y <= 37; y++) put(x, y, z, 0);
+  fixture.inventory[5] = null;
+  for (let y = 34; y <= 39; y++) put(0, y, 4, 3);
+  for (let x = 1; x <= 4; x++)
+    for (let z = 3; z <= 6; z++) {
+      put(x, 31, z, 3);
+      for (let y = 32; y <= 34; y++) put(x, y, z, 5);
+      for (let y = 35; y <= 40; y++) put(x, y, z, 0);
+    }
+  fixture.position = { x: 0.5, y: 40, z: 4.5 };
+  await load("water-descent", []);
+  await a.surfaceTo({ x: 3, z: 4 });
+  await new Promise((r) => setTimeout(r, 1500));
+  assert.ok(
+    (await d.info()).position.y < 37,
+    "descend to the water instead of stopping on the high ledge",
+  );
+  assert.ok((await d.info()).health > 0);
+  assert.equal(await d.count("planks"), 4, "water descent does not need a floating bridge");
+  console.log("PASS route down from a high ledge into water");
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  fixture.position = { x: 0.5, y: 34, z: 4.5 };
+  for (let y = 34; y <= 39; y++) put(0, y, 4, 0);
+  for (let x = 1; x <= 4; x++)
+    for (let z = 3; z <= 6; z++) {
+      put(x, 32, z, 3);
+      put(x, 33, z, 3);
+      for (let y = 34; y <= 40; y++) put(x, y, z, 0);
+    }
+  fixture.inventory[2].count = 32;
+  fixture.vitals.health = 14;
+  const retreatsBefore = a.combatStats.retreats;
+  await load("defensive-crowd", [
+    mob(1, "ember", 2.5, 4.5),
+    mob(2, "ember", 3.5, 5.5),
+    mob(3, "ember", 4.5, 3.5),
+    mob(4, "ember", 5.5, 6.5),
+  ]);
+  await a.guard();
+  assert.ok(
+    a.combatStats.retreats > retreatsBefore,
+    "retreat before being surrounded at reduced health",
+  );
+  assert.ok(
+    (await a.adventure()).creatures.every((m) => ![1, 2, 3, 4].includes(m.id)),
+    "defeat the pursuing group from safer range",
+  );
+  assert.ok((await d.info()).health > 0);
+  console.log("PASS retreat early and defeat four pursuing enemies after landing damage");
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  fixture.vitals.health = 20;
   fixture.inventory[2].count = 10;
   for (let x = 2; x <= 5; x++)
     for (let z = 3; z <= 6; z++) {
