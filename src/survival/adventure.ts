@@ -359,12 +359,10 @@ export class Adventure {
       return true;
     }
     if (item.id === "enderEye") {
-      const normalHit = raycastVoxels(
-        origin,
-        direction,
-        6,
-        (x, y, z) => s.world.getBlock(x, y, z) !== BlockId.AIR,
-      );
+      const normalHit = raycastVoxels(origin, direction, 6, (x, y, z) => {
+        const b = s.world.getBlock(x, y, z);
+        return b !== BlockId.AIR && b !== BlockId.WATER && b !== BlockId.LAVA;
+      });
       if (this.state.dimension !== "overworld") {
         s.notice?.("エンダーアイは通常世界の遺跡で使えます");
         return true;

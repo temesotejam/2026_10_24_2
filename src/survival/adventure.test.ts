@@ -279,6 +279,17 @@ describe("planned adventure progression", () => {
         "overworld",
         2,
       );
+      const world = new World(seed, "overworld", 2),
+        room = stronghold(seed);
+      for (let t = 0; t <= entrance.y - room.y; t++) {
+        for (const dx of [-2, 0, 2]) {
+          const x = room.x + dx,
+            z = room.z + 4 + t;
+          world.ensureChunk(Math.floor(x / 16), Math.floor(z / 16));
+          expect(world.getBlock(x, room.y + t + 4, z)).toBe(BlockId.STONE_BRICK);
+          if (dx !== 0) expect(world.getBlock(x, room.y + t, z)).toBe(BlockId.STONE_BRICK);
+        }
+      }
       expect(entrance.y).toBeGreaterThan(
         Math.max(32, sample(entrance.x, entrance.z).terrainHeight),
       );
@@ -290,6 +301,16 @@ describe("planned adventure progression", () => {
       ).toBe(BlockId.AIR);
     },
   );
+  it("inserts an eye into a submerged frame without water intercepting the action", () => {
+    const { world, data, adventure } = fixture();
+    data.inventory[0] = stack("enderEye");
+    world.setBlock(0, 34, -1, BlockId.WATER);
+    world.setBlock(0, 34, -2, BlockId.WATER);
+    world.setBlock(0, 34, -3, BlockId.END_FRAME);
+    adventure.use({ x: 0.5, y: 34.5, z: 0.5 }, { x: 0, y: 0, z: -1 });
+    expect(world.getBlock(0, 34, -3)).toBe(BlockId.END_FRAME_FILLED);
+    expect(data.inventory[0]).toBeNull();
+  });
   it("creates all twelve stronghold frames, four awaiting eyes, and six end crystals", () => {
     const room = stronghold(2026);
     expect(room.y).toBeLessThan(32);

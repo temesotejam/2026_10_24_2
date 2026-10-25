@@ -60,6 +60,8 @@ let recorder;
 const startRecording = async () => {
   await page.select("#render-scale", "0.5");
   part.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
+  part.initial = await d.info();
+  part.dimension = (await a.adventure()).dimension;
   part.startedAt = new Date().toISOString();
   flush();
   recorder = await page.screencast({
@@ -293,9 +295,13 @@ try {
   if (resume <= 5) {
     const c = (await a.adventure()).stronghold;
     const entrance = (await a.adventure()).entrance ?? { x: c.x, y: c.y + 24, z: c.z + 28 };
-    await a.surfaceTo({ x: entrance.x, z: entrance.z });
-    for (let t = entrance.y - c.y; t >= 0; t--) await a.move(c.x + 0.5, c.z + 4 + t + 0.5);
-    await a.move(c.x + 0.5, c.z + 3.5);
+    const current = (await d.info()).position;
+    if (!(current.y <= c.y + 4 && Math.hypot(current.x - c.x, current.z - c.z) < 8)) {
+      await a.surfaceTo({ x: entrance.x, z: entrance.z });
+      for (let t = entrance.y - c.y; t >= 0; t--) await a.move(c.x + 0.5, c.z + 4 + t + 0.5);
+      await a.move(c.x + 0.5, c.z + 3.5);
+    }
+    await a.move(c.x + 0.5, c.z + 0.5, true);
     await d.equip("enderEye");
     for (const [dx, dz] of [
       [-2, 0],

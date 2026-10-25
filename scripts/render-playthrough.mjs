@@ -48,6 +48,8 @@ run("ffmpeg", [
   list,
   "-vf",
   "setpts=(PTS-STARTPTS)/1.5",
+  "-r",
+  "45/2",
   "-an",
   "-c:v",
   "libx264",

@@ -143,10 +143,15 @@ export function stampAdventure(
       put(p.x, p.y, p.z, p.empty ? BlockId.END_FRAME : BlockId.END_FRAME_FILLED);
     // Stairs connect the underground room to daylight, rather than a sealed box.
     for (let t = 0; t <= stairLength; t++)
-      for (let dx = -1; dx <= 1; dx++) {
+      for (let dx = -2; dx <= 2; dx++) {
         put(room.x + dx, room.y - 1 + t, room.z + 4 + t, BlockId.STONE_BRICK);
-        for (let dy = 0; dy <= 3; dy++)
-          put(room.x + dx, room.y + t + dy, room.z + 4 + t, BlockId.AIR);
+        for (let dy = 0; dy <= 4; dy++)
+          put(
+            room.x + dx,
+            room.y + t + dy,
+            room.z + 4 + t,
+            Math.abs(dx) === 2 || dy === 4 ? BlockId.STONE_BRICK : BlockId.AIR,
+          );
       }
     put(room.x - 4, room.y, room.z, BlockId.TORCH);
     put(room.x + 4, room.y, room.z, BlockId.TORCH);
