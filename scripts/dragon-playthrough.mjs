@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import puppeteer from "puppeteer";
 import { createDriver, initialJourney, finishIronDiamond, wait } from "./lib/survival-driver.mjs";
 import { createAdventureDriver } from "./lib/adventure-driver.mjs";
@@ -34,6 +35,7 @@ const part = {
   resumePhase: resume,
   startedAt: null,
   completed: false,
+  sourceCommit: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
 };
 meta.parts.push(part);
 const flush = () => writeFileSync(path.join(out, "recording.json"), JSON.stringify(meta, null, 2));
@@ -320,6 +322,7 @@ try {
   assert.ok(final.dragon.defeated);
   assert.equal(await d.count("dragonEgg"), 1);
   meta.completed = true;
+  delete meta.error;
   meta.combat = a.combatStats;
   meta.final = {
     health: (await d.info()).health,
@@ -331,7 +334,8 @@ try {
   await wait(2000);
   part.completed = true;
 } catch (error) {
-  meta.error = String(error?.stack ?? error);
+  part.error = String(error?.stack ?? error);
+  meta.error = part.error;
   console.error(error);
   try {
     await d.releaseAttack();
