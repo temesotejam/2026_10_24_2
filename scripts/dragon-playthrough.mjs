@@ -127,11 +127,51 @@ async function stockFood(village) {
   await d.equip("iron_pick");
   await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
   await page.waitForSelector('[data-recipe="bread"]');
-  while ((await d.count("bread")) < 12) await d.make("bread");
+  while ((await d.count("bread")) < 12 && (await d.count("wheat")) >= 3) await d.make("bread");
+  assert.ok((await d.count("bread")) >= 6, "carry enough real food for the trip");
   await d.close();
   await a.eat();
   await a.recover(20);
   await d.report("通常の農業とクラフトで食料を補充し、体力を回復");
+}
+async function stockArrows(village, target = 24) {
+  d.setGoal("遠出の前に、矢と予備の材料を補充します。");
+  if ((await d.count("planks")) < 4) {
+    await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
+    await a.move(village.x - 5.5, village.z + 2.7);
+    await a.move(village.x - 4.5, village.z + 3.5);
+    await d.equip("iron_pick");
+    for (const [dy, dz] of [
+      [1, 3],
+      [2, 3],
+      [1, 2],
+      [2, 2],
+      [1, 6],
+    ]) {
+      if ((await d.count("planks")) >= 4) break;
+      const cell = { x: village.x - 4, y: village.y + dy, z: village.z + dz };
+      if ((await d.block(cell)) === 10) await d.mine(cell);
+      await wait(450);
+    }
+    assert.ok((await d.count("planks")) >= 4, "gather wood for arrows and a reserve");
+  }
+  await craftArrows(target);
+}
+async function craftArrows(target) {
+  if ((await d.count("arrow")) >= target) return;
+  await d.open();
+  while ((await d.count("arrow")) < target) {
+    if (!(await d.count("stick"))) {
+      assert.ok((await d.count("planks")) >= 2, "own wood for arrows");
+      await d.make("sticks");
+    }
+    if (!(await d.count("flint"))) {
+      assert.ok((await d.count("cobble")) >= 2, "own stone for arrows");
+      await d.make("flint");
+    }
+    await d.make("arrow");
+  }
+  await d.close();
 }
 try {
   if (resume === 0) {
@@ -384,6 +424,7 @@ try {
     await chapter("育った小麦を村人と交換し、4個のエンダーアイを作成", 5);
   }
   if (resume <= 5) {
+    await stockArrows(village);
     await stockFood(village);
     d.setGoal("エンダーアイを持って、地下遺跡へ向かいます。");
     const c = (await a.adventure()).stronghold;
@@ -404,6 +445,7 @@ try {
     await chapter("地下遺跡のゲートを開き、エンドの島へ到達", 6);
   }
   if (resume <= 6) {
+    await craftArrows(8);
     d.setGoal("まずクリスタルを弓で壊し、ドラゴンの回復を止めます。");
     await a.defeatDragon();
     await d.report("エンダードラゴン討伐。クリスタル6個破壊、卵1個を獲得");

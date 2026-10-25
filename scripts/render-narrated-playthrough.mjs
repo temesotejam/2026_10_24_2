@@ -44,6 +44,18 @@ for (const part of metadata.parts) {
   );
   rawDuration += part.duration;
 }
+const observationsFile = path.join(directory, "observed-commentary.json");
+if (existsSync(observationsFile)) {
+  const observed = JSON.parse(readFileSync(observationsFile, "utf8"));
+  for (const event of observed.events)
+    if (
+      !metadata.narration.some(
+        (n) => n.part === event.part && n.seconds === event.seconds && n.text === event.text,
+      )
+    )
+      metadata.narration.push(event);
+  metadata.observedCommentaryReadOnly = true;
+}
 const cues = narrationCues(metadata);
 assert.ok(cues.length >= 10);
 writeFileSync(path.join(directory, "commentary.srt"), srt(cues));
