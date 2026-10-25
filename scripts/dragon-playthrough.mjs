@@ -92,6 +92,28 @@ const villageFromWorld = async () => {
     .filter((s) => s.kind === "village")
     .sort((x, y) => Math.hypot(x.x - p.x, x.z - p.z) - Math.hypot(y.x - p.x, y.z - p.z))[0];
 };
+async function stockFood(village) {
+  if ((await d.count("bread")) >= 6) return;
+  await a.surfaceTo({ x: village.x, z: village.z - 3 });
+  const needed = 3 * (8 - (await d.count("bread"))),
+    until = Date.now() + 240000;
+  while ((await d.count("wheat")) < needed) {
+    assert.ok(Date.now() < until, "grow food through ordinary farming");
+    await a.harvest(village, needed, true);
+    if ((await d.count("wheat")) < needed) await a.waitSafe(5000);
+  }
+  await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
+  await a.move(village.x - 5.5, village.z + 2.7);
+  await a.move(village.x - 4.5, village.z + 3.5);
+  await d.equip("iron_pick");
+  await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
+  await page.waitForSelector('[data-recipe="bread"]');
+  while ((await d.count("bread")) < 8) await d.make("bread");
+  await d.close();
+  await a.eat();
+  await a.recover(20);
+  await d.report("通常の農業とクラフトで食料を補充し、体力を回復");
+}
 try {
   if (resume === 0) {
     await initialJourney(d, page, url, startRecording);
@@ -310,10 +332,12 @@ try {
       await d.make("enderEye");
     }
     await d.close();
+    await stockFood(village);
     await a.eat();
     await chapter("育った小麦を村人と交換し、4個のエンダーアイを作成", 5);
   }
   if (resume <= 5) {
+    await stockFood(village);
     const c = (await a.adventure()).stronghold;
     await a.enterStronghold();
     await d.equip("enderEye");
