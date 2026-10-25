@@ -282,16 +282,18 @@ try {
     await chapter("ネザーで素材を入手し、持ち物を持って村へ帰還", 4);
   }
   if (resume <= 4) {
-    await a.surfaceTo({ x: village.x, z: village.z - 3 });
-    const deadline = Date.now() + 240000;
-    while ((await d.count("wheat")) < 144) {
-      assert.ok(Date.now() < deadline, "farm the remaining wheat");
-      await a.harvest(village, 144, true);
-      if ((await d.count("wheat")) < 144) await a.waitSafe(5000);
+    if ((await d.count("enderPearl")) < 4 && (await d.count("enderEye")) < 4) {
+      await a.surfaceTo({ x: village.x, z: village.z - 3 });
+      const deadline = Date.now() + 240000;
+      while ((await d.count("wheat")) < 144) {
+        assert.ok(Date.now() < deadline, "farm the remaining wheat");
+        await a.harvest(village, 144, true);
+        if ((await d.count("wheat")) < 144) await a.waitSafe(5000);
+      }
+      await a.tradePearls(village);
     }
-    await a.tradePearls(village);
     await d.open();
-    while ((await d.count("arrow")) < 24) {
+    while ((await d.count("arrow")) < 16) {
       if (!(await d.count("stick"))) {
         assert.ok((await d.count("planks")) >= 2, "wood available for spare arrows");
         await d.make("sticks");
@@ -303,8 +305,10 @@ try {
       if (!(await d.count("flint"))) await d.make("flint");
       await d.make("arrow");
     }
-    while ((await d.count("blazePowder")) < 4) await d.make("blazePowder");
-    while ((await d.count("enderEye")) < 4) await d.make("enderEye");
+    while ((await d.count("enderEye")) < 4) {
+      if (!(await d.count("blazePowder"))) await d.make("blazePowder");
+      await d.make("enderEye");
+    }
     await d.close();
     await a.eat();
     await chapter("育った小麦を村人と交換し、4個のエンダーアイを作成", 5);
