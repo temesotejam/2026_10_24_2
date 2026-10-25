@@ -63,8 +63,8 @@ const fragmentShader = /* glsl */ `
     if (tex.a < 0.05) discard;
     float diffuse = uAmbient + uSunIntensity * max(dot(normalize(vNormal), uSunDir), 0.0);
     vec3 lightPos = (vWorld + vNormal * 0.02 - uLightOrigin) / 32.0;
-    // Stored levels are 0..15 in normalized unsigned bytes (0..255).
-    vec2 light = texture(uLightField, clamp(lightPos, vec3(0.001), vec3(0.999))).rg * 17.0;
+    // buildLightField expands its 0..15 levels to the full byte range.
+    vec2 light = texture(uLightField, clamp(lightPos, vec3(0.001), vec3(0.999))).rg;
     bool inLight = all(greaterThanEqual(lightPos,vec3(0.0))) && all(lessThan(lightPos,vec3(1.0)));
     float localLight = inLight ? max(light.r * uDayLight, light.g) : 0.7 + 0.3 * uDayLight;
     localLight = max(localLight, uMinimumLight);

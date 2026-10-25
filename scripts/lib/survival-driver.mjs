@@ -83,6 +83,8 @@ export function createDriver(page, out) {
   }
   async function walk(x, z, jump = false, tolerance = 0.3) {
     const start = Date.now();
+    let lastProgress = Date.now(),
+      previous = null;
     while (true) {
       const s = await info();
       assert.ok(s.health > 0, "survive travel");
@@ -92,6 +94,19 @@ export function createDriver(page, out) {
         Date.now() - start < 60000,
         `travel to ${x},${z}; position=${JSON.stringify(s.position)}`,
       );
+      if (previous && Math.hypot(s.position.x - previous.x, s.position.z - previous.z) > 0.04)
+        lastProgress = Date.now();
+      if (Date.now() - lastProgress > 1500) {
+        await page.keyboard.up("KeyW");
+        await page.keyboard.up("Space");
+        for (let yy = Math.floor(s.position.y); yy <= Math.floor(s.position.y) + 3; yy++) {
+          const cell = { x: Math.floor(x), y: yy, z: Math.floor(z) },
+            id = await block(cell);
+          if (id !== 0 && id !== 5 && id !== 8) await mine(cell);
+        }
+        lastProgress = Date.now();
+      }
+      previous = { ...s.position };
       await aim({ x, y: s.position.y + s.eye, z });
       await page.keyboard.down("KeyW");
       if (jump) await page.keyboard.down("Space");
@@ -368,18 +383,16 @@ export async function initialJourney(d, page, url, onReady) {
   console.log("Surface route", route);
   for (const point of route.slice(1)) {
     const foot = Math.min(point.h, Math.round((await info()).position.y) + 1);
-    for (const y of [
-      Math.max(foot + 2, Math.floor((await info()).position.y) + 1),
-      foot + 1,
-      foot,
-    ]) {
+    const current = (await info()).position;
+    for (let y = foot; y <= Math.max(foot + 2, Math.floor(current.y) + 2); y++) {
       const obstacle = { x: point.x, y, z: point.z };
       const b = await block(obstacle);
       if (b !== 0 && b !== 5) await mine(obstacle);
     }
-    await walk(point.x + 0.5, point.z + 0.5, true);
+    await walk(point.x + 0.5, point.z + 0.5, point.h > current.y + 0.1);
   }
   for (let dy = 0; dy < 4; dy++) await mine({ x: tree.x, y: tree.y + dy, z: tree.z });
+  await walk(tree.x + 0.5, tree.z + 0.5, false, 0.12);
   const log = tree.id === 27 ? "birchLog" : "log";
   await collect(log, 4);
   await report("Gathered four natural logs with empty hands");
