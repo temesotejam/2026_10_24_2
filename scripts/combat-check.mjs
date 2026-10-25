@@ -139,6 +139,31 @@ try {
   console.log(
     "PASS approaching enemy interrupted travel and the original movement goal was reached afterwards",
   );
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  fixture.inventory[2].count = 10;
+  for (let x = 2; x <= 5; x++)
+    for (let z = 3; z <= 6; z++) {
+      put(x, 32, z, 3);
+      put(x, 33, z, 0);
+    }
+  const rangedBefore = a.combatStats.ranged;
+  await load("ledge-interruption", [
+    { ...mob(1, "ember", 3.5, 4.5), position: { x: 3.5, y: 33, z: 4.5 } },
+  ]);
+  await a.guard();
+  assert.ok(
+    a.combatStats.ranged > rangedBefore,
+    "use reserve arrows for an enemy beyond vertical melee reach",
+  );
+  assert.ok(
+    (await a.adventure()).creatures.every((m) => m.id !== 1),
+    "ledge enemy defeated",
+  );
+  assert.ok((await d.info()).health > 0);
+  console.log(
+    "PASS enemy on a lower ledge is defeated with reserve arrows instead of repeating out-of-range melee",
+  );
   await page.screenshot({ path: path.join(out, "reactive-combat.png") });
   writeFileSync(
     path.join(out, "results.json"),

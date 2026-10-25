@@ -1,4 +1,4 @@
-import { chooseThreat, safeRetreat, solid } from "./combat-policy.mjs";
+import { canMelee, chooseThreat, safeRetreat, solid } from "./combat-policy.mjs";
 /** Read-only world inspection plus normal keyboard/mouse/UI actions. */
 import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
@@ -334,7 +334,7 @@ export function createAdventureDriver(page, d) {
             await eat();
           }
         }
-        if (target.distance <= 3.1) {
+        if (canMelee(s.position, s.eye, target.position)) {
           const sword = s.inventory.some((item) => item?.id === "iron_sword");
           if (sword) await d.equip("iron_sword");
           else {
@@ -346,7 +346,11 @@ export function createAdventureDriver(page, d) {
           await wait(420);
           await page.mouse.up();
           combatStats.melee++;
-        } else if ((await d.count("bow")) && (await d.count("arrow")) > 10) {
+        } else if (
+          (await d.count("bow")) &&
+          (await d.count("arrow")) > 0 &&
+          ((await d.count("arrow")) > 10 || target.distance < 5)
+        ) {
           await d.equip("bow");
           const t = target.distance / 22;
           await d.aim({

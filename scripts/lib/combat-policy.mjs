@@ -25,6 +25,11 @@ export function clearSight(from, to, blockAt) {
       return false;
   return true;
 }
+export function canMelee(player, eyeHeight, target) {
+  return (
+    Math.hypot(player.x - target.x, player.y + eyeHeight - target.y - 1, player.z - target.z) <= 2.8
+  );
+}
 export function chooseThreat(player, mobs, blockAt) {
   const eye = { ...player, y: player.y + 1.4 };
   return (

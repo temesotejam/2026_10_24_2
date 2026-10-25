@@ -198,76 +198,81 @@ try {
   if (resume <= 3) {
     if ((await a.adventure()).dimension === "overworld")
       await a.travel("nether", { x: village.x - 8, y: village.y + 1, z: village.z - 10 });
-    const landing = await page.evaluate(() => {
-      const mc = window.__mc,
-        points = [];
-      for (let x = -24; x <= 24; x++)
-        for (let z = -24; z <= 24; z++) {
-          if (Math.abs(x) <= 5 && Math.abs(z) <= 5) continue;
-          for (let y = 60; y >= 25; y--)
-            if (
-              [29, 32].includes(mc.blockAt(x, y, z)) &&
-              mc.blockAt(x, y + 1, z) === 0 &&
-              mc.blockAt(x, y + 2, z) === 0
-            ) {
-              points.push({ x, z, y, d: x * x + z * z + (34 - y) ** 2 });
-              break;
+    if ((await d.count("blazeRod")) < 2) {
+      const netherStart = (await d.info()).position;
+      if (Math.abs(netherStart.x) <= 5 && Math.abs(netherStart.z) <= 5 && netherStart.y >= 33) {
+        const landing = await page.evaluate(() => {
+          const mc = window.__mc,
+            points = [];
+          for (let x = -24; x <= 24; x++)
+            for (let z = -24; z <= 24; z++) {
+              if (Math.abs(x) <= 5 && Math.abs(z) <= 5) continue;
+              for (let y = 60; y >= 25; y--)
+                if (
+                  [29, 32].includes(mc.blockAt(x, y, z)) &&
+                  mc.blockAt(x, y + 1, z) === 0 &&
+                  mc.blockAt(x, y + 2, z) === 0
+                ) {
+                  points.push({ x, z, y, d: x * x + z * z + (34 - y) ** 2 });
+                  break;
+                }
             }
-        }
-      return points.sort((x, y) => x.d - y.d)[0];
-    });
-    assert.ok(landing, "find dry Nether terrain");
-    await d.tunnelTo(landing);
-    const position = (await d.info()).position;
-    await d.mine({
-      x: Math.floor(position.x),
-      y: Math.round(position.y) - 1,
-      z: Math.floor(position.z),
-    });
-    await wait(1000);
-    const deadline = Date.now() + 240000;
-    while ((await d.count("blazeRod")) < 2) {
-      assert.ok(Date.now() < deadline, "gather two rods through survival combat");
-      assert.ok((await d.info()).health > 0, "survive Nether expedition");
-      await a.eat();
-      const p = (await d.info()).position;
-      const mobs = (await a.adventure()).creatures
-        .filter((m) => m.species === "ember")
-        .sort(
-          (x, y) =>
-            Math.hypot(x.position.x - p.x, x.position.z - p.z) -
-            Math.hypot(y.position.x - p.x, y.position.z - p.z),
-        );
-      const mob = mobs[0];
-      if (!mob) {
-        await wait(700);
-        continue;
-      }
-      const distance = Math.hypot(mob.position.x - p.x, mob.position.z - p.z);
-      if (distance < 2.8) {
-        await d.equip("iron_sword");
-        await d.aim({ ...mob.position, y: mob.position.y + 1 });
-        await page.mouse.down();
-        await wait(450);
-        await page.mouse.up();
-      } else if (distance < 24 && (await d.count("arrow")) > 12) {
-        await d.equip("bow");
-        const t = distance / 22;
-        await d.aim({
-          x: mob.position.x + mob.velocity.x * t,
-          y: mob.position.y + 1 + 1.2 * t * t,
-          z: mob.position.z + mob.velocity.z * t,
+          return points.sort((x, y) => x.d - y.d)[0];
         });
-        await a.right();
-        await wait(700);
-      } else await wait(500);
-      const alive = (await a.adventure()).creatures.some((m) => m.id === mob.id);
-      if (!alive) {
-        await d.equip("iron_pick");
-        await d.tunnelTo({ x: Math.floor(mob.position.x), z: Math.floor(mob.position.z) });
-        if ((await d.info()).position.y < Math.floor(mob.position.y))
-          await a.pillarTo(Math.floor(mob.position.y));
+        assert.ok(landing, "find dry Nether terrain");
+        await d.tunnelTo(landing);
+        const position = (await d.info()).position;
+        await d.mine({
+          x: Math.floor(position.x),
+          y: Math.round(position.y) - 1,
+          z: Math.floor(position.z),
+        });
         await wait(1000);
+      }
+      const deadline = Date.now() + 240000;
+      while ((await d.count("blazeRod")) < 2) {
+        assert.ok(Date.now() < deadline, "gather two rods through survival combat");
+        assert.ok((await d.info()).health > 0, "survive Nether expedition");
+        await a.eat();
+        const p = (await d.info()).position;
+        const mobs = (await a.adventure()).creatures
+          .filter((m) => m.species === "ember")
+          .sort(
+            (x, y) =>
+              Math.hypot(x.position.x - p.x, x.position.z - p.z) -
+              Math.hypot(y.position.x - p.x, y.position.z - p.z),
+          );
+        const mob = mobs[0];
+        if (!mob) {
+          await wait(700);
+          continue;
+        }
+        const distance = Math.hypot(mob.position.x - p.x, mob.position.z - p.z);
+        if (distance < 2.8) {
+          await d.equip("iron_sword");
+          await d.aim({ ...mob.position, y: mob.position.y + 1 });
+          await page.mouse.down();
+          await wait(450);
+          await page.mouse.up();
+        } else if (distance < 24 && (await d.count("arrow")) > 12) {
+          await d.equip("bow");
+          const t = distance / 22;
+          await d.aim({
+            x: mob.position.x + mob.velocity.x * t,
+            y: mob.position.y + 1 + 1.2 * t * t,
+            z: mob.position.z + mob.velocity.z * t,
+          });
+          await a.right();
+          await wait(700);
+        } else await wait(500);
+        const alive = (await a.adventure()).creatures.some((m) => m.id === mob.id);
+        if (!alive) {
+          await d.equip("iron_pick");
+          await d.tunnelTo({ x: Math.floor(mob.position.x), z: Math.floor(mob.position.z) });
+          if ((await d.info()).position.y < Math.floor(mob.position.y))
+            await a.pillarTo(Math.floor(mob.position.y));
+          await wait(1000);
+        }
       }
     }
     await d.report("ネザーの敵を倒し、炎のロッドを2本回収");
@@ -286,6 +291,18 @@ try {
     }
     await a.tradePearls(village);
     await d.open();
+    while ((await d.count("arrow")) < 24) {
+      if (!(await d.count("stick"))) {
+        assert.ok((await d.count("planks")) >= 2, "wood available for spare arrows");
+        await d.make("sticks");
+      }
+      assert.ok(
+        (await d.count("cobble")) >= 2 || (await d.count("flint")),
+        "stone available for spare arrows",
+      );
+      if (!(await d.count("flint"))) await d.make("flint");
+      await d.make("arrow");
+    }
     while ((await d.count("blazePowder")) < 4) await d.make("blazePowder");
     while ((await d.count("enderEye")) < 4) await d.make("enderEye");
     await d.close();

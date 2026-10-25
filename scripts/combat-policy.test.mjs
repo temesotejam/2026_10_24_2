@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chooseThreat, safeRetreat } from "./lib/combat-policy.mjs";
+import { canMelee, chooseThreat, safeRetreat } from "./lib/combat-policy.mjs";
 const player = { x: 0.5, y: 34, z: 0.5 };
 const mob = (id, species, x, y = 34, z = 0.5) => ({ id, species, hp: 16, position: { x, y, z } });
 test("ignores villagers and passive wanderers but responds to an angry wanderer", () => {
@@ -43,4 +43,9 @@ test("retreats on supported ground rather than into lava or over a cliff", () =>
     safeRetreat(player, { x: -2, z: 0.5 }, () => 0),
     null,
   );
+});
+
+test("melee reach uses the eye and target body, including vertical ledges", () => {
+  assert.equal(canMelee({ x: 0, y: 34, z: 0 }, 1.62, { x: 2.7, y: 33, z: 0 }), false);
+  assert.equal(canMelee({ x: 0, y: 34, z: 0 }, 1.62, { x: 2.4, y: 34, z: 0 }), true);
 });
