@@ -4,7 +4,7 @@
 
 [対応バージョンのリリース（v0.2.0-beta.1）](https://github.com/temesotejam/2026_10_24_2/releases/tag/v0.2.0-beta.1)
 
-動画と `recording.json` は実行環境の出力ディレクトリに保存します。完成動画はこの作業のチャットで提供し、動画本体やブラウザプロファイルはGitへ追加しません。
+[全工程のMP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival.mp4)。Web用に軽量化した約1.5倍速・21分5秒の動画です。ブラウザのプロファイルは公開しません。
 
 ## 録画条件
 
@@ -27,7 +27,7 @@ node scripts/dragon-playthrough.mjs --out visual-check/dragon-playthrough/new-ru
 node scripts/render-playthrough.mjs visual-check/dragon-playthrough/new-run
 ```
 
-再開は同じ出力ディレクトリで `--resume <recording.jsonのnextPhase>` を指定する。新規録画では既存プロファイルを受け付けない。録画ファイルやブラウザプロファイルはGitへコミットしない。
+再開は同じ出力ディレクトリで `--resume <recording.jsonのnextPhase>` を指定する。新規録画では既存プロファイルを受け付けない。録画の原本とブラウザプロファイルはGitへコミットしない。公開用に軽量化したMP4のみ `public/watch/` へ配置する。
 
 ## 戦闘の実装と検証
 
