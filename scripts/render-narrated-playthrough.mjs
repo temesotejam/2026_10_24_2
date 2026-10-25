@@ -70,6 +70,8 @@ run("ffmpeg", [
   "-y",
   "-v",
   "error",
+  "-progress",
+  "encode-progress.txt",
   "-f",
   "concat",
   "-safe",

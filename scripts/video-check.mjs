@@ -61,7 +61,15 @@ try {
   await page.$eval("video", (video) => video.pause());
   await page.screenshot({ path: `${out}/victory.png` });
   assert.equal(errors.length, 0, errors.join("\n"));
-  const proof = { url, duration, playbackVerified: true, seekToVictoryVerified: true, errors };
+  const mediaUrl = await page.$eval("video", (video) => video.currentSrc);
+  const proof = {
+    url,
+    mediaUrl,
+    duration,
+    playbackVerified: true,
+    seekToVictoryVerified: true,
+    errors,
+  };
   writeFileSync(`${out}/proof.json`, JSON.stringify(proof, null, 2));
   console.log(JSON.stringify(proof));
 } finally {
