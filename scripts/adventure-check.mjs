@@ -366,6 +366,13 @@ try {
       2,
     ),
   );
+  if (process.env.GITHUB_ACTIONS)
+    console.log(
+      `::error title=Adventure UI check failed::${String(error?.stack ?? error)
+        .replaceAll("%", "%25")
+        .replaceAll("\r", "%0D")
+        .replaceAll("\n", "%0A")}`,
+    );
   throw error;
 } finally {
   await browser.close();

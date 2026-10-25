@@ -58,7 +58,7 @@ export function createDriver(page, out) {
   async function mine(p) {
     for (let attempt = 0; attempt < 16; attempt++) {
       const original = await block(p);
-      if (original === 0) return;
+      if ([0, 5, 26, 31, 40].includes(original)) return;
       assert.notEqual(original, 8, "do not mine bedrock");
       assert.ok((await info()).health > 0, "survive mining");
       await aim({ x: p.x + 0.5, y: p.y + 0.5, z: p.z + 0.5 });
@@ -144,7 +144,46 @@ export function createDriver(page, out) {
       { id, n },
     );
   }
+  async function light() {
+    if (!(await count("torch"))) return;
+    for (const id of ["iron_pick", "stone_pick", "wood_pick"])
+      if (await count(id)) {
+        await equip(id);
+        break;
+      }
+    const s = await info(),
+      x = Math.floor(s.position.x),
+      y = Math.round(s.position.y),
+      z = Math.floor(s.position.z);
+    if ((await block({ x, y, z })) === 16) {
+      await mine({ x, y, z });
+      await wait(500);
+    }
+    for (const [dx, dz] of [
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ]) {
+      const p = { x: x + dx, y, z: z + dz },
+        under = await block({ ...p, y: y - 1 });
+      if ([0, 5, 16, 22, 26].includes(under)) continue;
+      if ([12, 13, 14, 15, 34, 35].includes(await block(p))) continue;
+      for (const yy of [y + 1, y])
+        if ((await block({ ...p, y: yy })) !== 0) await mine({ ...p, y: yy });
+      await equip("torch");
+      await aim({ x: p.x + 0.5, y: y - 0.5, z: p.z + 0.5 });
+      await page.mouse.down({ button: "right" });
+      await page.mouse.up({ button: "right" });
+      if ((await block(p)) === 16) break;
+    }
+    for (const id of ["iron_pick", "stone_pick", "wood_pick"])
+      if (await count(id)) {
+        await equip(id);
+        break;
+      }
+  }
   async function station(id) {
+    await center();
     const s = await info();
     const x = Math.floor(s.position.x),
       y = Math.round(s.position.y),
@@ -268,6 +307,7 @@ export function createDriver(page, out) {
     bridge,
     tunnelTo,
     findOre,
+    light,
   };
 }
 export async function initialJourney(d, page, url, onReady) {
@@ -443,10 +483,21 @@ export async function initialJourney(d, page, url, onReady) {
     await collect(item, n);
   }
   await report("Collected coal and three iron ore using a stone pickaxe");
+  await finishIronDiamond(d, page);
+}
+export async function finishIronDiamond(d, page) {
+  const { info, report, station, close, equip, mine, collect, make, center, findOre, tunnelTo } = d;
+  let table;
+  if (!(await d.count("torch")) && (await d.count("coal"))) {
+    await d.open();
+    await d.make("torch");
+    await d.close();
+  }
+  await d.light();
   const furnace = await station("furnace");
   for (const [item, slot] of [
     ["ironOre", 0],
-    ["coal", 1],
+    [(await d.count("coal")) ? "coal" : "planks", 1],
   ]) {
     const index = (await info()).inventory.findIndex((s) => s?.id === item);
     await page.click(`[data-area="inventory"][data-slot="${index}"]`);
@@ -479,6 +530,7 @@ export async function initialJourney(d, page, url, onReady) {
     await mine({ x: Math.floor(p.x), y: Math.round(p.y) - 1, z: Math.floor(p.z) });
     await wait(500);
   }
+  await d.light();
   const diamond = await findOre(20);
   assert.ok(diamond, "find naturally generated diamond ore");
   const p = (await info()).position;

@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import puppeteer from "puppeteer";
-import { createDriver, initialJourney, wait } from "./lib/survival-driver.mjs";
+import { createDriver, initialJourney, finishIronDiamond, wait } from "./lib/survival-driver.mjs";
 import { createAdventureDriver } from "./lib/adventure-driver.mjs";
 const args = process.argv.slice(2),
   option = (key, fallback) => (args.includes(key) ? args[args.indexOf(key) + 1] : fallback);
@@ -97,6 +97,10 @@ try {
     await page.click("#play-button");
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
+  if (resume === 0.5) {
+    await finishIronDiamond(d, page);
+    await chapter("通常セーブから再開し、鉄の精錬と自然のダイヤ採掘を完了", 1);
+  }
   let village = meta.village;
   if (resume <= 1) {
     await a.reachSurface();
@@ -115,8 +119,12 @@ try {
     await a.eat();
     if ((await d.count("planks")) < 4) {
       await a.move(village.x - 5.5, village.z + 4.5);
-      await d.mine({ x: village.x - 4, y: village.y + 1, z: village.z + 4 });
-      await wait(600);
+      for (const dz of [3, 4, 2]) {
+        if ((await d.count("planks")) >= 4) break;
+        await d.mine({ x: village.x - 4, y: village.y, z: village.z + dz });
+        await wait(600);
+      }
+      assert.ok((await d.count("planks")) >= 4, "gather wood for spare sticks");
     }
     await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
     await page.waitForSelector('[data-recipe="bow"]');

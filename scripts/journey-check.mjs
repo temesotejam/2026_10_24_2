@@ -119,6 +119,14 @@ try {
       health: window.__mc?.health(),
     }));
     writeFileSync(`${out}/failure.json`, JSON.stringify(state, null, 2));
+    if (process.env.GITHUB_ACTIONS)
+      console.log(
+        `::error title=Survival journey failed::${String(error?.stack ?? error)
+          .concat("\nState: ", JSON.stringify(state))
+          .replaceAll("%", "%25")
+          .replaceAll("\r", "%0D")
+          .replaceAll("\n", "%0A")}`,
+      );
   }
   console.error(error);
   throw error;

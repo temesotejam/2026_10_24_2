@@ -51,7 +51,7 @@ export function createAdventureDriver(page, d) {
         z = Math.floor(s.position.z);
       if (y >= target) return;
       for (const yy of [y + 1, y + 2])
-        if ((await d.block({ x, y: yy, z })) !== 0) {
+        if (![0, 5, 26, 31, 40].includes(await d.block({ x, y: yy, z }))) {
           if (await d.count("iron_pick")) await d.equip("iron_pick");
           await d.mine({ x, y: yy, z });
         }
@@ -64,7 +64,7 @@ export function createAdventureDriver(page, d) {
         for (let t = 0; t < 20; t++) {
           await right();
           await wait(30);
-          if ((await d.block({ x, y, z })) !== 0) {
+          if ((await d.block({ x, y, z })) === (material === "cobble" ? 11 : 2)) {
             placed = true;
             break;
           }
