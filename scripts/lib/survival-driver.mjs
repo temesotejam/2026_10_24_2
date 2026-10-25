@@ -4,6 +4,21 @@ import { writeFileSync } from "node:fs";
 export const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 export function createDriver(page, out) {
   const events = [];
+  let threatHandler = null,
+    handlingThreat = false;
+  const setThreatHandler = (fn) => {
+    threatHandler = fn;
+  };
+  async function checkThreat() {
+    if (!threatHandler || handlingThreat) return false;
+    handlingThreat = true;
+    try {
+      return await threatHandler();
+    } finally {
+      handlingThreat = false;
+    }
+  }
+
   const info = () =>
     page.evaluate(() => ({
       position: window.__mc.position(),
@@ -21,6 +36,13 @@ export function createDriver(page, out) {
     writeFileSync(`${out}/progress.json`, JSON.stringify(events, null, 2));
     console.log(text);
   };
+  async function releaseAttack() {
+    try {
+      await page.mouse.up();
+    } catch (error) {
+      if (!String(error).includes("'left' is not pressed")) throw error;
+    }
+  }
   async function aim(p) {
     const s = await info();
     const dx = p.x - s.position.x,
@@ -48,8 +70,8 @@ export function createDriver(page, out) {
     assert.ok(index >= 0, `own ${id}`);
     if (index >= 9) {
       await open();
-      await page.click(`[data-area="inventory"][data-slot="${index}"]`);
-      await page.click('[data-area="inventory"][data-slot="0"]');
+      await page.locator(`[data-area="inventory"][data-slot="${index}"]`).click();
+      await page.locator('[data-area="inventory"][data-slot="0"]').click();
       await close();
       index = 0;
     }
@@ -57,6 +79,7 @@ export function createDriver(page, out) {
   }
   async function mine(p) {
     for (let attempt = 0; attempt < 16; attempt++) {
+      await checkThreat();
       const original = await block(p);
       if ([0, 5, 26, 31, 40].includes(original)) return;
       assert.notEqual(original, 8, "do not mine bedrock");
@@ -68,30 +91,42 @@ export function createDriver(page, out) {
       assert.notEqual(before, 8, "target is not bedrock");
       await page.mouse.down();
       try {
-        await page.waitForFunction(
-          ({ p, id }) => window.__mc.blockAt(p.x, p.y, p.z) !== id,
-          { timeout: 12000, polling: 100 },
-          { p: hit, id: before },
-        );
+        let deadline = Date.now() + 12000;
+        while ((await block(hit)) === before) {
+          assert.ok(
+            Date.now() < deadline,
+            `mining target changed or blocked ${JSON.stringify(hit)}`,
+          );
+          await wait(100);
+          const start = Date.now();
+          if (await checkThreat()) {
+            deadline += Date.now() - start;
+            await aim({ x: p.x + 0.5, y: p.y + 0.5, z: p.z + 0.5 });
+            await page.mouse.down();
+          }
+        }
       } finally {
-        await page.mouse.up();
+        await releaseAttack();
       }
       await wait(160);
       if ((await block(p)) === 0) return;
     }
     throw new Error(`Cannot reach ${JSON.stringify(p)}`);
   }
-  async function walk(x, z, jump = false, tolerance = 0.3) {
+  async function walk(x, z, jump = false, tolerance = 0.3, settle = 1000) {
     const start = Date.now();
+    let combatTime = 0;
     let lastProgress = Date.now(),
       previous = null;
     while (true) {
+      const checkedAt = Date.now();
+      if (await checkThreat()) combatTime += Date.now() - checkedAt;
       const s = await info();
       assert.ok(s.health > 0, "survive travel");
       const distance = Math.hypot(x - s.position.x, z - s.position.z);
       if (distance < tolerance) break;
       assert.ok(
-        Date.now() - start < 60000,
+        Date.now() - start - combatTime < 60000,
         `travel to ${x},${z}; position=${JSON.stringify(s.position)}`,
       );
       if (previous && Math.hypot(s.position.x - previous.x, s.position.z - previous.z) > 0.04)
@@ -114,7 +149,7 @@ export function createDriver(page, out) {
       await page.keyboard.up("KeyW");
       await page.keyboard.up("Space");
     }
-    await wait(1000);
+    await wait(settle);
   }
   async function center() {
     const p = (await info()).position;
@@ -127,11 +162,13 @@ export function createDriver(page, out) {
     await wait(300);
   }
   async function make(id) {
-    await page.$eval("details", (d) => {
-      d.open = true;
+    await checkThreat();
+    await page.evaluate(() => {
+      const book = document.querySelector("#inventory-panel details");
+      if (book) book.open = true;
     });
-    await page.click(`[data-recipe="${id}"]`);
-    await page.click("#craft-output");
+    await page.locator(`[data-recipe="${id}"]`).click();
+    await page.locator("#craft-output").click();
   }
   async function collect(id, n) {
     await page.waitForFunction(
@@ -211,6 +248,16 @@ export function createDriver(page, out) {
     await page.waitForSelector("#inventory-panel:not([hidden])");
     return cell;
   }
+  async function chooseMaterial() {
+    for (const [id, block] of [
+      ["dirt", 2],
+      ["cobble", 11],
+      ["netherrack", 29],
+      ["planks", 10],
+    ])
+      if (await count(id)) return { id, block };
+    throw new Error("No gathered building material remains");
+  }
   async function bridge(nx, cy, nz) {
     const before = await info(),
       cx = Math.floor(before.position.x),
@@ -222,8 +269,8 @@ export function createDriver(page, out) {
       (el) => Number(el.textContent) - 1,
     );
     const previous = before.inventory[selected]?.id;
-    const material = (await count("dirt")) > 0 ? "dirt" : "cobble";
-    await equip(material);
+    const material = await chooseMaterial();
+    await equip(material.id);
     await page.keyboard.down("ShiftLeft");
     await aim({
       x: cx + 0.5 + dx * 2,
@@ -247,7 +294,11 @@ export function createDriver(page, out) {
     await page.mouse.down({ button: "right" });
     await page.mouse.up({ button: "right" });
     await wait(300);
-    assert.notEqual(await block({ x: nx, y: cy - 1, z: nz }), 0, "placed a real bridge block");
+    assert.equal(
+      await block({ x: nx, y: cy - 1, z: nz }),
+      material.block,
+      "placed a real bridge block",
+    );
     await page.keyboard.up("ShiftLeft");
     if (previous) await equip(previous);
   }
@@ -308,6 +359,10 @@ export function createDriver(page, out) {
     tunnelTo,
     findOre,
     light,
+    setThreatHandler,
+    checkThreat,
+    chooseMaterial,
+    releaseAttack,
   };
 }
 export async function initialJourney(d, page, url, onReady) {
@@ -332,7 +387,7 @@ export async function initialJourney(d, page, url, onReady) {
   await page.waitForFunction(() => window.__mc?.meshedChunks() >= 60, { timeout: 120000 });
   assert.ok((await info()).inventory.every((s) => s === null));
   await onReady?.();
-  await page.click("#play-button");
+  await page.locator("#play-button").click();
   await page.waitForFunction(() => window.__mc.mode() === "pointer");
   const tree = await page.evaluate(() => {
     const trees = [];
@@ -500,8 +555,8 @@ export async function finishIronDiamond(d, page) {
     [(await d.count("coal")) ? "coal" : "planks", 1],
   ]) {
     const index = (await info()).inventory.findIndex((s) => s?.id === item);
-    await page.click(`[data-area="inventory"][data-slot="${index}"]`);
-    await page.click(`[data-area="furnace"][data-slot="${slot}"]`);
+    await page.locator(`[data-area="inventory"][data-slot="${index}"]`).click();
+    await page.locator(`[data-area="furnace"][data-slot="${slot}"]`).click();
   }
   await page.waitForFunction(
     () =>
@@ -510,9 +565,9 @@ export async function finishIronDiamond(d, page) {
       ) >= 3,
     { timeout: 40000 },
   );
-  await page.click('[data-area="furnace"][data-slot="2"]');
+  await page.locator('[data-area="furnace"][data-slot="2"]').click();
   const free = (await info()).inventory.findIndex((s) => s === null);
-  await page.click(`[data-area="inventory"][data-slot="${free}"]`);
+  await page.locator(`[data-area="inventory"][data-slot="${free}"]`).click();
   await close();
   await equip("stone_pick");
   await mine(furnace);

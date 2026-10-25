@@ -13,6 +13,7 @@ import {
   END_CRYSTALS,
   endFrames,
   stronghold,
+  strongholdEntrance,
   structureBlocks,
   structuresNear,
 } from "../world/adventure-terrain";
@@ -38,6 +39,23 @@ function fixture(dimension: Dimension = "overworld") {
 }
 
 describe("planned adventure progression", () => {
+  it("lights a supported fire with flint and steel outside a portal frame", () => {
+    const { world, data, adventure } = fixture();
+    data.inventory[0] = stack("flintSteel");
+    adventure.use({ x: 0.5, y: 35.6, z: 0.5 }, { x: 0, y: -1, z: -1 });
+    expect(world.getBlock(0, 34, -2)).toBe(BlockId.FIRE);
+    expect(data.inventory.at(0)?.durability).toBe(64);
+  });
+  it("takes contact fire damage and honors a fire resistance potion", () => {
+    const { world, data, session, a } = fixture();
+    world.setBlock(0, 34, 0, BlockId.FIRE);
+    const sample = { position: data.position, onGround: true, yaw: 0, pitch: 0 };
+    for (let i = 0; i < 6; i++) session.tick(0.2, sample);
+    expect(data.vitals.health).toBe(16);
+    a.fire = 60;
+    for (let i = 0; i < 6; i++) session.tick(0.2, sample);
+    expect(data.vitals.health).toBe(16);
+  });
   it("keeps inventory transactions atomic when materials or output capacity are missing", () => {
     const inv = emptySlots(2);
     inv[0] = stack("wheat", 12);
@@ -249,6 +267,29 @@ describe("planned adventure progression", () => {
     expect(world.getBlock(1, 35, -4)).toBe(BlockId.AIR);
     expect(world.getBlock(2, 37, -4)).toBe(BlockId.AIR);
   });
+  it.each([1, 2026, -987654321, 42, 99, 12345])(
+    "connects the stronghold stairs to dry daylight for seed %s",
+    (seed) => {
+      const sample = createColumnSampler(seed, 2),
+        entrance = strongholdEntrance(seed, sample);
+      const c = generateChunk(
+        Math.floor(entrance.x / 16),
+        Math.floor(entrance.z / 16),
+        seed,
+        "overworld",
+        2,
+      );
+      expect(entrance.y).toBeGreaterThan(
+        Math.max(32, sample(entrance.x, entrance.z).terrainHeight),
+      );
+      expect(
+        c.getBlock(((entrance.x % 16) + 16) % 16, entrance.y - 1, ((entrance.z % 16) + 16) % 16),
+      ).toBe(BlockId.STONE_BRICK);
+      expect(
+        c.getBlock(((entrance.x % 16) + 16) % 16, entrance.y, ((entrance.z % 16) + 16) % 16),
+      ).toBe(BlockId.AIR);
+    },
+  );
   it("creates all twelve stronghold frames, four awaiting eyes, and six end crystals", () => {
     const room = stronghold(2026);
     expect(room.y).toBeLessThan(32);

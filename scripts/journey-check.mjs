@@ -91,7 +91,7 @@ try {
   await report("Crafted a torch and verified real cave illumination");
   await page.evaluate(() => document.exitPointerLock());
   await page.waitForFunction(() => window.__mc.mode() === "idle");
-  await page.click("#save-button");
+  await page.locator("#save-button").click();
   await page.waitForFunction(
     () => document.querySelector("#save-status").textContent === "保存済み",
   );
@@ -103,7 +103,7 @@ try {
   assert.equal(restored.health, beforeReload.health);
   assert.equal(await block(torchCell), 16);
   assert.ok((await count("diamond")) >= 1);
-  await page.click("#play-button");
+  await page.locator("#play-button").click();
   await page.waitForFunction(() => window.__mc.mode() === "pointer");
   await wait(500);
   assert.equal(errors.length, 0, errors.join("\n"));

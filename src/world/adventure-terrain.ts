@@ -120,8 +120,10 @@ export function stampAdventure(
         chunk.setBlock(p.x - ox, p.y, p.z - oz, p.id);
     }
   }
-  const room = stronghold(seed);
-  if (Math.abs(ox + 8 - room.x) < 32 && Math.abs(oz + 8 - room.z) < 48) {
+  const room = stronghold(seed),
+    entrance = strongholdEntrance(seed, sample);
+  const stairLength = entrance.y - room.y;
+  if (Math.abs(ox + 8 - room.x) < 32 && oz + 16 >= room.z - 6 && oz <= entrance.z + 1) {
     const put = (x: number, y: number, z: number, id: BlockId) => {
       if (x >= ox && x < ox + 16 && z >= oz && z < oz + 16 && y > 0 && y < 95)
         chunk.setBlock(x - ox, y, z - oz, id);
@@ -140,7 +142,7 @@ export function stampAdventure(
     for (const p of endFrames(seed))
       put(p.x, p.y, p.z, p.empty ? BlockId.END_FRAME : BlockId.END_FRAME_FILLED);
     // Stairs connect the underground room to daylight, rather than a sealed box.
-    for (let t = 0; t <= 24; t++)
+    for (let t = 0; t <= stairLength; t++)
       for (let dx = -1; dx <= 1; dx++) {
         put(room.x + dx, room.y - 1 + t, room.z + 4 + t, BlockId.STONE_BRICK);
         for (let dy = 0; dy <= 3; dy++)
@@ -153,6 +155,17 @@ export function stampAdventure(
 
 export function stronghold(seed: number): { x: number; y: number; z: number } {
   return { x: 24 + ((seed >>> 0) % 16), y: 18, z: -40 - ((seed >>> 4) % 16) };
+}
+export function strongholdEntrance(
+  seed: number,
+  sample: (x: number, z: number) => ColumnProfile,
+): { x: number; y: number; z: number } {
+  const c = stronghold(seed);
+  for (let t = 8; t <= 60; t++) {
+    const z = c.z + 4 + t;
+    if (c.y + t > Math.max(32, sample(c.x, z).terrainHeight)) return { x: c.x, y: c.y + t, z };
+  }
+  return { x: c.x, y: c.y + 60, z: c.z + 64 };
 }
 export function endFrames(seed: number): (StructureBlock & { empty: boolean })[] {
   const c = stronghold(seed),

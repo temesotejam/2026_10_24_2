@@ -341,7 +341,16 @@ export class Adventure {
         ? portalInterior(s.world, { x: hit.blockX, y: hit.blockY, z: hit.blockZ })
         : null;
       if (!cells) {
-        s.notice?.("黒曜石で外幅4・高さ5の枠を作り、枠を右クリックしてください");
+        if (
+          hit &&
+          isSolid(s.world.getBlock(hit.blockX, hit.blockY, hit.blockZ)) &&
+          s.world.getBlock(hit.placeX, hit.placeY, hit.placeZ) === BlockId.AIR &&
+          isSolid(s.world.getBlock(hit.placeX, hit.placeY - 1, hit.placeZ))
+        ) {
+          s.edit(hit.placeX, hit.placeY, hit.placeZ, BlockId.FIRE);
+          if (!s.creative) wearTool(s.data.inventory, s.data.selected);
+          s.notice?.("火を付けました。ゲートには黒曜石の外幅4・高さ5の枠が必要です");
+        } else s.notice?.("黒曜石で外幅4・高さ5の枠を作り、枠を右クリックしてください");
         return true;
       }
       for (const p of cells) s.edit(p.x, p.y, p.z, BlockId.PORTAL);

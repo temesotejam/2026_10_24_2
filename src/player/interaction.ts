@@ -162,11 +162,19 @@ export class BlockInteraction {
     const creature = this.creatureTarget();
     if (creature !== null && this.onCreatureUse?.(creature)) return;
     if (creature !== null && this.session.feedCreature(creature)) return;
-    if (this.session.eat()) return;
     const hit = this.raycastFromCamera(this.session.creative ? 6 : 4.5);
+    if (
+      hit &&
+      this.onUseBlock?.(
+        hit.blockX,
+        hit.blockY,
+        hit.blockZ,
+        this.world.getBlock(hit.blockX, hit.blockY, hit.blockZ),
+      )
+    )
+      return;
+    if (this.session.eat()) return;
     if (!hit) return;
-    const current = this.world.getBlock(hit.blockX, hit.blockY, hit.blockZ);
-    if (this.onUseBlock?.(hit.blockX, hit.blockY, hit.blockZ, current)) return;
     if (this.session.till(hit.blockX, hit.blockY, hit.blockZ)) return;
     const block = this.hotbar.selectedBlock;
     if (block === BlockId.AIR) return;

@@ -48,14 +48,16 @@ const browser = await puppeteer.launch({
     "--window-size=1280,720",
   ],
 });
+const restoredPages = await browser.pages();
 const page = await browser.newPage();
+for (const restored of restoredPages) await restored.close({ runBeforeUnload: false });
 await page.setViewport({ width: 1280, height: 720 });
 const d = createDriver(page, out),
   a = createAdventureDriver(page, d);
 let recorder;
 const startRecording = async () => {
   await page.select("#render-scale", "0.5");
-  meta.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
+  part.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
   part.startedAt = new Date().toISOString();
   flush();
   recorder = await page.screencast({
@@ -64,7 +66,7 @@ const startRecording = async () => {
     fps: 15,
     quality: 28,
     speed: 1,
-    ffmpegPath: "/usr/bin/ffmpeg",
+    ffmpegPath: path.resolve("scripts/ffmpeg-capture.py"),
   });
 };
 const chapter = async (name, phase) => {
@@ -94,7 +96,7 @@ try {
     await page.goto(url.href, { waitUntil: "domcontentloaded" });
     await a.boot();
     await startRecording();
-    await page.click("#play-button");
+    await page.locator("#play-button").click();
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
   if (resume === 0.5) {
@@ -116,32 +118,62 @@ try {
   }
   assert.ok(village, "remember the actually discovered village");
   if (resume <= 2) {
+    await a.guard();
+    await a.recover();
     await a.eat();
-    if ((await d.count("planks")) < 4) {
-      await a.move(village.x - 5.5, village.z + 4.5);
-      for (const dz of [3, 4, 2]) {
-        if ((await d.count("planks")) >= 4) break;
-        await d.mine({ x: village.x - 4, y: village.y, z: village.z + dz });
-        await wait(600);
+    if (
+      !(await d.count("iron_sword")) ||
+      !(await d.count("bow")) ||
+      !(await d.count("flintSteel")) ||
+      (await d.count("arrow")) < 32
+    ) {
+      await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
+      await a.move(village.x - 5.5, village.z + 2.7);
+      const requiredSticks =
+        ((await d.count("iron_sword")) ? 0 : 1) +
+        ((await d.count("bow")) ? 0 : 3) +
+        Math.ceil(Math.max(0, 32 - (await d.count("arrow"))) / 4);
+      const neededPlanks =
+        2 * Math.ceil(Math.max(0, requiredSticks - (await d.count("stick"))) / 4);
+      if ((await d.count("planks")) < neededPlanks) {
+        await a.move(village.x - 5.5, village.z + 4.5);
+        for (const dz of [3, 4, 2]) {
+          if ((await d.count("planks")) >= neededPlanks) break;
+          await d.mine({ x: village.x - 4, y: village.y, z: village.z + dz });
+          await wait(600);
+        }
+        await a.move(village.x - 4.5, village.z + 3.5);
+        await wait(700);
+        assert.ok((await d.count("planks")) >= neededPlanks, "gather wood for spare sticks");
       }
-      assert.ok((await d.count("planks")) >= 4, "gather wood for spare sticks");
+      await d.equip("iron_pick");
+      await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
+      await page.waitForSelector('[data-recipe="bow"]');
+      while ((await d.count("stick")) < requiredSticks) await d.make("sticks");
+      if (!(await d.count("iron_sword"))) await d.make("iron_sword");
+      if (!(await d.count("bow"))) await d.make("bow");
+      if (!(await d.count("flintSteel"))) {
+        await d.make("flint");
+        await d.make("flintSteel");
+      }
+      while ((await d.count("arrow")) < 32) {
+        if (!(await d.count("flint"))) await d.make("flint");
+        await d.make("arrow");
+      }
+      await d.close();
     }
-    await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
-    await page.waitForSelector('[data-recipe="bow"]');
-    while ((await d.count("stick")) < 12) await d.make("sticks");
-    if (!(await d.count("iron_sword"))) await d.make("iron_sword");
-    if (!(await d.count("bow"))) await d.make("bow");
-    if (!(await d.count("flintSteel"))) {
-      await d.make("flint");
-      await d.make("flintSteel");
-    }
-    while ((await d.count("arrow")) < 32) {
-      if (!(await d.count("flint"))) await d.make("flint");
-      await d.make("arrow");
-    }
-    await d.close();
     await a.surfaceTo({ x: village.x, z: village.z - 3 });
     await a.harvest(village, 144, true);
+    if ((await d.count("bread")) < 8) {
+      await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
+      await a.move(village.x - 4.5, village.z + 3.5);
+      await d.equip("iron_pick");
+      await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
+      await page.waitForSelector('[data-recipe="bread"]');
+      while ((await d.count("bread")) < 8 && (await d.count("wheat")) >= 3) await d.make("bread");
+      await d.close();
+    }
+
     await a.surfaceTo({ x: village.x - 7, z: village.z - 8 });
     const repair = { x: village.x - 8, y: village.y, z: village.z - 10 };
     if ((await d.block(repair)) !== 28) {
@@ -227,7 +259,10 @@ try {
       } else await wait(500);
       const alive = (await a.adventure()).creatures.some((m) => m.id === mob.id);
       if (!alive) {
-        await a.surfaceTo({ x: Math.floor(mob.position.x), z: Math.floor(mob.position.z) });
+        await d.equip("iron_pick");
+        await d.tunnelTo({ x: Math.floor(mob.position.x), z: Math.floor(mob.position.z) });
+        if ((await d.info()).position.y < Math.floor(mob.position.y))
+          await a.pillarTo(Math.floor(mob.position.y));
         await wait(1000);
       }
     }
@@ -243,7 +278,7 @@ try {
     while ((await d.count("wheat")) < 144) {
       assert.ok(Date.now() < deadline, "farm the remaining wheat");
       await a.harvest(village, 144, true);
-      if ((await d.count("wheat")) < 144) await wait(5000);
+      if ((await d.count("wheat")) < 144) await a.waitSafe(5000);
     }
     await a.tradePearls(village);
     await d.open();
@@ -255,8 +290,9 @@ try {
   }
   if (resume <= 5) {
     const c = (await a.adventure()).stronghold;
-    await a.surfaceTo({ x: c.x, z: c.z + 28 });
-    for (let t = 24; t >= 0; t--) await a.move(c.x + 0.5, c.z + 4 + t + 0.5);
+    const entrance = (await a.adventure()).entrance ?? { x: c.x, y: c.y + 24, z: c.z + 28 };
+    await a.surfaceTo({ x: entrance.x, z: entrance.z });
+    for (let t = entrance.y - c.y; t >= 0; t--) await a.move(c.x + 0.5, c.z + 4 + t + 0.5);
     await a.move(c.x + 0.5, c.z + 3.5);
     await d.equip("enderEye");
     for (const [dx, dz] of [
@@ -268,6 +304,7 @@ try {
       if ((await d.block({ x: c.x + dx, y: c.y, z: c.z + dz })) === 38)
         await a.useAt({ x: c.x + dx, y: c.y, z: c.z + dz });
     assert.equal(await d.block(c), 40, "activate the discovered stronghold gateway");
+    await a.recover(20);
     await a.travel("end", c);
     await chapter("地下遺跡のゲートを開き、エンドの島へ到達", 6);
   }
@@ -283,6 +320,7 @@ try {
   assert.ok(final.dragon.defeated);
   assert.equal(await d.count("dragonEgg"), 1);
   meta.completed = true;
+  meta.combat = a.combatStats;
   meta.final = {
     health: (await d.info()).health,
     dragon: final.dragon,
@@ -296,7 +334,7 @@ try {
   meta.error = String(error?.stack ?? error);
   console.error(error);
   try {
-    await page.mouse.up();
+    await d.releaseAttack();
     await page.keyboard.up("KeyW");
     await page.keyboard.up("Space");
     await a.save();

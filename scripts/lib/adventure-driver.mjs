@@ -1,3 +1,4 @@
+import { chooseThreat, safeRetreat, solid } from "./combat-policy.mjs";
 /** Read-only world inspection plus normal keyboard/mouse/UI actions. */
 import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
@@ -18,33 +19,20 @@ export function createAdventureDriver(page, d) {
     if (await page.$("#inventory-panel:not([hidden])")) await d.close();
     await page.evaluate(() => document.exitPointerLock());
     await page.waitForFunction(() => window.__mc.mode() === "idle");
-    await page.click("#save-button");
+    await page.locator("#save-button").click();
     await page.waitForFunction(
       () => document.querySelector("#save-status").textContent === "保存済み",
     );
-    await page.click("#play-button");
+    await page.locator("#play-button").click();
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
   async function move(x, z, jump = false, tolerance = 0.3) {
-    const deadline = Date.now() + 25000;
-    while (true) {
-      const s = await d.info(),
-        distance = Math.hypot(x - s.position.x, z - s.position.z);
-      assert.ok(s.health > 0, "survive movement");
-      if (distance < tolerance) break;
-      assert.ok(Date.now() < deadline, `move ${x},${z} from ${JSON.stringify(s.position)}`);
-      await d.aim({ x, y: s.position.y + s.eye, z });
-      await page.keyboard.down("KeyW");
-      if (jump) await page.keyboard.down("Space");
-      await wait(Math.max(35, Math.min(160, (distance / 4.317) * 650)));
-      await page.keyboard.up("KeyW");
-      await page.keyboard.up("Space");
-    }
-    await wait(jump ? 500 : 180);
+    await d.walk(x, z, jump, tolerance, jump ? 800 : 180);
   }
   async function pillarTo(target) {
     await d.center();
     for (let step = 0; step < 80; step++) {
+      await d.checkThreat();
       const s = await d.info(),
         y = Math.round(s.position.y),
         x = Math.floor(s.position.x),
@@ -55,8 +43,8 @@ export function createAdventureDriver(page, d) {
           if (await d.count("iron_pick")) await d.equip("iron_pick");
           await d.mine({ x, y: yy, z });
         }
-      const material = (await d.count("cobble")) ? "cobble" : "dirt";
-      await d.equip(material);
+      const material = await d.chooseMaterial();
+      await d.equip(material.id);
       await d.aim({ x: x + 0.5, y: y - 0.5, z: z + 0.5 });
       let placed = false;
       for (let attempt = 0; attempt < 4 && !placed; attempt++) {
@@ -64,7 +52,7 @@ export function createAdventureDriver(page, d) {
         for (let t = 0; t < 20; t++) {
           await right();
           await wait(30);
-          if ((await d.block({ x, y, z })) === (material === "cobble" ? 11 : 2)) {
+          if ((await d.block({ x, y, z })) === material.block) {
             placed = true;
             break;
           }
@@ -196,8 +184,8 @@ export function createAdventureDriver(page, d) {
       if (!present) continue;
       const free = (await d.info()).inventory.findIndex((s) => s === null);
       assert.ok(free >= 0, "space for discovered treasure");
-      await page.click(`[data-area="chest"][data-slot="${i}"]`);
-      await page.click(`[data-area="inventory"][data-slot="${free}"]`);
+      await page.locator(`[data-area="chest"][data-slot="${i}"]`).click();
+      await page.locator(`[data-area="inventory"][data-slot="${free}"]`).click();
     }
     await d.close();
   }
@@ -205,10 +193,197 @@ export function createAdventureDriver(page, d) {
     const hunger = await page.$eval("#hunger", (el) =>
       Number(el.textContent.match(/食料 (\d+)/)?.[1]),
     );
-    if (hunger < 20 && (await d.count("bread"))) {
+    if (hunger < 18 && (await d.count("bread"))) {
       await d.equip("bread");
+      const s = await d.info();
+      await d.aim({ x: s.position.x, y: s.position.y + 20, z: s.position.z - 1 });
       await right();
+      return true;
     }
+    return false;
+  }
+  let guarding = false;
+  const combatStats = { interruptions: 0, melee: 0, ranged: 0, retreats: 0 };
+  async function threat() {
+    const s = await d.info(),
+      mobs = (await adventure()).creatures;
+    const points = [];
+    for (const m of mobs) {
+      const dx = m.position.x - s.position.x,
+        dy = m.position.y - s.position.y,
+        dz = m.position.z - s.position.z;
+      if (Math.hypot(dx, dy, dz) > 14) continue;
+      const length = Math.hypot(dx, dy - 0.4, dz);
+      for (let t = 0.2; t < length - 0.3; t += 0.25)
+        points.push([
+          Math.floor(s.position.x + (dx * t) / length),
+          Math.floor(s.position.y + 1.4 + ((dy - 0.4) * t) / length),
+          Math.floor(s.position.z + (dz * t) / length),
+        ]);
+    }
+    const entries = await page.evaluate(
+      (points) => points.map((p) => [p.join(","), window.__mc.blockAt(...p)]),
+      points,
+    );
+    const blocks = new Map(entries);
+    return chooseThreat(s.position, mobs, (x, y, z) => blocks.get(`${x},${y},${z}`) ?? 0);
+  }
+  async function guard() {
+    if (guarding) return false;
+    let target = await threat();
+    if (!target) {
+      const snapshot = await d.info();
+      if (
+        snapshot.health < 18 &&
+        (await page.evaluate(
+          () =>
+            window.__mc.mode() === "pointer" && document.querySelector("#inventory-panel").hidden,
+        ))
+      ) {
+        const hungry = await page.$eval(
+          "#hunger",
+          (el) => Number(el.textContent.match(/食料 (\d+)/)?.[1]) < 18,
+        );
+        if (hungry && (await d.count("bread"))) {
+          const selected = await page.$eval(
+              "#hotbar .selected .hotbar-key",
+              (el) => Number(el.textContent) - 1,
+            ),
+            held = snapshot.inventory[selected]?.id;
+          await d.releaseAttack();
+          await page.keyboard.up("KeyW");
+          await page.keyboard.up("Space");
+          await eat();
+          if (held && (await d.count(held))) await d.equip(held);
+          return true;
+        }
+      }
+      return false;
+    }
+    guarding = true;
+    combatStats.interruptions++;
+    const saved = await d.info(),
+      ui = await page.evaluate(() => ({
+        open: !document.querySelector("#inventory-panel").hidden,
+        title: document.querySelector("#inventory-panel h2")?.textContent,
+        target: window.__mc.target(),
+        selected: Number(document.querySelector("#hotbar .selected .hotbar-key")?.textContent) - 1,
+      }));
+    const held = saved.inventory[ui.selected]?.id;
+    await d.releaseAttack();
+    await page.keyboard.up("KeyW");
+    await page.keyboard.up("Space");
+    if (ui.open) await d.close();
+    try {
+      const until = Date.now() + 45000;
+      while (target && Date.now() < until) {
+        const s = await d.info();
+        assert.ok(s.health > 0, "survive reactive combat");
+        if (s.health <= 6) {
+          const cells = await page.evaluate(() => {
+            const p = window.__mc.position(),
+              r = [];
+            for (let x = Math.floor(p.x) - 3; x <= Math.floor(p.x) + 3; x++)
+              for (let z = Math.floor(p.z) - 3; z <= Math.floor(p.z) + 3; z++)
+                for (let y = Math.floor(p.y) - 1; y <= Math.floor(p.y) + 1; y++)
+                  r.push([`${x},${y},${z}`, window.__mc.blockAt(x, y, z)]);
+            return r;
+          });
+          const map = new Map(cells),
+            retreat = safeRetreat(
+              s.position,
+              target.position,
+              (x, y, z) => map.get(`${x},${y},${z}`) ?? 0,
+            );
+          if (retreat) {
+            await d.aim({ x: retreat.x, y: s.position.y + s.eye, z: retreat.z });
+            await page.keyboard.down("ControlLeft");
+            await page.keyboard.down("KeyW");
+            await wait(350);
+            await page.keyboard.up("KeyW");
+            await page.keyboard.up("ControlLeft");
+            combatStats.retreats++;
+            await eat();
+          }
+        }
+        if (target.distance <= 3.1) {
+          const sword = s.inventory.some((item) => item?.id === "iron_sword");
+          if (sword) await d.equip("iron_sword");
+          else {
+            const pick = s.inventory.findIndex((item) => item?.id === "stone_pick");
+            if (pick >= 0) await d.equip("stone_pick");
+          }
+          await d.aim({ ...target.position, y: target.position.y + 1 });
+          await page.mouse.down();
+          await wait(420);
+          await page.mouse.up();
+          combatStats.melee++;
+        } else if ((await d.count("bow")) && (await d.count("arrow")) > 10) {
+          await d.equip("bow");
+          const t = target.distance / 22;
+          await d.aim({
+            x: target.position.x + target.velocity.x * t,
+            y: target.position.y + 1 + 1.2 * t * t,
+            z: target.position.z + target.velocity.z * t,
+          });
+          await right();
+          await wait(550);
+          combatStats.ranged++;
+        } else {
+          await d.aim({ ...target.position, y: target.position.y + 1 });
+          const front = await page.evaluate(() => {
+            const p = window.__mc.position(),
+              yaw = window.__mc.yaw(),
+              x = Math.floor(p.x - Math.sin(yaw) * 0.8),
+              z = Math.floor(p.z - Math.cos(yaw) * 0.8),
+              y = Math.floor(p.y);
+            return {
+              floor: window.__mc.blockAt(x, y - 1, z),
+              feet: window.__mc.blockAt(x, y, z),
+              head: window.__mc.blockAt(x, y + 1, z),
+            };
+          });
+          if ([0, 26].includes(front.floor) || front.feet === 26) break;
+          await page.keyboard.down("ControlLeft");
+          await page.keyboard.down("KeyW");
+          if (solid(front.feet) && !solid(front.head)) await page.keyboard.down("Space");
+          await wait(160);
+          await page.keyboard.up("KeyW");
+          await page.keyboard.up("Space");
+          await page.keyboard.up("ControlLeft");
+        }
+        target = await threat();
+      }
+      assert.ok(!(await threat()), "finish or safely escape the current combat encounter");
+      await d.walk(saved.position.x, saved.position.z, false, 0.35, 150);
+      if (ui.open) {
+        if (ui.title !== "所持品" && ui.target) {
+          if (await d.count("iron_sword")) await d.equip("iron_sword");
+          await useAt(ui.target);
+          await page.waitForSelector("#inventory-panel:not([hidden])");
+        } else await d.open();
+      } else if (held && (await d.count(held))) await d.equip(held);
+      return true;
+    } finally {
+      guarding = false;
+    }
+  }
+  d.setThreatHandler(guard);
+  async function waitSafe(ms) {
+    const until = Date.now() + ms;
+    while (Date.now() < until) {
+      await d.checkThreat();
+      await wait(Math.min(200, until - Date.now()));
+    }
+  }
+  async function recover(target = 18) {
+    const until = Date.now() + 100000;
+    while ((await d.info()).health < target && Date.now() < until) {
+      await guard();
+      await eat();
+      await waitSafe(4000);
+    }
+    assert.ok((await d.info()).health >= target, "recover through ordinary food and regeneration");
   }
   async function harvest(village, needed = 144, replant = true) {
     await eat();
@@ -218,7 +393,8 @@ export function createAdventureDriver(page, d) {
         for (let z = -6; z <= -3 && (await d.count("wheat")) < needed; z++) {
           const p = { x: village.x + x, y: village.y, z: village.z + z };
           if ((await d.block(p)) !== 23) continue;
-          await move(p.x + 0.5, p.z + 0.5);
+          await guard();
+          await move(p.x + 0.5, p.z + 0.5, true);
           if (await d.count("stick")) await d.equip("stick");
           await d.mine(p);
           await wait(350);
@@ -253,9 +429,9 @@ export function createAdventureDriver(page, d) {
     }
     await page.waitForSelector('[data-action="sell-wheat"]');
     while ((await d.count("wheat")) >= 12 && (await d.count("emerald")) < 12)
-      await page.click('[data-action="sell-wheat"]');
+      await page.locator('[data-action="sell-wheat"]').click();
     while ((await d.count("emerald")) >= 3 && (await d.count("enderPearl")) < 4)
-      await page.click('[data-action="buy-pearl"]');
+      await page.locator('[data-action="buy-pearl"]').click();
     await d.close();
     assert.ok((await d.count("enderPearl")) >= 4, "trade for four ender pearls");
   }
@@ -269,7 +445,7 @@ export function createAdventureDriver(page, d) {
     );
     await boot();
     await page.select("#render-scale", "0.5");
-    await page.click("#play-button");
+    await page.locator("#play-button").click();
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
   async function shootCrystal(p) {
@@ -335,6 +511,10 @@ export function createAdventureDriver(page, d) {
     useAt,
     takeChest,
     eat,
+    combatStats,
+    waitSafe,
+    guard,
+    recover,
     harvest,
     tradePearls,
     travel,

@@ -50,7 +50,7 @@ try {
     await page.waitForFunction(() => window.__mc.mode() === "idle");
   };
   const play = async () => {
-    await page.click("#play-button");
+    await page.locator("#play-button").click();
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   };
   const right = async () => {
@@ -77,8 +77,8 @@ try {
     if (index >= 9) {
       await page.keyboard.press("KeyE");
       await page.waitForSelector("#inventory-panel:not([hidden])");
-      await page.click(`[data-area="inventory"][data-slot="${index}"]`);
-      await page.click('[data-area="inventory"][data-slot="0"]');
+      await page.locator(`[data-area="inventory"][data-slot="${index}"]`).click();
+      await page.locator('[data-area="inventory"][data-slot="0"]').click();
       await page.keyboard.press("KeyE");
       await page.waitForFunction(() => window.__mc.mode() === "pointer");
       index = 0;
@@ -116,7 +116,7 @@ try {
   }
   await page.goto(url.href, { waitUntil: "domcontentloaded" });
   await boot();
-  await page.click("#save-button");
+  await page.locator("#save-button").click();
   await page.waitForFunction(
     () => document.querySelector("#save-status").textContent === "保存済み",
   );
@@ -136,6 +136,8 @@ try {
     { id: "bow", count: 1, durability: 385 },
     { id: "arrow", count: 32 },
   ].forEach((v, i) => (fixture.inventory[i] = v));
+  fixture.inventory[10] = { id: "bread", count: 2 };
+  fixture.vitals.hunger = 10;
   fixture.adventure.xp = 5;
   fixture.vitals.health = 8;
   const put = (x, y, z, id) => {
@@ -159,11 +161,13 @@ try {
   await page.waitForFunction(() => window.__mc.adventure().cast?.elapsed >= 5, { timeout: 15000 });
   await right();
   check("fish from a real water cast and timed retrieval", (await count("fish")) === 1);
-  await equip("iron_sword");
+  await equip("bread");
   await aim({ x: -1.5, y: 34.5, z: 0.5 });
   await right();
-  await page.waitForSelector('[data-action="enchant-0"]');
-  await page.click('[data-action="enchant-0"]');
+  const swordIndex = (await state()).inventory.findIndex((s) => s?.id === "iron_sword");
+  await page.waitForSelector(`[data-action="enchant-${swordIndex}"]`);
+  check("usable stations open before eating a held food item", (await count("bread")) === 2);
+  await page.locator(`[data-action="enchant-${swordIndex}"]`).click();
   check(
     "enchant station spends five XP and changes the actual tool",
     (await count("enchanted_iron_sword")) === 1 && (await state()).adventure.xp === 1,
@@ -173,9 +177,9 @@ try {
   await aim({ x: 0.5, y: 34.5, z: 0.5 });
   await right();
   await page.waitForSelector('[data-action="brew-healingPotion"]');
-  await page.click('[data-action="brew-healingPotion"]');
+  await page.locator('[data-action="brew-healingPotion"]').click();
   await page.waitForSelector('[data-action="claim-brew"]', { timeout: 15000 });
-  await page.click('[data-action="claim-brew"]');
+  await page.locator('[data-action="claim-brew"]').click();
   await page.keyboard.press("KeyE");
   await page.waitForFunction(() => window.__mc.mode() === "pointer");
   await equip("healingPotion");
@@ -332,7 +336,7 @@ try {
   );
   await page.screenshot({ path: path.join(out, "victory.png") });
   await pause();
-  await page.click("#save-button");
+  await page.locator("#save-button").click();
   await page.waitForFunction(
     () => document.querySelector("#save-status").textContent === "保存済み",
   );

@@ -24,6 +24,7 @@ export const BLOCK_COLORS: Readonly<Record<BlockId, BlockColor>> = {
   [BlockId.BREWING]: uniform(130, 116, 82),
   [BlockId.STONE_BRICK]: uniform(106, 112, 119),
   [BlockId.GLASS]: uniform(182, 221, 224),
+  [BlockId.FIRE]: uniform(255, 135, 34),
   [BlockId.END_FRAME]: uniform(64, 112, 102),
   [BlockId.END_FRAME_FILLED]: uniform(80, 155, 125),
   [BlockId.END_GATE]: uniform(27, 22, 43),

@@ -35,6 +35,14 @@ describe("bounded fluids", () => {
     expect(world.getBlock(9, 2, 5)).toBe(BlockId.AIR);
     expect(world.getBlock(5, 2, 10)).toBe(BlockId.AIR);
   });
+  it("extinguishes contact fire with flowing water", () => {
+    const { world, sim } = fixture();
+    world.setBlock(5, 2, 5, BlockId.WATER);
+    world.setBlock(5, 1, 5, BlockId.FIRE);
+    sim.notify(5, 2, 5);
+    sim.tick(0.2);
+    expect(world.getBlock(5, 1, 5)).toBe(BlockId.WATER);
+  });
   it("turns water touching a lava source into obsidian", () => {
     const { world, sim } = fixture();
     world.setBlock(5, 2, 5, BlockId.WATER);

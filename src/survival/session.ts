@@ -427,7 +427,9 @@ export class SurvivalSession {
           step,
           (distance * step) / Math.max(dt, step),
           head === BlockId.WATER,
-          this.world.getBlock(x, y, z) === BlockId.LAVA && !this.data.adventure?.fire,
+          [BlockId.LAVA, BlockId.FIRE].includes(
+            this.world.getBlock(x, y, z) as typeof BlockId.LAVA,
+          ) && !this.data.adventure?.fire,
           isSolid(head),
         );
         if (this.data.vitals.health <= 0) {

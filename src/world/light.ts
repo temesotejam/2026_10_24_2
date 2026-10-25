@@ -42,6 +42,7 @@ export function buildLightField(
         if (sky) data[i * 2] = 15;
         if (
           id === BlockId.TORCH ||
+          id === BlockId.FIRE ||
           id === BlockId.LAVA ||
           id === BlockId.GLOWSTONE ||
           id === BlockId.PORTAL ||

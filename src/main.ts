@@ -1,6 +1,6 @@
 import { portalInterior } from "./survival/adventure";
 import { dragonPosition } from "./survival/dragon";
-import { structuresNear, stronghold } from "./world/adventure-terrain";
+import { structuresNear, stronghold, strongholdEntrance } from "./world/adventure-terrain";
 import { Adventure } from "./survival/adventure";
 import { travelCandidate } from "./survival/adventure-state";
 import { AdventureView } from "./render/adventure-view";
@@ -720,6 +720,7 @@ async function boot(): Promise<void> {
       dragonPosition: dragonPosition(adventure.state.dragon.phase),
       creatures: structuredClone(data.creatures),
       stronghold: stronghold(SEED),
+      entrance: strongholdEntrance(SEED, sampleColumn),
       structures: structuresNear(SEED, player.position.x, player.position.z, sampleColumn),
     }),
     effects: () => ({

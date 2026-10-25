@@ -37,6 +37,7 @@ export function miningSeconds(block: BlockId, held: Stack | null): number {
   );
 }
 export function blockDrops(block: BlockId, held: Stack | null, roll: number): Stack[] {
+  if (block === BlockId.FIRE) return [];
   const tool = held ? ITEMS[held.id] : undefined;
   const tier = tool?.tool === "pick" ? (tool.tier ?? 0) : 0;
   if (PICK_BLOCKS.includes(block)) {

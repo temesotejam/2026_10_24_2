@@ -43,6 +43,7 @@ export const BlockId = {
   END_GATE: 40,
   END_STONE: 41,
   END_CRYSTAL: 42,
+  FIRE: 43,
 } as const;
 
 export type BlockId = (typeof BlockId)[keyof typeof BlockId];
@@ -80,6 +81,7 @@ export const BLOCKS: Readonly<Record<BlockId, BlockDef>> = {
   [BlockId.BREWING]: block(BlockId.BREWING, "brewing"),
   [BlockId.STONE_BRICK]: block(BlockId.STONE_BRICK, "stone_brick"),
   [BlockId.GLASS]: block(BlockId.GLASS, "glass", { transparent: true }),
+  [BlockId.FIRE]: block(BlockId.FIRE, "fire", { solid: false, transparent: true }),
   [BlockId.END_FRAME]: block(BlockId.END_FRAME, "end_frame", { breakable: false }),
   [BlockId.END_FRAME_FILLED]: block(BlockId.END_FRAME_FILLED, "end_frame_filled", {
     breakable: false,
@@ -154,6 +156,7 @@ export const PLACEABLE_BLOCKS: readonly BlockId[] = [
 export function isSmallBlock(id: BlockId): boolean {
   return (
     id === BlockId.TORCH ||
+    id === BlockId.FIRE ||
     id === BlockId.NETHER_WART ||
     id === BlockId.CROP ||
     id === BlockId.RIPE_CROP ||

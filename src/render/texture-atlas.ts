@@ -25,6 +25,7 @@ const TILE_STYLES: Record<TileKind, TileStyle> = {
   [TileKind.BREWING]: { base: [130, 116, 82], alpha: 255, speckleAmount: 24 },
   [TileKind.STONE_BRICK]: { base: [106, 112, 119], alpha: 255, speckleAmount: 24 },
   [TileKind.GLASS]: { base: [182, 221, 224], alpha: 175, speckleAmount: 24 },
+  [TileKind.FIRE]: { base: [255, 135, 34], alpha: 235, speckleAmount: 32 },
   [TileKind.END_FRAME]: { base: [64, 112, 102], alpha: 255, speckleAmount: 24 },
   [TileKind.END_FRAME_FILLED]: { base: [80, 155, 125], alpha: 255, speckleAmount: 24 },
   [TileKind.END_GATE]: { base: [27, 22, 43], alpha: 255, speckleAmount: 24 },
