@@ -15,6 +15,21 @@ interface TileStyle {
 }
 
 const TILE_STYLES: Record<TileKind, TileStyle> = {
+  [TileKind.OBSIDIAN]: { base: [48, 30, 65], alpha: 255, speckleAmount: 24 },
+  [TileKind.NETHERRACK]: { base: [117, 53, 47], alpha: 255, speckleAmount: 24 },
+  [TileKind.GLOWSTONE]: { base: [241, 192, 91], alpha: 255, speckleAmount: 24 },
+  [TileKind.PORTAL]: { base: [130, 64, 191], alpha: 175, speckleAmount: 24 },
+  [TileKind.SOUL_SAND]: { base: [88, 65, 54], alpha: 255, speckleAmount: 24 },
+  [TileKind.NETHER_WART]: { base: [152, 42, 55], alpha: 255, speckleAmount: 24 },
+  [TileKind.ENCHANT_TABLE]: { base: [60, 54, 101], alpha: 255, speckleAmount: 24 },
+  [TileKind.BREWING]: { base: [130, 116, 82], alpha: 255, speckleAmount: 24 },
+  [TileKind.STONE_BRICK]: { base: [106, 112, 119], alpha: 255, speckleAmount: 24 },
+  [TileKind.GLASS]: { base: [182, 221, 224], alpha: 175, speckleAmount: 24 },
+  [TileKind.END_FRAME]: { base: [64, 112, 102], alpha: 255, speckleAmount: 24 },
+  [TileKind.END_FRAME_FILLED]: { base: [80, 155, 125], alpha: 255, speckleAmount: 24 },
+  [TileKind.END_GATE]: { base: [27, 22, 43], alpha: 255, speckleAmount: 24 },
+  [TileKind.END_STONE]: { base: [211, 215, 158], alpha: 255, speckleAmount: 24 },
+  [TileKind.END_CRYSTAL]: { base: [222, 109, 224], alpha: 255, speckleAmount: 24 },
   [TileKind.BIRCH]: { base: [211, 211, 189], alpha: 255, speckleAmount: 16 },
   [TileKind.PLANKS]: { base: [174, 135, 79], alpha: 255, speckleAmount: 24 },
   [TileKind.COBBLE]: { base: [111, 116, 121], alpha: 255, speckleAmount: 24 },

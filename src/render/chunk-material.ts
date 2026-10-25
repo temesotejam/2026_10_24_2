@@ -41,6 +41,7 @@ const fragmentShader = /* glsl */ `
   uniform highp sampler3D uLightField;
   uniform vec3 uLightOrigin;
   uniform float uDayLight;
+  uniform float uMinimumLight;
   uniform vec3 uSunDir;
   uniform float uSunIntensity;
   uniform float uAmbient;
@@ -62,9 +63,11 @@ const fragmentShader = /* glsl */ `
     if (tex.a < 0.05) discard;
     float diffuse = uAmbient + uSunIntensity * max(dot(normalize(vNormal), uSunDir), 0.0);
     vec3 lightPos = (vWorld + vNormal * 0.02 - uLightOrigin) / 32.0;
-    vec2 light = texture(uLightField, clamp(lightPos, vec3(0.001), vec3(0.999))).rg;
+    // Stored levels are 0..15 in normalized unsigned bytes (0..255).
+    vec2 light = texture(uLightField, clamp(lightPos, vec3(0.001), vec3(0.999))).rg * 17.0;
     bool inLight = all(greaterThanEqual(lightPos,vec3(0.0))) && all(lessThan(lightPos,vec3(1.0)));
     float localLight = inLight ? max(light.r * uDayLight, light.g) : 0.7 + 0.3 * uDayLight;
+    localLight = max(localLight, uMinimumLight);
     vec3 rgb = tex.rgb * vShade * diffuse * (0.035 + localLight);
     float fog = clamp((vFogDepth - uFogNear) / (uFogFar - uFogNear), 0.0, 1.0);
     rgb = mix(rgb, uFogColor, fog);
@@ -81,6 +84,7 @@ export function createChunkMaterial(atlasArray: THREE.DataArrayTexture): THREE.S
       uLightField: { value: null },
       uLightOrigin: { value: new THREE.Vector3() },
       uDayLight: { value: 1 },
+      uMinimumLight: { value: 0 },
       uSunDir: { value: new THREE.Vector3(0.4, 0.85, 0.28).normalize() },
       uSunIntensity: { value: 0.85 },
       uAmbient: { value: 0.55 },
@@ -97,7 +101,10 @@ export function createChunkMaterial(atlasArray: THREE.DataArrayTexture): THREE.S
  * direction along its arc, sun/ambient strength, and the fog color that
  * matches the sky. Mirrors the CPU renderer's lighting so the two look
  * alike. */
-export function updateChunkMaterial(material: THREE.ShaderMaterial, sky: CpuSkyState): void {
+export function updateChunkMaterial(
+  material: THREE.ShaderMaterial,
+  sky: CpuSkyState & { minimumLight?: number },
+): void {
   const u = material.uniforms;
   const angle = sky.sunAngle;
   const dir = u.uSunDir?.value as THREE.Vector3 | undefined;
@@ -107,6 +114,7 @@ export function updateChunkMaterial(material: THREE.ShaderMaterial, sky: CpuSkyS
   // never blow out at noon.
   const day = sky.sunIntensity / 1.7;
   if (u.uDayLight) u.uDayLight.value = 0.08 + day * 0.92;
+  if (u.uMinimumLight) u.uMinimumLight.value = sky.minimumLight ?? 0;
   if (u.uSunIntensity) u.uSunIntensity.value = 0.3 + 0.22 * day;
   if (u.uAmbient) u.uAmbient.value = 0.5 + 0.28 * day;
   const fog = u.uFogColor?.value as THREE.Color | undefined;

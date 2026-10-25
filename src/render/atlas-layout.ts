@@ -41,6 +41,21 @@ export const TileKind = {
   LAVA: 27,
   BIRCH: 28,
   TORCH_TOP: 29,
+  OBSIDIAN: 30,
+  NETHERRACK: 31,
+  GLOWSTONE: 32,
+  PORTAL: 33,
+  SOUL_SAND: 34,
+  NETHER_WART: 35,
+  ENCHANT_TABLE: 36,
+  BREWING: 37,
+  STONE_BRICK: 38,
+  GLASS: 39,
+  END_FRAME: 40,
+  END_FRAME_FILLED: 41,
+  END_GATE: 42,
+  END_STONE: 43,
+  END_CRYSTAL: 44,
 } as const;
 
 export type TileKind = (typeof TileKind)[keyof typeof TileKind];
@@ -123,6 +138,36 @@ export function tileForBlockFace(id: BlockId, face: Face): TileKind {
       return TileKind.LAVA;
     case BlockId.BIRCH:
       return face === "top" || face === "bottom" ? TileKind.WOOD_TOP : TileKind.BIRCH;
+    case BlockId.OBSIDIAN:
+      return TileKind.OBSIDIAN;
+    case BlockId.NETHERRACK:
+      return TileKind.NETHERRACK;
+    case BlockId.GLOWSTONE:
+      return TileKind.GLOWSTONE;
+    case BlockId.PORTAL:
+      return TileKind.PORTAL;
+    case BlockId.SOUL_SAND:
+      return TileKind.SOUL_SAND;
+    case BlockId.NETHER_WART:
+      return TileKind.NETHER_WART;
+    case BlockId.ENCHANT_TABLE:
+      return TileKind.ENCHANT_TABLE;
+    case BlockId.BREWING:
+      return TileKind.BREWING;
+    case BlockId.STONE_BRICK:
+      return TileKind.STONE_BRICK;
+    case BlockId.GLASS:
+      return TileKind.GLASS;
+    case BlockId.END_FRAME:
+      return TileKind.END_FRAME;
+    case BlockId.END_FRAME_FILLED:
+      return TileKind.END_FRAME_FILLED;
+    case BlockId.END_GATE:
+      return TileKind.END_GATE;
+    case BlockId.END_STONE:
+      return TileKind.END_STONE;
+    case BlockId.END_CRYSTAL:
+      return TileKind.END_CRYSTAL;
     case BlockId.AIR:
       return TileKind.STONE; // never sampled — the mesher skips air outright
   }

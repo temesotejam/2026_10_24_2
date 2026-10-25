@@ -1,3 +1,4 @@
+import type { Dimension, GeneratorVersion } from "./adventure-terrain";
 import { BlockId } from "./blocks";
 import { Chunk } from "./chunk";
 import { chunkKey, worldToChunk, worldToLocal } from "./coords";
@@ -12,7 +13,11 @@ export class World implements NeighborLookup {
   readonly seed: number;
   private readonly chunks = new Map<string, Chunk>();
 
-  constructor(seed: number) {
+  readonly dimension: Dimension;
+  readonly revision: GeneratorVersion;
+  constructor(seed: number, dimension: Dimension = "overworld", revision: GeneratorVersion = 1) {
+    this.dimension = dimension;
+    this.revision = revision;
     this.seed = seed;
   }
 
@@ -40,7 +45,7 @@ export class World implements NeighborLookup {
   ensureChunk(cx: number, cz: number): Chunk {
     const existing = this.getChunk(cx, cz);
     if (existing) return existing;
-    const chunk = generateChunk(cx, cz, this.seed);
+    const chunk = generateChunk(cx, cz, this.seed, this.dimension, this.revision);
     this.setChunk(chunk);
     return chunk;
   }

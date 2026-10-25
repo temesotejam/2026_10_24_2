@@ -9,8 +9,42 @@ export interface ItemDef {
   durability?: number;
   food?: number;
   fuel?: number;
+  enchanted?: boolean;
 }
 export const ITEMS: Record<string, ItemDef> = {
+  obsidian: { name: "黒曜石", color: "#301e41", block: BlockId.OBSIDIAN },
+  netherrack: { name: "ネザーラック", color: "#75352f", block: BlockId.NETHERRACK },
+  glowstone: { name: "グロウストーン", color: "#f1c05b", block: BlockId.GLOWSTONE },
+  soulSand: { name: "ソウルサンド", color: "#584136", block: BlockId.SOUL_SAND },
+  netherWart: { name: "ネザーウォート", color: "#982a37", block: BlockId.NETHER_WART },
+  enchantTable: { name: "エンチャント台", color: "#3c3665", block: BlockId.ENCHANT_TABLE },
+  brewingStand: { name: "醸造台", color: "#827452", block: BlockId.BREWING },
+  stoneBrick: { name: "石レンガ", color: "#6a7077", block: BlockId.STONE_BRICK },
+  glass: { name: "ガラス", color: "#b6dde0", block: BlockId.GLASS },
+  string: { name: "糸", color: "#ddd9cf" },
+  fishingRod: { name: "釣り竿", color: "#b5956b", durability: 65 },
+  fish: { name: "生魚", color: "#7aa5b0", food: 2 },
+  cookedFish: { name: "焼き魚", color: "#b98c65", food: 6 },
+  flint: { name: "火打石", color: "#555363" },
+  flintSteel: { name: "火打石と打ち金", color: "#9b9da9", durability: 65 },
+  book: { name: "本", color: "#99795c" },
+  emerald: { name: "エメラルド", color: "#4fb77d" },
+  blazeRod: { name: "炎のロッド", color: "#e6b54c" },
+  blazePowder: { name: "炎の粉", color: "#e78e32" },
+  bottle: { name: "ガラス瓶", color: "#b6dde0" },
+  waterBottle: { name: "水入り瓶", color: "#558acc" },
+  healingPotion: { name: "治癒のポーション", color: "#dd6682" },
+  firePotion: { name: "耐火のポーション（60秒）", color: "#e8a04a" },
+  strengthPotion: { name: "力のポーション（60秒）", color: "#ab639e" },
+  bucket: { name: "バケツ", color: "#b8c0c9" },
+  waterBucket: { name: "水入りバケツ", color: "#558acc", block: BlockId.WATER },
+  lavaBucket: { name: "溶岩入りバケツ", color: "#e88835", block: BlockId.LAVA },
+  endStone: { name: "エンドストーン", color: "#d3d79e", block: BlockId.END_STONE },
+  enderPearl: { name: "エンダーパール", color: "#43877c" },
+  enderEye: { name: "エンダーアイ", color: "#72ad72" },
+  dragonEgg: { name: "ドラゴンの卵（討伐の証）", color: "#65427c" },
+  bow: { name: "弓", color: "#bd955d", durability: 385 },
+  arrow: { name: "矢", color: "#b9bfc8" },
   dirt: { name: "土", color: "#876044", block: BlockId.DIRT },
   grass: { name: "草ブロック", color: "#73a448", block: BlockId.GRASS },
   stone: { name: "石", color: "#999ca5", block: BlockId.STONE },
@@ -69,13 +103,28 @@ for (const [material, tier, color, durability] of [
     };
   }
 }
+for (const [id, def] of Object.entries(ITEMS)) {
+  if (!def.tool) continue;
+  ITEMS[`enchanted_${id}`] = {
+    ...def,
+    name: `${def.name}（強化）`,
+    enchanted: true,
+    durability: (def.durability ?? 1) * 2,
+  };
+}
 export interface Stack {
   id: string;
   count: number;
   durability?: number;
 }
 export function stackLimit(id: string): number {
-  return ITEMS[id]?.tool ? 1 : 64;
+  return ITEMS[id]?.durability ||
+    id.endsWith("Potion") ||
+    id === "waterBottle" ||
+    id.endsWith("Bucket") ||
+    id === "bucket"
+    ? 1
+    : 64;
 }
 export function stack(id: string, count = 1): Stack {
   const durability = ITEMS[id]?.durability;

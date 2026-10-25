@@ -619,3 +619,37 @@ button:disabled {
   image-rendering: pixelated;
   pointer-events: none;
 }
+
+#dimension-label {
+  position: absolute;
+  top: 64px;
+  right: 12px;
+  color: #fff;
+  font-size: 12px;
+  text-shadow: 1px 1px #222;
+  pointer-events: none;
+}
+.adventure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 500px;
+  margin-bottom: 16px;
+}
+.adventure-actions p {
+  width: 100%;
+}
+
+#boss-hud {
+  position: absolute;
+  top: 12px;
+  left: 25%;
+  width: 50%;
+  text-align: center;
+  color: white;
+  text-shadow: 1px 1px #222;
+  pointer-events: none;
+  padding-bottom: 10px;
+  background: linear-gradient(to right, #ad4bba var(--boss-health), #332537 var(--boss-health))
+    bottom / 100% 7px no-repeat;
+}

@@ -347,7 +347,11 @@ try {
   console.log("Surface route", route);
   for (const point of route.slice(1)) {
     const foot = Math.min(point.h, Math.round((await info()).position.y) + 1);
-    for (const y of [foot + 1, foot]) {
+    for (const y of [
+      Math.max(foot + 2, Math.floor((await info()).position.y) + 1),
+      foot + 1,
+      foot,
+    ]) {
       const obstacle = { x: point.x, y, z: point.z };
       const b = await block(obstacle);
       if (b !== 0 && b !== 5) await mine(obstacle);

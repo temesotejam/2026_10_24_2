@@ -1,3 +1,11 @@
+import { portalInterior } from "./survival/adventure";
+import { dragonPosition } from "./survival/dragon";
+import { structuresNear, stronghold } from "./world/adventure-terrain";
+import { Adventure } from "./survival/adventure";
+import { travelCandidate } from "./survival/adventure-state";
+import { AdventureView } from "./render/adventure-view";
+import { adventureSky, weatherAt } from "./world/weather";
+import { createColumnSampler } from "./world/terrain";
 import { FluidSimulator } from "./world/fluids";
 import { asyncEvent } from "./core/events";
 import { must } from "./core/assert";
@@ -72,6 +80,7 @@ declare global {
       gameMode: () => string;
       time: () => number;
       cameraFov: () => number;
+      adventure: () => unknown;
       effects: () => {
         fragments: number;
         soundEnabled: boolean;
@@ -153,7 +162,7 @@ async function boot(): Promise<void> {
     if (saved && (saved.seed !== SEED || saved.mode !== mode))
       throw new Error("保存先とワールド情報が一致しません");
   }
-  const world = new World(SEED);
+  const world = new World(SEED, saved?.adventure?.dimension ?? "overworld", saved?.generator ?? 2);
   let entityScene: THREE.Scene | null = null;
   let terrainMaterial: THREE.ShaderMaterial | null = null;
   let lightDirty = true;
@@ -193,7 +202,7 @@ async function boot(): Promise<void> {
       qualityNote: () => `${Math.round(gameScene.pixelRatio() * 100)}% scale`,
     };
     chunkMeshes = new ChunkMeshManager(gameScene.scene, world, chunkMaterial);
-    clouds = new Clouds(gameScene.scene, SEED);
+    if (world.dimension === "overworld") clouds = new Clouds(gameScene.scene, SEED);
     highlight = new THREE.LineSegments(
       new THREE.EdgesGeometry(new THREE.BoxGeometry(1.002, 1.002, 1.002)),
       new THREE.LineBasicMaterial({ color: 0x000000 }),
@@ -254,14 +263,14 @@ async function boot(): Promise<void> {
   let generator: ChunkGenerator;
   try {
     if (typeof Worker === "undefined") throw new Error("workers unavailable");
-    generator = createWorkerGenerator(SEED, receive);
+    generator = createWorkerGenerator(SEED, receive, world.dimension, world.revision);
   } catch {
     // No module workers? Generate on the main thread — slower on chunk
     // arrival, but the game works everywhere.
-    generator = createSyncGenerator(SEED, receive);
+    generator = createSyncGenerator(SEED, receive, world.dimension, world.revision);
   }
   streamer.attachGenerator(generator);
-  const spawn = findPleasantSpawn(SEED);
+  const spawn = findPleasantSpawn(SEED, world.revision);
   // Ground under the player's feet before the first frame; the rest streams in.
   streamer.warmUp(saved?.position.x ?? spawn.x, saved?.position.z ?? spawn.z, WARMUP_RADIUS_CHUNKS);
   const player = new PlayerController(view.camera, view.domElement, world, spawn.x, spawn.z);
@@ -292,7 +301,10 @@ async function boot(): Promise<void> {
   const avatar = entityScene ? createAvatar(entityScene) : null;
   player.canSprint = () => session.creative || data.vitals.hunger > 6;
   const hotbar = new Hotbar(hotbarContainer, session);
-  const inventory = new InventoryView(session);
+  const adventure = new Adventure(session);
+  const adventureView = entityScene ? new AdventureView(entityScene) : null;
+  const sampleColumn = createColumnSampler(SEED, world.revision);
+  const inventory = new InventoryView(session, adventure);
   const interaction = new BlockInteraction(
     view.camera,
     view.domElement,
@@ -303,6 +315,13 @@ async function boot(): Promise<void> {
     session,
   );
   const entities = new EntityView(entityScene, app, world);
+  const dimensionLabel = document.createElement("div");
+  dimensionLabel.id = "dimension-label";
+  app.append(dimensionLabel);
+  const bossHud = document.createElement("div");
+  bossHud.id = "boss-hud";
+  bossHud.hidden = true;
+  app.append(bossHud);
   const toast = must(document.querySelector<HTMLDivElement>("#toast"));
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
   session.notice = (text) => {
@@ -359,7 +378,61 @@ async function boot(): Promise<void> {
       inventory.open();
     }
   };
+  interaction.onAttack = () => adventure.attackDragon(player.eyePosition, player.lookDirection);
+  interaction.onItemUse = () => adventure.use(player.eyePosition, player.lookDirection);
+  interaction.onCreatureUse = (id) => {
+    if (data.creatures.find((m) => m.id === id)?.species !== "villager") return false;
+    player.pause();
+    inventory.open("trade");
+    return true;
+  };
+  let traveling = false;
+  adventure.onTravel = (destination) => {
+    if (traveling) return;
+    if (!repository) {
+      session.notice?.("安全な移動には保存機能が必要です");
+      return;
+    }
+    traveling = true;
+    player.pause();
+    restoring = true;
+    void (async () => {
+      try {
+        if (saveTask) await saveTask;
+        const next = travelCandidate(
+          snapshot(),
+          destination ?? (world.dimension === "overworld" ? "nether" : "overworld"),
+          { x: 0.5, y: 34, z: 0.5 },
+        );
+        await repository.save(next);
+        location.reload();
+      } catch {
+        traveling = false;
+        restoring = false;
+        player.resume();
+        session.notice?.("移動先を保存できませんでした。現在のワールドで続けられます");
+      }
+    })();
+  };
   interaction.onUseBlock = (x, y, z, id) => {
+    if (id === BlockId.END_GATE) {
+      adventure.onTravel?.(world.dimension === "end" ? "overworld" : "end");
+      return true;
+    }
+    if (id === BlockId.PORTAL) {
+      if (!portalInterior(world, { x, y, z })) {
+        session.edit(x, y, z, BlockId.AIR);
+        session.notice?.("ゲートの枠が壊れています");
+        return true;
+      }
+      adventure.onTravel?.();
+      return true;
+    }
+    if (id === BlockId.ENCHANT_TABLE || id === BlockId.BREWING) {
+      player.pause();
+      inventory.open(id === BlockId.ENCHANT_TABLE ? "enchant" : "brew", null, `${x},${y},${z}`);
+      return true;
+    }
     if (id === BlockId.BED) {
       session.sleep(x, y, z);
       return true;
@@ -640,6 +713,15 @@ async function boot(): Promise<void> {
     gameMode: () => data.mode,
     time: () => data.time,
     cameraFov: () => view.camera.fov,
+    adventure: () => ({
+      ...structuredClone(adventure.state),
+      cast: adventure.cast ? structuredClone(adventure.cast) : null,
+      generator: world.revision,
+      dragonPosition: dragonPosition(adventure.state.dragon.phase),
+      creatures: structuredClone(data.creatures),
+      stronghold: stronghold(SEED),
+      structures: structuresNear(SEED, player.position.x, player.position.z, sampleColumn),
+    }),
     effects: () => ({
       fragments: fragments?.pool.particles.length ?? 0,
       soundEnabled: sounds.enabled,
@@ -722,14 +804,27 @@ async function boot(): Promise<void> {
         fluids.wake(player.position);
         lastFluidWake = { ...player.position };
       }
+      const beforeTime = data.time;
       session.tick(dt, {
         position: player.position,
         onGround: player.onGround,
         yaw: player.eyeYaw,
         pitch: player.eyePitch,
       });
+      adventure.tick(data.time - beforeTime);
     }
     if (time - lastUi > 100) {
+      dimensionLabel.textContent =
+        world.dimension === "nether"
+          ? "ネザー · 帰還ゲートを右クリック"
+          : world.dimension === "end"
+            ? "エンド"
+            : "通常世界";
+      bossHud.hidden = world.dimension !== "end";
+      bossHud.textContent = adventure.state.dragon.defeated
+        ? "エンダードラゴン討伐！ · 帰還ゲートが開きました"
+        : `エンダードラゴン ${Math.ceil(adventure.state.dragon.health)} / 120`;
+      bossHud.style.setProperty("--boss-health", `${(adventure.state.dragon.health / 120) * 100}%`);
       lastUi = time;
       hotbar.refresh();
       inventory.refresh();
@@ -738,12 +833,19 @@ async function boot(): Promise<void> {
         "♥".repeat(Math.ceil(data.vitals.health / 2)) +
         "♡".repeat(10 - Math.ceil(data.vitals.health / 2));
       must(document.querySelector<HTMLElement>("#hunger")).textContent =
-        `食料 ${Math.ceil(data.vitals.hunger)}/20${data.vitals.air < 10 ? ` · 呼吸 ${Math.ceil(data.vitals.air)}` : ""}`;
-      must(document.querySelector<HTMLElement>("#objective")).textContent = session.creative
-        ? "クリエイティブ · E：所持品 / 作業台"
-        : data.inventory.some((s) => s?.id === "diamond")
-          ? "ダイヤモンド発見！ 建築と探索を続けよう"
-          : "原木 → 作業台 → 木・石・鉄のツルハシ → ダイヤ · E：所持品 / レシピ集 · 右クリック：使用";
+        `食料 ${Math.ceil(data.vitals.hunger)}/20${data.vitals.air < 10 ? ` · 呼吸 ${Math.ceil(data.vitals.air)}` : ""} · XP ${adventure.state.xp}${adventure.state.fire ? ` · 耐火 ${Math.ceil(adventure.state.fire)}秒` : ""}${adventure.state.strength ? ` · 力 ${Math.ceil(adventure.state.strength)}秒` : ""}`;
+      must(document.querySelector<HTMLElement>("#objective")).textContent =
+        world.dimension === "end"
+          ? adventure.state.dragon.defeated
+            ? "ドラゴン討伐！ 帰還ゲートで通常世界へ戻ろう"
+            : "クリスタルを弓で破壊 → 中央へ降りたドラゴンを攻撃"
+          : world.dimension === "nether"
+            ? "炎のロッド・ウォートを集め、帰還ゲートで戻ろう"
+            : session.creative
+              ? "クリエイティブ · E：所持品 / 作業台"
+              : data.inventory.some((s) => s?.id === "diamond")
+                ? "村・廃ゲート → ネザー → アイで地下遺跡へ → エンド · E：冒険ガイド"
+                : "原木 → 作業台 → 木・石・鉄のツルハシ → ダイヤ · E：所持品 / レシピ集 · 右クリック：使用";
     }
     let meshBudget = MESH_BUDGET_PER_FRAME;
     for (const [key, c] of editedChunks) {
@@ -757,7 +859,10 @@ async function boot(): Promise<void> {
     for (const { cx, cz } of streamer.drainDirty(meshBudget)) {
       chunkMeshes?.updateChunk(cx, cz);
     }
-    view.applySky(skyStateAt(data.time));
+    const profile = sampleColumn(player.position.x, player.position.z);
+    const weather = weatherAt(SEED, data.time, world.dimension, profile.isSnowy, profile.isDesert);
+    view.applySky(adventureSky(data.time, world.dimension, weather));
+    adventureView?.update(world, view.camera, weather, elapsed, adventure);
     clouds?.update(player.position.x, player.position.z, elapsed);
     const hit = interaction.raycastFromCamera();
     if (highlight) {

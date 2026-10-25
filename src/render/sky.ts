@@ -9,6 +9,8 @@ export const DAY_LENGTH_SECONDS = 1200;
 export const STARTUP_PHASE = 0.15;
 
 export interface SkyState {
+  readonly celestialVisible?: boolean;
+  readonly minimumLight?: number;
   /** RGB in 0..1, used for the sky background and the fog. */
   readonly skyColor: readonly [number, number, number];
   readonly sunIntensity: number;

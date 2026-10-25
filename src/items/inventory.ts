@@ -54,7 +54,8 @@ export const SMELTING: Record<string, string> = {
   rawMeat: "meat",
   log: "coal",
   birchLog: "coal",
-  sand: "stone",
+  sand: "glass",
+  fish: "cookedFish",
 };
 export interface FurnaceState {
   slots: Slots;

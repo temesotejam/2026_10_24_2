@@ -14,6 +14,21 @@ const uniform = (r: number, g: number, b: number): BlockColor => ({
 });
 
 export const BLOCK_COLORS: Readonly<Record<BlockId, BlockColor>> = {
+  [BlockId.OBSIDIAN]: uniform(48, 30, 65),
+  [BlockId.NETHERRACK]: uniform(117, 53, 47),
+  [BlockId.GLOWSTONE]: uniform(241, 192, 91),
+  [BlockId.PORTAL]: uniform(130, 64, 191),
+  [BlockId.SOUL_SAND]: uniform(88, 65, 54),
+  [BlockId.NETHER_WART]: uniform(152, 42, 55),
+  [BlockId.ENCHANT_TABLE]: uniform(60, 54, 101),
+  [BlockId.BREWING]: uniform(130, 116, 82),
+  [BlockId.STONE_BRICK]: uniform(106, 112, 119),
+  [BlockId.GLASS]: uniform(182, 221, 224),
+  [BlockId.END_FRAME]: uniform(64, 112, 102),
+  [BlockId.END_FRAME_FILLED]: uniform(80, 155, 125),
+  [BlockId.END_GATE]: uniform(27, 22, 43),
+  [BlockId.END_STONE]: uniform(211, 215, 158),
+  [BlockId.END_CRYSTAL]: uniform(222, 109, 224),
   [BlockId.PLANKS]: uniform(174, 135, 79),
   [BlockId.COBBLE]: uniform(111, 116, 121),
   [BlockId.TABLE]: uniform(137, 95, 47),

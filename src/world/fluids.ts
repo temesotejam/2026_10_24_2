@@ -92,7 +92,14 @@ export class FluidSimulator {
           (target === BlockId.WATER && kind === BlockId.LAVA) ||
           (target === BlockId.LAVA && kind === BlockId.WATER)
         ) {
-          this.edit(xx, yy, zz, BlockId.COBBLE);
+          this.edit(
+            xx,
+            yy,
+            zz,
+            target === BlockId.LAVA && (this.levels[targetKey] ?? 0) === 0
+              ? BlockId.OBSIDIAN
+              : BlockId.COBBLE,
+          );
           this.removeLevel(targetKey);
           return false;
         }

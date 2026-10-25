@@ -40,7 +40,15 @@ export function buildLightField(
         const i = index(x, ly, z);
         passable[i] = isTransparent(id) ? 1 : 0;
         if (sky) data[i * 2] = 15;
-        if (id === BlockId.TORCH || id === BlockId.LAVA) data[i * 2 + 1] = 14;
+        if (
+          id === BlockId.TORCH ||
+          id === BlockId.LAVA ||
+          id === BlockId.GLOWSTONE ||
+          id === BlockId.PORTAL ||
+          id === BlockId.END_CRYSTAL ||
+          id === BlockId.END_GATE
+        )
+          data[i * 2 + 1] = 14;
       }
     }
   for (let channel = 0; channel < 2; channel++) {

@@ -1,3 +1,7 @@
+import { BREWS, newAdventure, type AdventureState } from "./adventure-state";
+import { structureBlocks, structuresNear } from "../world/adventure-terrain";
+import { createColumnSampler } from "../world/terrain";
+import { portalInterior } from "./adventure";
 import { must } from "../core/assert";
 import { raycastVoxels } from "../player/raycast";
 import { FixedStepClock } from "../core/fixed-step";
@@ -32,7 +36,8 @@ import { deriveSeed, mulberry32 } from "../world/rng";
 export type GameMode = "survival" | "creative";
 export interface SessionState {
   version: 1;
-  generator: 1;
+  generator: 1 | 2;
+  adventure?: AdventureState;
   seed: number;
   mode: GameMode;
   inventory: Slots;
@@ -67,7 +72,8 @@ export function newSession(seed: number, mode: GameMode, spawn: Vec3): SessionSt
     );
   return {
     version: 1,
-    generator: 1,
+    generator: 2,
+    adventure: newAdventure(),
     seed,
     mode,
     inventory,
@@ -118,6 +124,7 @@ export class SurvivalSession {
     this.world = world;
     this.edit = edit;
     this.data = data;
+    data.adventure ??= newAdventure();
     this.random = mulberry32(deriveSeed(data.seed, 10247));
   }
   get held(): Stack | null {
@@ -164,7 +171,29 @@ export class SurvivalSession {
         this.drop(item, { x: x + 0.5, y: y + 0.25, z: z + 0.5 });
       wearTool(this.data.inventory, this.data.selected);
     }
+    if (id === BlockId.CHEST) this.chest(x, y, z);
+    if (
+      !this.creative &&
+      [BlockId.COAL_ORE, BlockId.IRON_ORE, BlockId.GOLD_ORE, BlockId.DIAMOND_ORE].includes(
+        id as typeof BlockId.COAL_ORE,
+      )
+    )
+      must(this.data.adventure).xp = Math.min(1000000, must(this.data.adventure).xp + 1);
     const key = blockKey(x, y, z);
+    const brewKey = `${must(this.data.adventure).dimension}:${key}`;
+    const brew = must(this.data.adventure).brewing[brewKey];
+    if (brew) {
+      if (brew.remaining === 0) this.drop(stack(brew.output), { x, y, z });
+      else
+        for (const id of [
+          "waterBottle",
+          "netherWart",
+          "blazePowder",
+          BREWS[brew.output].ingredient,
+        ])
+          this.drop(stack(id), { x, y, z });
+      Reflect.deleteProperty(must(this.data.adventure).brewing, brewKey);
+    }
     for (const item of this.data.chests[key] ?? []) if (item) this.drop(item, { x, y: y + 0.5, z });
     for (const item of this.data.furnaces[key]?.slots ?? [])
       if (item) this.drop(item, { x, y: y + 0.5, z });
@@ -172,6 +201,18 @@ export class SurvivalSession {
     Reflect.deleteProperty(this.data.furnaces, key);
     Reflect.deleteProperty(this.data.growth, key);
     this.edit(x, y, z, BlockId.AIR);
+    if (id === BlockId.OBSIDIAN) {
+      for (let dx = -3; dx <= 3; dx++)
+        for (let dy = -4; dy <= 4; dy++)
+          for (let dz = -3; dz <= 3; dz++) {
+            const p = { x: x + dx, y: y + dy, z: z + dz };
+            if (
+              this.world.getBlock(p.x, p.y, p.z) === BlockId.PORTAL &&
+              !portalInterior(this.world, p)
+            )
+              this.edit(p.x, p.y, p.z, BlockId.AIR);
+          }
+    }
     this.onChange?.();
     return true;
   }
@@ -191,14 +232,22 @@ export class SurvivalSession {
     )
       return false;
     const below = this.world.getBlock(x, y - 1, z);
+    if (this.world.dimension === "nether" && block === BlockId.WATER) return false;
+    if (block === BlockId.NETHER_WART && below !== BlockId.SOUL_SAND) {
+      this.notice?.("ネザーウォートはソウルサンドに植えます");
+      return false;
+    }
     if (block === BlockId.CROP && below !== BlockId.FARMLAND) {
       this.notice?.("種はクワで耕した土に植えます");
       return false;
     }
     if ((block === BlockId.SAPLING || block === BlockId.TORCH) && !isSolid(below)) return false;
-    if (!this.creative) removeItem(this.data.inventory, this.data.selected);
+    if (!this.creative) {
+      removeItem(this.data.inventory, this.data.selected);
+      if (item?.id.endsWith("Bucket")) this.collect(stack("bucket"));
+    }
     this.edit(x, y, z, block);
-    if (block === BlockId.CROP || block === BlockId.SAPLING)
+    if (block === BlockId.CROP || block === BlockId.SAPLING || block === BlockId.NETHER_WART)
       this.data.growth[blockKey(x, y, z)] = 0;
     this.onChange?.();
     return true;
@@ -225,6 +274,10 @@ export class SurvivalSession {
     return true;
   }
   sleep(x: number, y: number, z: number): void {
+    if (this.world.dimension !== "overworld") {
+      this.notice?.("この世界では眠れません。帰還ゲートで通常世界へ戻ってください");
+      return;
+    }
     // Respawn beside the bed, not inside its full-block collision box.
     const place = [
       [1, 0],
@@ -259,22 +312,40 @@ export class SurvivalSession {
     this.onChange?.();
   }
   get isNight(): boolean {
-    return isNightAt(this.data.time);
+    return this.world.dimension === "nether" || isNightAt(this.data.time);
   }
   hitCreature(id: number): void {
     if (this.attackCooldown > 0 || this.dead) return;
     const mob = this.data.creatures.find((m) => m.id === id);
     if (!mob) return;
     const item = this.held ? ITEMS[this.held.id] : undefined;
-    mob.hp -= item?.tool === "sword" ? 4 + (item.tier ?? 1) * 2 : item?.tool ? 3 : 1;
+    mob.hp -=
+      (this.data.adventure?.strength ? 4 : 0) +
+      (item?.enchanted ? 2 : 0) +
+      (item?.tool === "sword" ? 4 + (item.tier ?? 1) * 2 : item?.tool ? 3 : 1);
     mob.cooldown = 0.7;
+    if (mob.species === "wanderer") mob.fuse = 2;
     this.attackCooldown = 0.4;
     if (!this.creative) wearTool(this.data.inventory, this.data.selected);
     this.removeDead();
   }
+  shootCreature(id: number, amount: number): void {
+    const mob = this.data.creatures.find((m) => m.id === id);
+    if (!mob || this.dead) return;
+    if (mob.species === "wanderer") mob.fuse = 2;
+    mob.hp -= amount;
+    mob.cooldown = 0.7;
+    this.removeDead();
+    this.onChange?.();
+  }
   feedCreature(id: number): boolean {
     const mob = this.data.creatures.find((m) => m.id === id);
-    if (!mob || hostile(mob) || this.held?.id !== (mob.species === "chicken" ? "seeds" : "wheat"))
+    if (
+      !mob ||
+      mob.species === "villager" ||
+      hostile(mob) ||
+      this.held?.id !== (mob.species === "chicken" ? "seeds" : "wheat")
+    )
       return false;
     if (mob.love > 0 || mob.age < 0) return true;
     mob.love = 30;
@@ -356,7 +427,7 @@ export class SurvivalSession {
           step,
           (distance * step) / Math.max(dt, step),
           head === BlockId.WATER,
-          this.world.getBlock(x, y, z) === BlockId.LAVA,
+          this.world.getBlock(x, y, z) === BlockId.LAVA && !this.data.adventure?.fire,
           isSolid(head),
         );
         if (this.data.vitals.health <= 0) {
@@ -392,6 +463,11 @@ export class SurvivalSession {
       if (!this.world.hasChunk(Math.floor(x / 16), Math.floor(z / 16))) continue;
       const block = this.world.getBlock(x, y, z);
       d.growth[key] = age + dt;
+      if (block === BlockId.NETHER_WART && age > 60) {
+        this.drop(stack("netherWart", 2), { x: x + 0.5, y, z: z + 0.5 });
+        this.edit(x, y, z, BlockId.AIR);
+        Reflect.deleteProperty(d.growth, key);
+      }
       if (block === BlockId.CROP && age > 180) {
         this.edit(x, y, z, BlockId.RIPE_CROP);
         Reflect.deleteProperty(d.growth, key);
@@ -407,7 +483,7 @@ export class SurvivalSession {
           Reflect.deleteProperty(d.growth, key);
         }
       }
-      if (block !== BlockId.CROP && block !== BlockId.SAPLING)
+      if (block !== BlockId.CROP && block !== BlockId.SAPLING && block !== BlockId.NETHER_WART)
         Reflect.deleteProperty(d.growth, key);
     }
     for (const m of d.creatures) {
@@ -451,7 +527,13 @@ export class SurvivalSession {
           ) === null
         );
       };
-      if (hostile(m) && !this.creative && m.cooldown === 0 && visible()) {
+      if (
+        hostile(m) &&
+        (m.species !== "wanderer" || m.fuse === 2) &&
+        !this.creative &&
+        m.cooldown === 0 &&
+        visible()
+      ) {
         if (m.species === "skeleton" && dist < 14) {
           const delta = {
             x: d.position.x - m.position.x,
@@ -558,6 +640,51 @@ export class SurvivalSession {
   private spawnCreature(): void {
     const d = this.data;
     if (d.creatures.length >= 28) return;
+    if (this.world.dimension === "end") {
+      const x = Math.floor((this.random() - 0.5) * 48),
+        z = Math.floor((this.random() - 0.5) * 48);
+      if (
+        d.creatures.filter((m) => m.species === "wanderer").length < 4 &&
+        this.world.getBlock(x, 33, z) === BlockId.END_STONE
+      )
+        d.creatures.push(this.makeCreature("wanderer", { x: x + 0.5, y: 34, z: z + 0.5 }));
+      return;
+    }
+    if (this.world.dimension === "nether") {
+      const x = Math.floor(d.position.x + (this.random() - 0.5) * 30),
+        z = Math.floor(d.position.z + (this.random() - 0.5) * 30);
+      if (!this.world.hasChunk(Math.floor(x / 16), Math.floor(z / 16))) return;
+      for (let y = 60; y >= 25; y--)
+        if (
+          isSolid(this.world.getBlock(x, y, z)) &&
+          this.world.getBlock(x, y + 1, z) === BlockId.AIR &&
+          this.world.getBlock(x, y + 2, z) === BlockId.AIR
+        ) {
+          if (d.creatures.filter((m) => m.species === "ember").length < 8)
+            d.creatures.push(this.makeCreature("ember", { x: x + 0.5, y: y + 1, z: z + 0.5 }));
+          break;
+        }
+      return;
+    }
+    if (
+      this.world.revision === 2 &&
+      d.creatures.filter((m) => m.species === "villager").length < 2
+    ) {
+      const village = structuresNear(
+        d.seed,
+        d.position.x,
+        d.position.z,
+        createColumnSampler(d.seed, this.world.revision),
+      ).find(
+        (v) => v.kind === "village" && Math.hypot(v.x - d.position.x, v.z - d.position.z) < 30,
+      );
+      if (village && this.world.hasChunk(Math.floor(village.x / 16), Math.floor(village.z / 16))) {
+        d.creatures.push(
+          this.makeCreature("villager", { x: village.x + 3.5, y: village.y, z: village.z + 0.5 }),
+        );
+        return;
+      }
+    }
     // Keep room for night enemies even when a daytime herd is nearby.
     if (d.creatures.filter((m) => hostile(m) === this.isNight).length >= 12) return;
     const angle = this.random() * Math.PI * 2;
@@ -570,14 +697,22 @@ export class SurvivalSession {
     const surface = this.world.getBlock(x, y, z);
     if (surface !== BlockId.GRASS && surface !== BlockId.DIRT && surface !== BlockId.SNOW) return;
     const species = this.isNight
-      ? must((["zombie", "skeleton", "mossling", "spider"] as const)[Math.floor(this.random() * 4)])
+      ? must(
+          (["zombie", "skeleton", "mossling", "spider", "wanderer"] as const)[
+            Math.floor(this.random() * 5)
+          ],
+        )
       : must(FRIENDLY[Math.floor(this.random() * 4)]);
     if (d.creatures.filter((m) => m.species === species).length >= 6) return;
     d.creatures.push(this.makeCreature(species, { x: x + 0.5, y: y + 1, z: z + 0.5 }));
   }
   private removeDead(): void {
     for (const m of this.data.creatures)
-      if (m.hp <= 0) for (const item of creatureDrops(m)) this.drop(item, m.position);
+      if (m.hp <= 0) {
+        if (!this.creative && hostile(m))
+          must(this.data.adventure).xp = Math.min(1000000, must(this.data.adventure).xp + 2);
+        for (const item of creatureDrops(m)) this.drop(item, m.position);
+      }
     this.data.creatures = this.data.creatures.filter(
       (m) =>
         m.hp > 0 &&
@@ -585,7 +720,44 @@ export class SurvivalSession {
     );
   }
   chest(x: number, y: number, z: number): Slots {
-    return (this.data.chests[blockKey(x, y, z)] ??= emptySlots(27));
+    const key = blockKey(x, y, z);
+    if (!this.data.chests[key]) {
+      const slots = emptySlots(27);
+      if (
+        this.world.dimension === "overworld" &&
+        this.world.revision === 2 &&
+        this.world.getBlock(x, y, z) === BlockId.CHEST
+      ) {
+        const generated = structuresNear(
+          this.data.seed,
+          x,
+          z,
+          createColumnSampler(this.data.seed, this.world.revision),
+        ).some((s) =>
+          structureBlocks(s).some(
+            (p) => p.x === x && p.y === y && p.z === z && p.id === BlockId.CHEST,
+          ),
+        );
+        // A replaced chest must never regenerate its original treasure.
+        const cx = Math.floor(x / 16),
+          cz = Math.floor(z / 16),
+          index = y * 256 + (((z % 16) + 16) % 16) * 16 + (((x % 16) + 16) % 16);
+        const changed = this.data.edits[`${cx},${cz}`]?.[String(index)] !== undefined;
+        const treasureKey = `${this.world.dimension}:${key}`;
+        const opened = must(this.data.adventure).opened;
+        if (generated && !changed && !opened[treasureKey])
+          [
+            stack("bread", 6),
+            stack("iron", 4),
+            stack("string", 6),
+            stack("book"),
+            stack("obsidian", 4),
+          ].forEach((v, i) => (slots[i] = v));
+        opened[treasureKey] = true;
+      }
+      this.data.chests[key] = slots;
+    }
+    return must(this.data.chests[key]);
   }
   furnace(x: number, y: number, z: number): FurnaceState {
     return (this.data.furnaces[blockKey(x, y, z)] ??= newFurnace());

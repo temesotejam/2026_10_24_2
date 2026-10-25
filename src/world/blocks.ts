@@ -28,6 +28,21 @@ export const BlockId = {
   SAPLING: 25,
   LAVA: 26,
   BIRCH: 27,
+  OBSIDIAN: 28,
+  NETHERRACK: 29,
+  GLOWSTONE: 30,
+  PORTAL: 31,
+  SOUL_SAND: 32,
+  NETHER_WART: 33,
+  ENCHANT_TABLE: 34,
+  BREWING: 35,
+  STONE_BRICK: 36,
+  GLASS: 37,
+  END_FRAME: 38,
+  END_FRAME_FILLED: 39,
+  END_GATE: 40,
+  END_STONE: 41,
+  END_CRYSTAL: 42,
 } as const;
 
 export type BlockId = (typeof BlockId)[keyof typeof BlockId];
@@ -48,6 +63,37 @@ function block(id: BlockId, name: string, overrides: Partial<BlockDef> = {}): Bl
 }
 
 export const BLOCKS: Readonly<Record<BlockId, BlockDef>> = {
+  [BlockId.OBSIDIAN]: block(BlockId.OBSIDIAN, "obsidian"),
+  [BlockId.NETHERRACK]: block(BlockId.NETHERRACK, "netherrack"),
+  [BlockId.GLOWSTONE]: block(BlockId.GLOWSTONE, "glowstone"),
+  [BlockId.PORTAL]: block(BlockId.PORTAL, "portal", {
+    solid: false,
+    transparent: true,
+    breakable: false,
+  }),
+  [BlockId.SOUL_SAND]: block(BlockId.SOUL_SAND, "soul_sand"),
+  [BlockId.NETHER_WART]: block(BlockId.NETHER_WART, "nether_wart", {
+    solid: false,
+    transparent: true,
+  }),
+  [BlockId.ENCHANT_TABLE]: block(BlockId.ENCHANT_TABLE, "enchant_table"),
+  [BlockId.BREWING]: block(BlockId.BREWING, "brewing"),
+  [BlockId.STONE_BRICK]: block(BlockId.STONE_BRICK, "stone_brick"),
+  [BlockId.GLASS]: block(BlockId.GLASS, "glass", { transparent: true }),
+  [BlockId.END_FRAME]: block(BlockId.END_FRAME, "end_frame", { breakable: false }),
+  [BlockId.END_FRAME_FILLED]: block(BlockId.END_FRAME_FILLED, "end_frame_filled", {
+    breakable: false,
+  }),
+  [BlockId.END_GATE]: block(BlockId.END_GATE, "end_gate", {
+    solid: false,
+    transparent: true,
+    breakable: false,
+  }),
+  [BlockId.END_STONE]: block(BlockId.END_STONE, "end_stone"),
+  [BlockId.END_CRYSTAL]: block(BlockId.END_CRYSTAL, "end_crystal", {
+    solid: false,
+    transparent: true,
+  }),
   [BlockId.AIR]: block(BlockId.AIR, "air", { solid: false, transparent: true, breakable: false }),
   [BlockId.GRASS]: block(BlockId.GRASS, "grass"),
   [BlockId.DIRT]: block(BlockId.DIRT, "dirt"),
@@ -108,6 +154,7 @@ export const PLACEABLE_BLOCKS: readonly BlockId[] = [
 export function isSmallBlock(id: BlockId): boolean {
   return (
     id === BlockId.TORCH ||
+    id === BlockId.NETHER_WART ||
     id === BlockId.CROP ||
     id === BlockId.RIPE_CROP ||
     id === BlockId.SAPLING
