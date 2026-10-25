@@ -11,11 +11,18 @@ const out = "visual-check/polish";
 mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({
   headless: true,
-  args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--window-size=1280,720"],
+  args: [
+    "--no-sandbox",
+    "--enable-unsafe-swiftshader",
+    "--use-angle=swiftshader",
+    "--window-size=1280,720",
+  ],
 });
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+let activePage;
 try {
   const page = await browser.newPage();
+  activePage = page;
   await page.setViewport({ width: 1280, height: 720 });
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -23,6 +30,11 @@ try {
     page.waitForFunction(() => window.__mc?.meshedChunks() >= 60, { timeout: 120000 });
   await page.goto(url.href, { waitUntil: "domcontentloaded" });
   await boot();
+  assert.equal(
+    await page.evaluate(() => window.__mc.renderer()),
+    "webgl",
+    "fragment rendering requires WebGL",
+  );
   assert.equal(await page.evaluate(() => window.__mc.cameraFov()), 70);
   assert.equal(await page.$eval("#fps", (el) => el.hidden), true);
   await page.click("#overlay-content h1");
@@ -86,14 +98,55 @@ try {
   await page.mouse.up({ button: "right" });
   await page.waitForFunction(() => window.__mc.effects().soundCounts.place > 0);
   const placed = { ...ground, y: ground.y + 1 };
+  assert.equal(
+    await page.evaluate((p) => window.__mc.blockAt(p.x, p.y, p.z), placed),
+    2,
+    "the chosen dirt block was placed",
+  );
   await aim({ x: placed.x + 0.5, y: placed.y + 0.5, z: placed.z + 0.5 });
+  assert.deepEqual(
+    await page.evaluate(() => window.__mc.target()),
+    placed,
+    "crosshair aims at the placed block",
+  );
+  // Observe the short-lived effect during the click, before CDP/screenshot delays.
+  const observedFragments = page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const start = window.performance.now();
+        function sample(now) {
+          const effects = window.__mc.effects();
+          if (effects.fragments > 0) {
+            resolve(effects.fragments);
+            return;
+          }
+          if (now - start > 5000) {
+            resolve(0);
+            return;
+          }
+          window.requestAnimationFrame(sample);
+        }
+        window.requestAnimationFrame(sample);
+      }),
+  );
   await page.mouse.down();
   await wait(120);
   await page.mouse.up();
-  await page.waitForFunction(() => window.__mc.effects().fragments > 0);
+  assert.ok(await observedFragments, "render frames observed fragments during the click");
+  assert.equal(
+    await page.evaluate((p) => window.__mc.blockAt(p.x, p.y, p.z), placed),
+    0,
+    "the targeted block was removed",
+  );
   await page.screenshot({ path: `${out}/fragments.png` });
   await page.waitForFunction(() => window.__mc.effects().soundPeak > 0);
   const audible = await page.evaluate(() => window.__mc.effects());
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector("#app > canvas").getContext("webgl2").isContextLost(),
+    ),
+    false,
+  );
   assert.equal(audible.soundCounts.break, 1, "a short creative click breaks exactly one block");
   assert.ok(audible.soundCounts.place > 0);
   assert.ok(audible.fragments <= 128);
@@ -134,9 +187,24 @@ try {
     "PASS Classic comparison polish: FOV, responsive HUD, F3, fragments, real audio output, mute and preference reload",
   );
 } catch (error) {
+  let state;
+  try {
+    state = await activePage?.evaluate(() => ({
+      renderer: window.__mc?.renderer(),
+      mode: window.__mc?.mode(),
+      position: window.__mc?.position(),
+      target: window.__mc?.target(),
+      effects: window.__mc?.effects(),
+    }));
+    writeFileSync(`${out}/failure.json`, JSON.stringify(state, null, 2));
+    await activePage?.screenshot({ path: `${out}/failure.png` });
+  } catch {
+    /* Preserve the original failure if browser diagnostics are unavailable. */
+  }
   if (process.env.GITHUB_ACTIONS)
     console.log(
       `::error title=Classic polish verification failed::${String(error?.stack ?? error)
+        .concat("\nState: ", JSON.stringify(state))
         .replaceAll("%", "%25")
         .replaceAll("\r", "%0D")
         .replaceAll("\n", "%0A")}`,
