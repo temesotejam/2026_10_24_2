@@ -1,0 +1,58 @@
+{
+  "seed": 2026,
+  "mode": "survival",
+  "startingItems": 0,
+  "fixtureImports": false,
+  "stateMutationAPI": false,
+  "recordingParts": 3,
+  "includesNormalSaveResumes": true,
+  "final": {
+    "health": 10,
+    "dragon": {
+      "health": 0,
+      "phase": 45.39166666724452,
+      "defeated": true
+    },
+    "eggCount": 1,
+    "dimension": "overworld"
+  },
+  "export": {
+    "file": "survival-narrated-1.5x.mp4",
+    "speed": 1.5,
+    "rawDuration": 909.533334,
+    "duration": 606.366667,
+    "audio": false,
+    "outputFps": 30,
+    "captions": "Japanese, burned into the picture",
+    "captionCount": 88,
+    "subtitleFile": "commentary.srt",
+    "fullDecodeVerified": true
+  },
+  "bytes": 16764134,
+  "sha256": "373e8f001882fa8fa9a33b17a972b4361e0ec967a29aa04b5fc62ebc9837cd3a",
+  "coverage": [
+    {
+      "part": "part-1.mp4",
+      "recordedSeconds": 724.6,
+      "wallSeconds": 724.929
+    },
+    {
+      "part": "part-2.mp4",
+      "recordedSeconds": 106.266667,
+      "wallSeconds": 106.689
+    },
+    {
+      "part": "part-3.mp4",
+      "recordedSeconds": 78.666667,
+      "wallSeconds": 78.937
+    }
+  ],
+  "visualCaptionChecks": ["opening", "Nether combat", "sword attacks on the dragon", "victory"],
+  "sourceCommits": [
+    "22f5d905b1e5d350ea477f0d7b34166e73e49f9e",
+    "54477e9d79c261f4ef95edb5fb1a1c802cc30b75",
+    "2a28de863b7a0d86624ec611b3bd84e90ec5bf2c"
+  ],
+  "publishedFile": "survival-narrated.mp4",
+  "downloadUrl": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-narrated.mp4"
+}

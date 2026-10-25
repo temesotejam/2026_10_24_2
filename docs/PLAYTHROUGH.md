@@ -4,7 +4,9 @@
 
 [対応バージョンのリリース（v0.2.0-beta.1）](https://github.com/temesotejam/2026_10_24_2/releases/tag/v0.2.0-beta.1)
 
-[全工程のMP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival.mp4)。Web用に軽量化した約1.5倍速・21分5秒の動画です。ブラウザのプロファイルは公開しません。
+[新しい字幕実況付きMP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-narrated.mp4)。所持品ゼロから討伐・帰還までの全工程、約1.5倍速・10分6秒・約17MBです。日本語字幕を映像に焼き込んでいます。
+
+[前回の動画（字幕なし・21分5秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival.mp4) も保持しています。ブラウザのプロファイルは公開しません。
 
 ## 録画条件
 
@@ -42,3 +44,5 @@ node scripts/render-playthrough.mjs visual-check/dragon-playthrough/new-run
 `scripts/render-narrated-playthrough.mjs <録画ディレクトリ>` は、実行中に記録した行動時刻を約1.5倍速の動画時刻へ変換し、短い日本語字幕を映像へ焼き込みます。通常保存からの再開も時系列で扱い、操作調整で止まった部分は字幕で説明します。元のプレイ映像を省略しません。字幕のSRTと時刻のJSONも出力します。
 
 日本語表示には Noto Sans CJK JP、書き出しにはlibass対応FFmpegが必要です。
+
+字幕版は30fpsで書き出し、加速時にも録画した動きを保持します。実行時の行動記録に加えて、映像で確認した食事・剣への持ち替えを字幕へ補足しています。[字幕SRT](../public/watch/survival-narrated.srt) と [結果・SHA-256](../public/watch/narrated-proof.json) も保存しています。

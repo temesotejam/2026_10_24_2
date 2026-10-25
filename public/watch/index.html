@@ -71,29 +71,32 @@
   <body>
     <main>
       <a href="../">← ゲームへ</a>
-      <h1>所持品ゼロから、エンダードラゴン討伐まで</h1>
+      <h1>字幕実況付き：所持品ゼロから、エンダードラゴン討伐まで</h1>
       <p>
-        全工程・約1.5倍速・21分5秒。ロッドとエンダーアイの入手、討伐後の帰還まで収録しています。
+        新しいプレイの全工程・約1.5倍速・10分6秒。日本語の軽い実況字幕を付けました。ロッドとエンダーアイの入手、討伐後の帰還まで収録しています。
       </p>
       <video
         id="recording"
         controls
         playsinline
         preload="metadata"
-        poster="./poster.jpg"
+        poster="./poster-narrated.jpg"
         aria-label="サバイバル討伐の全工程"
       >
-        <source src="./survival.mp4" type="video/mp4" />
-        <a href="./survival.mp4">動画ファイルを直接開く</a>
+        <source src="./survival-narrated.mp4" type="video/mp4" />
+        <a href="./survival-narrated.mp4">動画ファイルを直接開く</a>
       </video>
       <nav aria-label="動画の再生とダウンロード">
         <button type="button" data-time="0">最初から再生</button>
-        <a class="download" href="./survival.mp4" download="survival-to-dragon-1.5x.mp4"
-          >MP4をダウンロード</a
+        <a class="download" href="./survival-narrated.mp4" download="survival-narrated-1.5x.mp4"
+          >字幕付きMP4をダウンロード（約17MB）</a
+        >
+        <a class="download" href="./survival.mp4" download="survival-original-1.5x.mp4"
+          >前回の動画（字幕なし）</a
         >
       </nav>
       <p>
-        自動操作の実録です。途中の通常セーブからの再開と一時停止を含みます。音声はありません。Web再生用に画質を軽量化していますが、全工程と再生時間は同じです。
+        字幕は映像に入っているので設定は不要です。平地の小刻みな停止を減らした、自動操作の実録です。途中の通常セーブからの再開と一時停止を含みます。音声はありません。Web再生用に画質を軽量化していますが、全工程と再生時間は同じです。
       </p>
       <p id="status" role="status" aria-live="polite"></p>
     </main>

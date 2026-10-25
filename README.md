@@ -4,7 +4,7 @@
 Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サーバーは不要です。
 公式 Minecraft の素材は同梱せず、テクスチャ・アイコン・モデルを手続き生成します。
 
-**[ブラウザで遊ぶ](https://temesotejam.github.io/2026_10_24_2/)** · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
+**[ブラウザで遊ぶ](https://temesotejam.github.io/2026_10_24_2/)** · [字幕実況付きプレイ動画をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-narrated.mp4) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
 
 ![作業台で木のツルハシを作成したサバイバル画面](docs/screenshots/survival-crafting.png)
 
