@@ -481,6 +481,8 @@ try {
   const active = await mobilePage.evaluate(() => window.__mc.mode());
   report("tapping play starts the game (drag mode) on touch", active === "drag", `mode=${active}`);
 
+  // Input mode changes in the click handler; controls appear on the next frame.
+  await mobilePage.waitForSelector(".touch-buttons", { visible: true, timeout: 5_000 });
   const controlsShown = await mobilePage.evaluate(() => {
     const buttons = document.querySelector(".touch-buttons");
     const visible = buttons ? getComputedStyle(buttons).display !== "none" : false;
