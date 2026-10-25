@@ -1,4 +1,4 @@
-import { canMelee, chooseThreat, safeRetreat, solid } from "./combat-policy.mjs";
+import { canMelee, chooseThreat, hostile, safeRetreat, solid } from "./combat-policy.mjs";
 /** Read-only world inspection plus normal keyboard/mouse/UI actions. */
 import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
@@ -254,7 +254,7 @@ export function createAdventureDriver(page, d) {
   }
   let guarding = false;
   const combatStats = { interruptions: 0, melee: 0, ranged: 0, retreats: 0 };
-  async function threat() {
+  async function threat(meleeRange = 5) {
     const s = await d.info(),
       mobs = (await adventure()).creatures;
     const points = [];
@@ -276,7 +276,12 @@ export function createAdventureDriver(page, d) {
       points,
     );
     const blocks = new Map(entries);
-    return chooseThreat(s.position, mobs, (x, y, z) => blocks.get(`${x},${y},${z}`) ?? 0);
+    return chooseThreat(
+      s.position,
+      mobs,
+      (x, y, z) => blocks.get(`${x},${y},${z}`) ?? 0,
+      meleeRange,
+    );
   }
   async function guard() {
     if (guarding) return false;
@@ -327,16 +332,26 @@ export function createAdventureDriver(page, d) {
     if (ui.open) await d.close();
     try {
       const until = Date.now() + 45000;
+      let defended = false;
       while (target && Date.now() < until) {
-        const s = await d.info();
+        let s = await d.info();
         assert.ok(s.health > 0, "survive reactive combat");
-        if (s.health <= 6) {
+        const nearby = (await adventure()).creatures.filter(
+          (m) =>
+            hostile(m) &&
+            Math.hypot(
+              m.position.x - s.position.x,
+              m.position.y - s.position.y,
+              m.position.z - s.position.z,
+            ) < 4.5,
+        ).length;
+        if (s.health <= 14 || nearby >= 2) {
           const cells = await page.evaluate(() => {
             const p = window.__mc.position(),
               r = [];
             for (let x = Math.floor(p.x) - 3; x <= Math.floor(p.x) + 3; x++)
               for (let z = Math.floor(p.z) - 3; z <= Math.floor(p.z) + 3; z++)
-                for (let y = Math.floor(p.y) - 1; y <= Math.floor(p.y) + 1; y++)
+                for (let y = Math.floor(p.y) - 3; y <= Math.floor(p.y) + 3; y++)
                   r.push([`${x},${y},${z}`, window.__mc.blockAt(x, y, z)]);
             return r;
           });
@@ -347,15 +362,21 @@ export function createAdventureDriver(page, d) {
               (x, y, z) => map.get(`${x},${y},${z}`) ?? 0,
             );
           if (retreat) {
-            await d.aim({ x: retreat.x, y: s.position.y + s.eye, z: retreat.z });
+            await d.aim({ x: retreat.x, y: s.position.y + s.eye, z: retreat.z }, 0);
             await page.keyboard.down("ControlLeft");
             await page.keyboard.down("KeyW");
+            if (retreat.jump) await page.keyboard.down("Space");
             await wait(350);
             await page.keyboard.up("KeyW");
             await page.keyboard.up("ControlLeft");
+            await page.keyboard.up("Space");
+            defended = true;
             combatStats.retreats++;
-            d.narrate("体力が減ったので、安全な足場へ退きます。", 2);
+            d.narrate("囲まれる前に、距離を取って応戦します。", 2);
             await eat();
+            s = await d.info();
+            target = await threat(14);
+            if (!target) break;
           }
         }
         if (canMelee(s.position, s.eye, target.position)) {
@@ -365,7 +386,7 @@ export function createAdventureDriver(page, d) {
             const pick = s.inventory.findIndex((item) => item?.id === "stone_pick");
             if (pick >= 0) await d.equip("stone_pick");
           }
-          await d.aim({ ...target.position, y: target.position.y + 1 });
+          await d.aim({ ...target.position, y: target.position.y + 1 }, 0);
           await page.mouse.down();
           await wait(420);
           await page.mouse.up();
@@ -374,15 +395,18 @@ export function createAdventureDriver(page, d) {
         } else if (
           (await d.count("bow")) &&
           (await d.count("arrow")) > 0 &&
-          ((await d.count("arrow")) > 10 || target.distance < 5)
+          ((await d.count("arrow")) > 10 || target.distance < 5 || defended)
         ) {
           await d.equip("bow");
           const t = target.distance / 22;
-          await d.aim({
-            x: target.position.x + target.velocity.x * t,
-            y: target.position.y + 1 + 1.2 * t * t,
-            z: target.position.z + target.velocity.z * t,
-          });
+          await d.aim(
+            {
+              x: target.position.x + target.velocity.x * t,
+              y: target.position.y + 1 + 1.2 * t * t,
+              z: target.position.z + target.velocity.z * t,
+            },
+            0,
+          );
           await right();
           await wait(550);
           combatStats.ranged++;
@@ -410,7 +434,7 @@ export function createAdventureDriver(page, d) {
           await page.keyboard.up("Space");
           await page.keyboard.up("ControlLeft");
         }
-        target = await threat();
+        target = await threat(defended ? 14 : 5);
       }
       assert.ok(!(await threat()), "finish or safely escape the current combat encounter");
       d.narrate("敵への対応を終えたので、元の作業に戻ります。", 2);

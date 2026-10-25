@@ -191,6 +191,29 @@ try {
   await page.waitForFunction(() => window.__mc.mode() === "idle");
   fixture.position = { x: 0.5, y: 34, z: 4.5 };
   for (let x = -12; x < 0; x++) for (let z = -12; z <= 12; z++) put(x, 33, z, 3);
+  fixture.inventory[2].count = 32;
+  fixture.vitals.health = 14;
+  const retreatsBefore = a.combatStats.retreats;
+  await load("defensive-crowd", [
+    mob(1, "ember", 2.5, 4.5),
+    mob(2, "ember", 3.5, 5.5),
+    mob(3, "ember", 4.5, 3.5),
+    mob(4, "ember", 5.5, 6.5),
+  ]);
+  await a.guard();
+  assert.ok(
+    a.combatStats.retreats > retreatsBefore,
+    "retreat before being surrounded at reduced health",
+  );
+  assert.ok(
+    (await a.adventure()).creatures.every((m) => ![1, 2, 3, 4].includes(m.id)),
+    "defeat the pursuing group from safer range",
+  );
+  assert.ok((await d.info()).health > 0);
+  console.log("PASS retreat early and defeat four pursuing enemies after landing damage");
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  fixture.vitals.health = 20;
   fixture.inventory[2].count = 10;
   for (let x = 2; x <= 5; x++)
     for (let z = 3; z <= 6; z++) {

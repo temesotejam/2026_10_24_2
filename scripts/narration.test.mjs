@@ -37,3 +37,19 @@ test("exports Japanese captions and neutralizes ASS formatting in text", () => {
   assert.match(ass(cues), /Noto Sans CJK JP/);
   assert.match(ass(cues), /鉄を採掘\\N｛字幕｝＼確認/);
 });
+
+test("explains a recorded interruption without removing its gameplay", () => {
+  const cues = narrationCues({
+    parts: [
+      { path: "a", duration: 30, error: "travel blocked" },
+      { path: "b", duration: 10 },
+    ],
+    narration: [
+      { part: "a", seconds: 0, text: "移動します。" },
+      { part: "b", seconds: 0.2, text: "再開します。" },
+    ],
+  });
+  const explanation = cues.find((c) => c.text.includes("通常保存"));
+  assert.equal(explanation.start, 16);
+  assert.ok(explanation.end < 20.2 / 1.5 + 30 / 1.5);
+});

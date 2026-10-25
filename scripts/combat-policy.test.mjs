@@ -49,3 +49,19 @@ test("melee reach uses the eye and target body, including vertical ledges", () =
   assert.equal(canMelee({ x: 0, y: 34, z: 0 }, 1.62, { x: 2.7, y: 33, z: 0 }), false);
   assert.equal(canMelee({ x: 0, y: 34, z: 0 }, 1.62, { x: 2.4, y: 34, z: 0 }), true);
 });
+
+test("keeps a pursuing melee enemy in view during a defensive retreat", () => {
+  const enemy = mob(1, "ember", 8);
+  assert.equal(
+    chooseThreat(player, [enemy], () => 0),
+    null,
+  );
+  assert.equal(chooseThreat(player, [enemy], () => 0, 14)?.id, 1);
+});
+test("finds a retreat over a single safe step", () => {
+  const terrain = (x, y) => (y <= (x >= 1 ? 34 : 33) ? 3 : 0);
+  const p = safeRetreat(player, { x: -2, z: 0.5 }, terrain);
+  assert.ok(p && p.x > player.x);
+  assert.equal(p.y, 35);
+  assert.equal(p.jump, true);
+});

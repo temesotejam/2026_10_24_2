@@ -34,3 +34,11 @@ node scripts/render-playthrough.mjs visual-check/dragon-playthrough/new-run
 [ボットの参考資料](BOT-REFERENCES.md) に、Mineflayer・mineflayer-pvp・pathfinder・Baritoneの参照元と、この独自ゲームへの適用方法を記録しています。近接・遠距離の脅威に応じて作業を中断し、入力を解放し、戦闘後に元の移動・クラフトへ戻ります。
 
 `combat-check.mjs` と `adventure-check.mjs` は明示した検証用データを使う機能試験です。配布する所持品ゼロからの動画とは区別します。
+
+## 字幕実況付きの再プレイ
+
+新しい通常サバイバルの録画では、移動中の小刻みなキー解除を減らし、平地の直線をまとめて進みます。視点の大きな旋回は短く補間し、農場のジャンプは段差・水路を越える時に限ります。足場の端で体の一部だけがブロックに乗っている場合も、支えているブロックから橋を作ります。
+
+`scripts/render-narrated-playthrough.mjs <録画ディレクトリ>` は、実行中に記録した行動時刻を約1.5倍速の動画時刻へ変換し、短い日本語字幕を映像へ焼き込みます。通常保存からの再開も時系列で扱い、操作調整で止まった部分は字幕で説明します。元のプレイ映像を省略しません。字幕のSRTと時刻のJSONも出力します。
+
+日本語表示には Noto Sans CJK JP、書き出しにはlibass対応FFmpegが必要です。

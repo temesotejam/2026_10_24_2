@@ -30,7 +30,7 @@ export function canMelee(player, eyeHeight, target) {
     Math.hypot(player.x - target.x, player.y + eyeHeight - target.y - 1, player.z - target.z) <= 2.8
   );
 }
-export function chooseThreat(player, mobs, blockAt) {
+export function chooseThreat(player, mobs, blockAt, meleeRange = 5) {
   const eye = { ...player, y: player.y + 1.4 };
   return (
     mobs
@@ -42,7 +42,7 @@ export function chooseThreat(player, mobs, blockAt) {
           player.z - m.position.z,
         );
         const visible = clearSight(eye, { ...m.position, y: m.position.y + 1 }, blockAt);
-        const range = m.species === "skeleton" ? 14 : 5;
+        const range = m.species === "skeleton" ? 14 : meleeRange;
         const priority =
           (m.species === "mossling" && distance < 4
             ? 1000
@@ -64,19 +64,27 @@ export function safeRetreat(player, target, blockAt) {
   for (let i = 0; i < 8; i++) {
     const dx = Math.cos((i * Math.PI) / 4),
       dz = Math.sin((i * Math.PI) / 4);
-    let safe = true;
+    let safe = true,
+      foot = y,
+      jump = false;
     for (let d = 0.5; d <= 2.5; d += 0.5) {
       const x = Math.floor(player.x + dx * d),
         z = Math.floor(player.z + dz * d);
-      if (
-        !solid(blockAt(x, y - 1, z)) ||
-        solid(blockAt(x, y, z)) ||
-        solid(blockAt(x, y + 1, z)) ||
-        [5, 26, 43].includes(blockAt(x, y, z))
-      )
+      const next = [foot, foot + 1, foot - 1].find(
+        (h) =>
+          solid(blockAt(x, h - 1, z)) &&
+          !solid(blockAt(x, h, z)) &&
+          !solid(blockAt(x, h + 1, z)) &&
+          ![5, 26, 43].includes(blockAt(x, h, z)),
+      );
+      if (next === undefined || Math.abs(next - y) > 1) {
         safe = false;
+        break;
+      }
+      jump ||= next > foot;
+      foot = next;
     }
-    const p = { x: player.x + dx * 2.5, y: player.y, z: player.z + dz * 2.5 };
+    const p = { x: player.x + dx * 2.5, y: foot, z: player.z + dz * 2.5, jump };
     const distance = Math.hypot(p.x - target.x, p.z - target.z);
     if (safe) options.push({ ...p, distance });
   }

@@ -6,7 +6,15 @@ export function narrationCues(metadata, speed = 1.5) {
     parts.set(part.path, { offset, duration: part.duration });
     offset += part.duration;
   }
-  const events = (metadata.narration ?? [])
+  const observed = [...(metadata.narration ?? [])];
+  for (const part of metadata.parts)
+    if (part.error)
+      observed.push({
+        part: part.path,
+        seconds: Math.max(0, part.duration - 6),
+        text: "操作を調整するため、通常保存から再開します。",
+      });
+  const events = observed
     .filter((event) => {
       const part = parts.get(event.part);
       return part && event.seconds >= 0 && event.seconds < part.duration && event.text.trim();
