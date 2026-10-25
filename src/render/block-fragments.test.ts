@@ -5,7 +5,18 @@ it("keeps particle count bounded during a large burst of mining", () => {
   const pool = new FragmentPool();
   for (let i = 0; i < 1000; i++) pool.burst(i, 1, 0, "#887766");
   expect(pool.particles).toHaveLength(MAX_FRAGMENTS);
+  pool.step(0.016, () => false);
   pool.step(1, () => false);
+  expect(pool.particles).toHaveLength(0);
+});
+
+it("draws a new burst before applying time from an earlier stalled frame", () => {
+  const pool = new FragmentPool();
+  pool.burst(0, 0, 0, "#887766");
+  pool.step(2, () => false);
+  expect(pool.particles).toHaveLength(12);
+  expect(pool.particles.every((p) => p.age === 0)).toBe(true);
+  pool.step(0.8, () => false);
   expect(pool.particles).toHaveLength(0);
 });
 

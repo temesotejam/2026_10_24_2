@@ -11,6 +11,7 @@ interface Fragment {
   vy: number;
   vz: number;
   age: number;
+  fresh: boolean;
   lifetime: number;
   size: number;
   shade: number;
@@ -35,6 +36,7 @@ export class FragmentPool {
         vy: 1 + this.random() * 3,
         vz: (this.random() - 0.5) * 3,
         age: 0,
+        fresh: true,
         lifetime: 0.45 + this.random() * 0.3,
         size: 0.045 + this.random() * 0.04,
         shade: 0.65 + this.random() * 0.35,
@@ -46,6 +48,13 @@ export class FragmentPool {
     const motion = Math.min(dt, 0.05);
     let alive = 0;
     for (const p of this.particles) {
+      // Input can arrive after a slow frame. Its earlier elapsed time must not
+      // expire a newly created burst before it has been drawn even once.
+      if (p.fresh) {
+        p.fresh = false;
+        this.particles[alive++] = p;
+        continue;
+      }
       p.age += dt;
       if (p.age >= p.lifetime) continue;
       p.vy -= 16 * motion;

@@ -71,6 +71,13 @@ try {
   await page.waitForFunction(() => window.__mc.effects().soundReady);
   await wait(350);
   await page.screenshot({ path: `${out}/playing.png` });
+  // Software-rendered CI must sample effects shorter than one full-resolution
+  // frame. HUD geometry was checked above; retain WebGL at a lower pixel count.
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  await page.select("#render-scale", "0.25");
+  await page.click("#play-button");
+  await page.waitForFunction(() => window.__mc.mode() === "pointer");
   async function aim(p) {
     const s = await page.evaluate(() => ({
       position: window.__mc.position(),
