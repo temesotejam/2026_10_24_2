@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>サバイバル討伐動画 | Classic Voxel Survival</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: system-ui, sans-serif;
+        background: #111820;
+        color: #edf2f5;
+      }
+      body {
+        margin: 0;
+      }
+      main {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 28px 18px 48px;
+      }
+      h1 {
+        font-size: clamp(1.35rem, 4vw, 2rem);
+        margin: 22px 0 10px;
+      }
+      p {
+        line-height: 1.8;
+        color: #bac8d3;
+      }
+      a {
+        color: #9dd4ff;
+      }
+      video {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        border-radius: 10px;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 18px 0;
+      }
+      button,
+      .download {
+        font: inherit;
+        border: 1px solid #4b6274;
+        border-radius: 6px;
+        padding: 10px 14px;
+        background: #203445;
+        color: #edf2f5;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      button:hover,
+      .download:hover {
+        background: #304e65;
+      }
+      button:focus-visible,
+      a:focus-visible {
+        outline: 3px solid #9dd4ff;
+        outline-offset: 3px;
+      }
+      #status {
+        min-height: 1.8em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a href="../">← ゲームへ</a>
+      <h1>所持品ゼロから、エンダードラゴン討伐まで</h1>
+      <p>
+        全工程・約1.5倍速・21分5秒。ロッドとエンダーアイの入手、討伐後の帰還まで収録しています。
+      </p>
+      <video
+        id="recording"
+        controls
+        playsinline
+        preload="metadata"
+        poster="./poster.jpg"
+        aria-label="サバイバル討伐の全工程"
+      >
+        <source src="./survival.mp4" type="video/mp4" />
+        <a href="./survival.mp4">動画ファイルを直接開く</a>
+      </video>
+      <nav aria-label="動画の再生とダウンロード">
+        <button type="button" data-time="0">最初から再生</button>
+        <a class="download" href="./survival.mp4" download="survival-to-dragon-1.5x.mp4"
+          >MP4をダウンロード</a
+        >
+      </nav>
+      <p>
+        自動操作の実録です。途中の通常セーブからの再開と一時停止を含みます。音声はありません。Web再生用に画質を軽量化していますが、全工程と再生時間は同じです。
+      </p>
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+    <script>
+      const video = document.querySelector("#recording");
+      const status = document.querySelector("#status");
+      for (const button of document.querySelectorAll("[data-time]")) {
+        button.addEventListener("click", async () => {
+          video.currentTime = Number(button.dataset.time);
+          try {
+            await video.play();
+            status.textContent = "";
+          } catch {
+            status.textContent =
+              "動画の再生ボタンを押してください。MP4の直接ダウンロードも利用できます。";
+          }
+        });
+      }
+      video.addEventListener("error", () => {
+        status.textContent =
+          "動画を読み込めませんでした。MP4のダウンロードリンクから直接開いてください。";
+      });
+    </script>
+  </body>
+</html>
