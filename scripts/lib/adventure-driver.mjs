@@ -96,23 +96,26 @@ export function createAdventureDriver(page, d) {
         function height(x, z) {
           const k = key(x, z);
           if (heights.has(k)) return heights.get(k);
+          const candidates = [];
+          const passable = (id) => [0, 5, 16, 22, 23, 25, 31, 33, 40, 43].includes(id);
           for (let y = nether ? 60 : 94; y > 0; y--)
             if (
               [1, 2, 3, 4, 5, 9, 10, 11, 17, 18, 19, 20, 21, 28, 29, 30, 32, 36].includes(
                 mc.blockAt(x, y, z),
-              )
-            ) {
-              if (nether && mc.blockAt(x, y + 1, z) === 26) {
-                heights.set(k, null);
-                return null;
-              }
-              heights.set(k, y + 1);
-              return y + 1;
-            }
+              ) &&
+              passable(mc.blockAt(x, y + 1, z)) &&
+              passable(mc.blockAt(x, y + 2, z))
+            )
+              candidates.push(y + 1);
+          candidates.sort((a, b) => Math.abs(a - p.y) - Math.abs(b - p.y) || b - a);
+          if (candidates.length) {
+            heights.set(k, candidates[0]);
+            return candidates[0];
+          }
           heights.set(k, null);
           return null;
         }
-        const start = { x: sx, z: sz, h: height(sx, sz) },
+        const start = { x: sx, z: sz, h: Math.round(p.y) },
           queue = [start],
           prev = new Map([[key(sx, sz), null]]);
         let best = start,
