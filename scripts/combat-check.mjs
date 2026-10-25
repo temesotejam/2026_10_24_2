@@ -141,6 +141,31 @@ try {
   );
   await page.evaluate(() => document.exitPointerLock());
   await page.waitForFunction(() => window.__mc.mode() === "idle");
+  await load("continuous-walking", []);
+  await page.evaluate(() => {
+    window.__walkingTrace = [];
+    window.__walkingTimer = window.setInterval(
+      () => window.__walkingTrace.push(window.__mc.position()),
+      50,
+    );
+  });
+  await d.walk(10.5, 4.5, false, 0.3, 0);
+  const trace = await page.evaluate(() => {
+    window.clearInterval(window.__walkingTimer);
+    return window.__walkingTrace;
+  });
+  const interior = trace.slice(3, -2);
+  const pauses = interior
+    .slice(1)
+    .filter((p, i) => Math.hypot(p.x - interior[i].x, p.z - interior[i].z) < 0.005).length;
+  assert.ok(interior.length > 15, "observe enough walking frames");
+  assert.ok(
+    pauses / (interior.length - 1) < 0.2,
+    "walk continuously instead of pulsing forward and stopping",
+  );
+  console.log(`PASS continuous walking: ${pauses}/${interior.length - 1} stationary samples`);
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
   fixture.inventory[2].count = 10;
   for (let x = 2; x <= 5; x++)
     for (let z = 3; z <= 6; z++) {

@@ -57,6 +57,19 @@ await page.setViewport({ width: 1280, height: 720 });
 const d = createDriver(page, out),
   a = createAdventureDriver(page, d);
 let recorder;
+meta.narration ??= [];
+let lastNarrationAt = -Infinity;
+const lastTextAt = new Map();
+d.setNarrator((text, priority = 0) => {
+  if (!part.startedAt) return;
+  const seconds = (Date.now() - Date.parse(part.startedAt)) / 1000;
+  const gap = priority >= 2 ? 4 : 6;
+  if (seconds - lastNarrationAt < gap || seconds - (lastTextAt.get(text) ?? -Infinity) < 20) return;
+  meta.narration.push({ part: part.path, seconds, text });
+  lastNarrationAt = seconds;
+  lastTextAt.set(text, seconds);
+  flush();
+});
 const startRecording = async () => {
   await page.select("#render-scale", "0.5");
   part.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
@@ -72,6 +85,11 @@ const startRecording = async () => {
     speed: 1,
     ffmpegPath: path.resolve("scripts/ffmpeg-capture.py"),
   });
+  d.setGoal(
+    resume === 0
+      ? "所持品ゼロで出発。まずは木を探して材料を集めます。"
+      : "通常セーブから再開し、冒険を続けます。",
+  );
 };
 const chapter = async (name, phase) => {
   meta.chapters.push({
@@ -93,9 +111,10 @@ const villageFromWorld = async () => {
     .sort((x, y) => Math.hypot(x.x - p.x, x.z - p.z) - Math.hypot(y.x - p.x, y.z - p.z))[0];
 };
 async function stockFood(village) {
-  if ((await d.count("bread")) >= 6) return;
+  if ((await d.count("bread")) >= 8) return;
+  d.setGoal("遠出に備えて、パンを補充し体力を回復します。");
   await a.surfaceTo({ x: village.x, z: village.z - 3 });
-  const needed = 3 * (8 - (await d.count("bread"))),
+  const needed = 3 * (12 - (await d.count("bread"))),
     until = Date.now() + 240000;
   while ((await d.count("wheat")) < needed) {
     assert.ok(Date.now() < until, "grow food through ordinary farming");
@@ -108,7 +127,7 @@ async function stockFood(village) {
   await d.equip("iron_pick");
   await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
   await page.waitForSelector('[data-recipe="bread"]');
-  while ((await d.count("bread")) < 8) await d.make("bread");
+  while ((await d.count("bread")) < 12) await d.make("bread");
   await d.close();
   await a.eat();
   await a.recover(20);
@@ -131,11 +150,13 @@ try {
   }
   let village = meta.village;
   if (resume <= 1) {
+    d.setGoal("地下から地上へ戻り、村を探します。");
     await a.reachSurface();
     village = await villageFromWorld();
     assert.ok(village, "discover a generated village");
     meta.village = village;
     flush();
+    d.setGoal("村を目指して、地上を進みます。");
     await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
     await a.move(village.x - 5.5, village.z + 2.7);
     await a.useAt({ x: village.x - 7, y: village.y, z: village.z + 5 });
@@ -144,6 +165,7 @@ try {
   }
   assert.ok(village, "remember the actually discovered village");
   if (resume <= 2) {
+    d.setGoal("村の素材で、剣と弓、矢を準備します。");
     await a.guard();
     await a.recover();
     await a.eat();
@@ -189,6 +211,7 @@ try {
       await d.close();
     }
     await a.surfaceTo({ x: village.x, z: village.z - 3 });
+    d.setGoal("畑を収穫し、小麦を食料と取引に回します。");
     await a.harvest(village, 144, true);
     if ((await d.count("bread")) < 8) {
       await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
@@ -200,6 +223,7 @@ try {
       await d.close();
     }
 
+    d.setGoal("壊れたゲートを修理して、ネザーへ向かいます。");
     await a.surfaceTo({ x: village.x - 7, z: village.z - 8 });
     const repair = { x: village.x - 8, y: village.y, z: village.z - 10 };
     if ((await d.block(repair)) !== 28) {
@@ -218,6 +242,7 @@ try {
     await chapter("弓と剣を作成、畑を収穫して植え直し、廃ゲートを修理・点火", 3);
   }
   if (resume <= 3) {
+    d.setGoal("ネザーの敵を倒して、ロッドを集めます。");
     if ((await a.adventure()).dimension === "overworld")
       await a.travel("nether", { x: village.x - 8, y: village.y + 1, z: village.z - 10 });
     if ((await d.count("blazeRod")) < 2) {
@@ -298,12 +323,14 @@ try {
       }
     }
     await d.report("ネザーの敵を倒し、炎のロッドを2本回収");
+    d.setGoal("ロッドを回収できたので、帰還ゲートへ戻ります。");
     await a.pillarTo(34);
     await d.tunnelTo({ x: 0, z: 0 });
     await a.travel("overworld", { x: 0, y: 35, z: -3 });
     await chapter("ネザーで素材を入手し、持ち物を持って村へ帰還", 4);
   }
   if (resume <= 4) {
+    d.setGoal("小麦を育て、村人との取引でパールを集めます。");
     if ((await d.count("enderPearl")) < 4 && (await d.count("enderEye")) < 4) {
       if ((await d.count("wheat")) < 144) await a.surfaceTo({ x: village.x, z: village.z - 3 });
       const deadline = Date.now() + 240000;
@@ -338,8 +365,10 @@ try {
   }
   if (resume <= 5) {
     await stockFood(village);
+    d.setGoal("エンダーアイを持って、地下遺跡へ向かいます。");
     const c = (await a.adventure()).stronghold;
     await a.enterStronghold();
+    d.narrate("遺跡に到着。空いている枠にアイを入れます。", 2);
     await d.equip("enderEye");
     for (const [dx, dz] of [
       [-2, 0],
@@ -355,6 +384,7 @@ try {
     await chapter("地下遺跡のゲートを開き、エンドの島へ到達", 6);
   }
   if (resume <= 6) {
+    d.setGoal("まずクリスタルを弓で壊し、ドラゴンの回復を止めます。");
     await a.defeatDragon();
     await d.report("エンダードラゴン討伐。クリスタル6個破壊、卵1個を獲得");
     await page.screenshot({ path: path.join(out, "victory.png") });
