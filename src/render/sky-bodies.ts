@@ -51,8 +51,8 @@ export class SkyBodies {
       [this.sun, sky.sunAngle],
       [this.moon, sky.moonAngle],
     ];
-    this.sun.visible = sky.moonAngle < 0;
-    this.moon.visible = sky.moonAngle >= 0;
+    this.sun.visible = sky.celestialVisible !== false && sky.moonAngle < 0;
+    this.moon.visible = sky.celestialVisible !== false && sky.moonAngle >= 0;
     for (const [mesh, angle] of bodies) {
       mesh.position.set(
         camera.position.x + Math.cos(angle) * 78,

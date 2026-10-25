@@ -1,3 +1,4 @@
+import type { GeneratorVersion } from "./adventure-terrain";
 import { createCaveSampler, createColumnSampler, SEA_LEVEL } from "./terrain";
 
 const MAX_SPAWN_HEIGHT = SEA_LEVEL + 12;
@@ -15,8 +16,8 @@ export interface SpawnPoint {
  * rings so the same seed always spawns in the same spot. Falls back to
  * (8, 8) if the seed is somehow all ocean and dunes within the search
  * limit. */
-export function findPleasantSpawn(seed: number): SpawnPoint {
-  const sample = createColumnSampler(seed);
+export function findPleasantSpawn(seed: number, revision: GeneratorVersion = 1): SpawnPoint {
+  const sample = createColumnSampler(seed, revision);
   const isCave = createCaveSampler(seed);
 
   for (let radius = 0; radius <= SEARCH_LIMIT; radius += SEARCH_STEP) {

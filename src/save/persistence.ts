@@ -2,6 +2,7 @@ import { BLOCKS } from "../world/blocks";
 import { validStack } from "../items/catalog";
 import type { Slots } from "../items/inventory";
 import type { SessionState } from "../survival/session";
+import { REALM_FIELDS } from "../survival/adventure-state";
 
 export const MAX_SAVE_BYTES = 10 * 1024 * 1024;
 const numeric = (v: unknown, min = 0, max = 1e10): v is number =>
@@ -22,7 +23,7 @@ function assert(ok: unknown, field: string): asserts ok {
 export function validateSave(value: unknown): SessionState {
   assert(record(value), "root");
   const d = value;
-  assert(d.version === 1 && d.generator === 1, "version / generator");
+  assert(d.version === 1 && (d.generator === 1 || d.generator === 2), "version / generator");
   assert(
     integer(d.seed, -2147483648, 2147483647) && (d.mode === "survival" || d.mode === "creative"),
     "world",
@@ -82,7 +83,7 @@ export function validateSave(value: unknown): SessionState {
         numeric(v.progress, 0, 8) &&
         (v.recipe === null ||
           (typeof v.recipe === "string" &&
-            ["iron", "gold", "meat", "coal", "stone"].includes(v.recipe))),
+            ["iron", "gold", "meat", "coal", "stone", "glass", "cookedFish"].includes(v.recipe))),
       "furnace",
     );
   }
@@ -102,9 +103,19 @@ export function validateSave(value: unknown): SessionState {
     assert(
       record(m) &&
         integer(m.id, 1) &&
-        ["pig", "cow", "sheep", "chicken", "zombie", "skeleton", "mossling", "spider"].includes(
-          String(m.species),
-        ) &&
+        [
+          "pig",
+          "cow",
+          "sheep",
+          "chicken",
+          "zombie",
+          "skeleton",
+          "mossling",
+          "spider",
+          "villager",
+          "ember",
+          "wanderer",
+        ].includes(String(m.species)) &&
         position(m.position) &&
         position(m.velocity) &&
         typeof m.onGround === "boolean" &&
@@ -142,6 +153,55 @@ export function validateSave(value: unknown): SessionState {
   assert(record(fluidLevels) && Object.keys(fluidLevels).length <= 10000, "fluids");
   for (const [key, level] of Object.entries(fluidLevels))
     assert(blockKey(key) && integer(level, 0, 4), "fluid level");
+  if (d.adventure !== undefined) {
+    const a = d.adventure;
+    assert(
+      record(a) &&
+        ["overworld", "nether", "end"].includes(String(a.dimension)) &&
+        integer(a.xp, 0, 1000000) &&
+        numeric(a.fire, 0, 60) &&
+        numeric(a.strength, 0, 60),
+      "adventure",
+    );
+    assert(
+      record(a.dragon) &&
+        numeric(a.dragon.health, 0, 120) &&
+        numeric(a.dragon.phase) &&
+        typeof a.dragon.defeated === "boolean" &&
+        a.dragon.defeated === (a.dragon.health === 0),
+      "dragon",
+    );
+    assert(record(a.opened) && Object.keys(a.opened).length <= 10000, "opened structures");
+    for (const [key, opened] of Object.entries(a.opened))
+      assert(
+        /^(overworld|nether|end):/.test(key) &&
+          blockKey(key.slice(key.indexOf(":") + 1)) &&
+          opened === true,
+        "opened structure",
+      );
+    assert(record(a.brewing) && Object.keys(a.brewing).length <= 1000, "brewing");
+    for (const [key, job] of Object.entries(a.brewing))
+      assert(
+        /^(overworld|nether|end):/.test(key) &&
+          blockKey(key.slice(key.indexOf(":") + 1)) &&
+          record(job) &&
+          numeric(job.remaining, 0, 5) &&
+          ["healingPotion", "firePotion", "strengthPotion"].includes(String(job.output)),
+        "brew",
+      );
+    assert(record(a.realms) && Object.keys(a.realms).length <= 3, "realms");
+    for (const [dimension, realm] of Object.entries(a.realms)) {
+      assert(
+        ["overworld", "nether", "end"].includes(dimension) &&
+          record(realm) &&
+          Object.keys(realm).length === REALM_FIELDS.length &&
+          REALM_FIELDS.every((key) => Object.hasOwn(realm, key)),
+        "realm",
+      );
+      validateSave({ ...d, ...realm, adventure: undefined });
+    }
+    assert(a.dimension === "overworld" || Object.hasOwn(a.realms, "overworld"), "return realm");
+  }
   return {
     ...structuredClone(value),
     fluidLevels: structuredClone(fluidLevels),
@@ -153,7 +213,10 @@ export function parseSave(text: string): SessionState {
   return validateSave(JSON.parse(text));
 }
 export function encodeSave(data: SessionState): string {
-  return JSON.stringify(validateSave(data));
+  const text = JSON.stringify(validateSave(data));
+  if (new TextEncoder().encode(text).byteLength > MAX_SAVE_BYTES)
+    throw new Error("セーブは 10 MB 以下にしてください");
+  return text;
 }
 export const saveKey = (seed: number, mode: string) => `${seed}:${mode}`;
 export class SaveRepository {
@@ -198,6 +261,8 @@ export class SaveRepository {
   }
   async save(data: SessionState): Promise<void> {
     const safe = validateSave(data);
+    if (new TextEncoder().encode(JSON.stringify(safe)).byteLength > MAX_SAVE_BYTES)
+      throw new Error("セーブは 10 MB 以下にしてください");
     const key = saveKey(safe.seed, safe.mode);
     return new Promise((resolve, reject) => {
       const tx = this.db.transaction("worlds", "readwrite");

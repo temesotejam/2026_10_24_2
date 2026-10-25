@@ -1,3 +1,4 @@
+import type { Dimension, GeneratorVersion } from "./adventure-terrain";
 import { Chunk } from "./chunk";
 import { type ChunkCoord, chunkKey, worldToChunk } from "./coords";
 import type { EditStore } from "./edit-store";
@@ -70,7 +71,7 @@ export class ChunkStreamer {
 
   private loadSync(cx: number, cz: number): void {
     if (this.world.hasChunk(cx, cz)) return;
-    const chunk = generateChunk(cx, cz, this.world.seed);
+    const chunk = generateChunk(cx, cz, this.world.seed, this.world.dimension, this.world.revision);
     this.editStore?.applyTo(chunk);
     this.world.setChunk(chunk);
     this.pending.delete(chunkKey(cx, cz));
@@ -184,7 +185,12 @@ interface WorkerResult {
 
 /** Production ChunkGenerator: a module Web Worker running generateChunk off
  * the main thread, block buffers coming back as transferables (zero copy). */
-export function createWorkerGenerator(seed: number, receive: ChunkReceiver): ChunkGenerator {
+export function createWorkerGenerator(
+  seed: number,
+  receive: ChunkReceiver,
+  dimension: Dimension = "overworld",
+  revision: GeneratorVersion = 1,
+): ChunkGenerator {
   const worker = new Worker(new URL("./generation-worker.ts", import.meta.url), {
     type: "module",
   });
@@ -194,7 +200,7 @@ export function createWorkerGenerator(seed: number, receive: ChunkReceiver): Chu
   };
   return {
     request(cx: number, cz: number): void {
-      worker.postMessage({ cx, cz, seed });
+      worker.postMessage({ cx, cz, seed, dimension, revision });
     },
     dispose(): void {
       worker.terminate();
@@ -203,10 +209,15 @@ export function createWorkerGenerator(seed: number, receive: ChunkReceiver): Chu
 }
 
 /** Test/fallback ChunkGenerator: generates immediately on the calling thread. */
-export function createSyncGenerator(seed: number, receive: ChunkReceiver): ChunkGenerator {
+export function createSyncGenerator(
+  seed: number,
+  receive: ChunkReceiver,
+  dimension: Dimension = "overworld",
+  revision: GeneratorVersion = 1,
+): ChunkGenerator {
   return {
     request(cx: number, cz: number): void {
-      receive(cx, cz, generateChunk(cx, cz, seed).buffer);
+      receive(cx, cz, generateChunk(cx, cz, seed, dimension, revision).buffer);
     },
     dispose(): void {
       // nothing to clean up

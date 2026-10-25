@@ -19,6 +19,9 @@ export class BlockInteraction {
   private progress = 0;
   private targetKey = "";
   private nextCreativeBreak = 0;
+  onAttack: (() => boolean) | undefined;
+  onItemUse: (() => boolean) | undefined;
+  onCreatureUse: ((id: number) => boolean) | undefined;
   onUseBlock: ((x: number, y: number, z: number, id: BlockId) => boolean) | undefined;
   onProgress: ((fraction: number) => void) | undefined;
   onBreak: ((position: Vec3, block: BlockId) => void) | undefined;
@@ -107,6 +110,7 @@ export class BlockInteraction {
   }
   breakTargetedBlock(tap = true): void {
     if (!this.controller.isActive || this.session.dead) return;
+    if (this.onAttack?.()) return;
     const mob = this.creatureTarget();
     if (mob !== null) {
       this.session.hitCreature(mob);
@@ -154,13 +158,23 @@ export class BlockInteraction {
   }
   placeTargetedBlock(): void {
     if (!this.controller.isActive || this.session.dead) return;
+    if (this.onItemUse?.()) return;
     const creature = this.creatureTarget();
+    if (creature !== null && this.onCreatureUse?.(creature)) return;
     if (creature !== null && this.session.feedCreature(creature)) return;
-    if (this.session.eat()) return;
     const hit = this.raycastFromCamera(this.session.creative ? 6 : 4.5);
+    if (
+      hit &&
+      this.onUseBlock?.(
+        hit.blockX,
+        hit.blockY,
+        hit.blockZ,
+        this.world.getBlock(hit.blockX, hit.blockY, hit.blockZ),
+      )
+    )
+      return;
+    if (this.session.eat()) return;
     if (!hit) return;
-    const current = this.world.getBlock(hit.blockX, hit.blockY, hit.blockZ);
-    if (this.onUseBlock?.(hit.blockX, hit.blockY, hit.blockZ, current)) return;
     if (this.session.till(hit.blockX, hit.blockY, hit.blockZ)) return;
     const block = this.hotbar.selectedBlock;
     if (block === BlockId.AIR) return;

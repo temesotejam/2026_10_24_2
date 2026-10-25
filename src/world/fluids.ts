@@ -86,13 +86,24 @@ export class FluidSimulator {
       const offer = (xx: number, yy: number, zz: number, nextLevel: number): boolean => {
         if (yy < 1 || yy >= 96 || !this.world.hasChunk(Math.floor(xx / 16), Math.floor(zz / 16)))
           return false;
-        const target = this.world.getBlock(xx, yy, zz);
+        let target = this.world.getBlock(xx, yy, zz);
+        if (kind === BlockId.WATER && target === BlockId.FIRE) {
+          this.edit(xx, yy, zz, BlockId.AIR);
+          target = BlockId.AIR;
+        }
         const targetKey = blockKey(xx, yy, zz);
         if (
           (target === BlockId.WATER && kind === BlockId.LAVA) ||
           (target === BlockId.LAVA && kind === BlockId.WATER)
         ) {
-          this.edit(xx, yy, zz, BlockId.COBBLE);
+          this.edit(
+            xx,
+            yy,
+            zz,
+            target === BlockId.LAVA && (this.levels[targetKey] ?? 0) === 0
+              ? BlockId.OBSIDIAN
+              : BlockId.COBBLE,
+          );
           this.removeLevel(targetKey);
           return false;
         }

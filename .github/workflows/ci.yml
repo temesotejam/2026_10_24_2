@@ -25,6 +25,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run format
+      - run: node --test scripts/combat-policy.test.mjs
       - run: npm test
       - run: npm run build:pages
       - name: Browser checks under the project subdirectory
@@ -48,6 +49,8 @@ jobs:
           node scripts/visual-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/survival-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/polish-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+          node scripts/combat-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+          node scripts/adventure-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/journey-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/load-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/explore-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --distance 32
@@ -98,6 +101,8 @@ jobs:
           node scripts/visual-check.mjs --url "$site_url"
           node scripts/survival-check.mjs --url "$site_url"
           node scripts/polish-check.mjs --url "$site_url"
+          node scripts/adventure-check.mjs --url "$site_url"
+          node scripts/combat-check.mjs --url "$site_url"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

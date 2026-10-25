@@ -4,7 +4,17 @@ import { stepPhysics, type PlayerPhysicsState, type Vec3 } from "../player/physi
 import { stack, type Stack } from "../items/catalog";
 
 export type Species =
-  "pig" | "cow" | "sheep" | "chicken" | "zombie" | "skeleton" | "mossling" | "spider";
+  | "pig"
+  | "cow"
+  | "sheep"
+  | "chicken"
+  | "zombie"
+  | "skeleton"
+  | "mossling"
+  | "spider"
+  | "villager"
+  | "ember"
+  | "wanderer";
 export interface Creature extends PlayerPhysicsState {
   id: number;
   species: Species;
@@ -28,6 +38,9 @@ export interface Arrow {
 }
 export const FRIENDLY: readonly Species[] = ["pig", "cow", "sheep", "chicken"];
 export const COLORS: Record<Species, number> = {
+  wanderer: 0x484052,
+  villager: 0x9f795e,
+  ember: 0xe2a24c,
   pig: 0xdba4a0,
   cow: 0x91745b,
   sheep: 0xe6e0d0,
@@ -38,9 +51,13 @@ export const COLORS: Record<Species, number> = {
   spider: 0x594a57,
 };
 export function hostile(m: Creature): boolean {
-  return !FRIENDLY.includes(m.species);
+  return m.species !== "villager" && !FRIENDLY.includes(m.species);
 }
 export function creatureDrops(m: Creature): Stack[] {
+  if (m.species === "villager") return [];
+  if (m.species === "wanderer") return [stack("enderPearl")];
+  if (m.species === "ember") return [stack("blazeRod")];
+  if (m.species === "spider") return [stack("string", 2)];
   return FRIENDLY.includes(m.species)
     ? [
         stack("rawMeat", m.species === "cow" ? 3 : 1),
@@ -52,7 +69,7 @@ export function creatureDrops(m: Creature): Stack[] {
 }
 export function moveCreature(m: Creature, target: Vec3, world: World, dt: number): void {
   const d = Math.hypot(target.x - m.position.x, target.z - m.position.z);
-  const aggressive = hostile(m);
+  const aggressive = hostile(m) && (m.species !== "wanderer" || m.fuse === 2);
   const flee = !aggressive && m.cooldown > 0;
   let yaw = Math.atan2(-(target.x - m.position.x), -(target.z - m.position.z));
   let forward = d < 1.3 ? 0 : 0.32;

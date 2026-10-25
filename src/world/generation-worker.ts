@@ -1,3 +1,4 @@
+import type { Dimension, GeneratorVersion } from "./adventure-terrain";
 import { generateChunk } from "./terrain";
 
 /** Web Worker entry point: terrain generation off the main thread. One
@@ -8,6 +9,8 @@ interface GenerateRequest {
   cx: number;
   cz: number;
   seed: number;
+  dimension?: Dimension;
+  revision?: GeneratorVersion;
 }
 
 interface WorkerScope {
@@ -18,8 +21,8 @@ interface WorkerScope {
 const scope = self as unknown as WorkerScope;
 
 scope.onmessage = (event) => {
-  const { cx, cz, seed } = event.data;
-  const chunk = generateChunk(cx, cz, seed);
+  const { cx, cz, seed, dimension, revision } = event.data;
+  const chunk = generateChunk(cx, cz, seed, dimension, revision);
   const buffer = chunk.buffer;
   scope.postMessage({ cx, cz, buffer }, [buffer.buffer]);
 };

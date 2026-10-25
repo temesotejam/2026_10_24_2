@@ -1,3 +1,4 @@
+import { Adventure, BREWS, exchange } from "../survival/adventure";
 import { itemIcon } from "../render/item-icon";
 import { must } from "../core/assert";
 import { ITEMS, stack, stackLimit } from "../items/catalog";
@@ -35,11 +36,15 @@ interface Source {
 export class InventoryView {
   readonly root: HTMLDivElement;
   private selected: Source | null = null;
-  private station: "inventory" | "table" | "furnace" | "chest" = "inventory";
+  private station: "inventory" | "table" | "furnace" | "chest" | "enchant" | "brew" | "trade" =
+    "inventory";
   private container: Slots | null = null;
   private signature = "";
+  private stationKey = "";
   onClose: (() => void) | undefined;
-  constructor(privateSession: SurvivalSession) {
+  private readonly adventure: Adventure;
+  constructor(privateSession: SurvivalSession, adventure: Adventure) {
+    this.adventure = adventure;
     this.session = privateSession;
     this.root = document.createElement("div");
     this.root.id = "inventory-panel";
@@ -59,7 +64,8 @@ export class InventoryView {
   get isOpen(): boolean {
     return !this.root.hidden;
   }
-  open(station: typeof this.station = "inventory", container: Slots | null = null): void {
+  open(station: typeof this.station = "inventory", container: Slots | null = null, key = ""): void {
+    this.stationKey = key;
     this.station = station;
     this.container = container;
     const size = station === "table" ? 3 : 2;
@@ -94,6 +100,8 @@ export class InventoryView {
       this.session.data.inventory,
       this.session.data.grid,
       this.container,
+      this.adventure.state.xp,
+      Object.values(this.adventure.state.brewing).map((job) => Math.ceil(job.remaining)),
     ]);
     if (signature === this.signature) return;
     this.signature = signature;
@@ -151,6 +159,9 @@ export class InventoryView {
       table: "作業台",
       furnace: "かまど",
       chest: "チェスト",
+      enchant: "エンチャント台",
+      brew: "醸造台",
+      trade: "村人との取引",
     }[this.station];
     const close = document.createElement("button");
     close.type = "button";
@@ -253,6 +264,68 @@ export class InventoryView {
           : "27 スロットの保管庫";
       body.append(text, grid);
     }
+    if (["enchant", "brew", "trade"].includes(this.station)) {
+      const panel = document.createElement("div");
+      panel.className = "adventure-actions";
+      const info = document.createElement("p");
+      const action = (id: string, text: string, fn: () => void) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.action = id;
+        button.textContent = text;
+        button.addEventListener("click", () => {
+          fn();
+          this.render();
+        });
+        panel.append(button);
+      };
+      if (this.station === "enchant") {
+        info.textContent = `経験値 ${this.adventure.state.xp} · 道具1個につきXP 5。採掘速度・攻撃力・耐久を強化します。`;
+        this.session.data.inventory.forEach((item, i) => {
+          if (item && ITEMS[item.id]?.tool && !ITEMS[item.id]?.enchanted)
+            action(`enchant-${i}`, `${must(ITEMS[item.id]).name}を強化`, () => {
+              this.adventure.enchant(i);
+            });
+        });
+      } else if (this.station === "brew") {
+        const job =
+          this.adventure.state.brewing[`${this.adventure.state.dimension}:${this.stationKey}`];
+        info.textContent = job
+          ? job.remaining > 0
+            ? `醸造中：あと${Math.ceil(job.remaining)}秒`
+            : "完成しました。受け取ってください"
+          : "水入り瓶 + ネザーウォート + 炎の粉 + 追加材料。醸造は5秒です。";
+        if (job) {
+          if (job.remaining === 0)
+            action("claim-brew", "完成したポーションを受け取る", () => {
+              this.adventure.claim(this.stationKey);
+            });
+        } else
+          for (const [id, recipe] of Object.entries(BREWS))
+            action(
+              `brew-${id}`,
+              `${recipe.name}：追加材料 ${must(ITEMS[recipe.ingredient]).name}`,
+              () => {
+                this.adventure.brew(this.stationKey, id as keyof typeof BREWS);
+              },
+            );
+      } else {
+        info.textContent = "村の畑で収穫した小麦や、釣った魚を交換できます。";
+        for (const [id, text, costs, output] of [
+          ["sell-wheat", "小麦12 → エメラルド1", { wheat: 12 }, stack("emerald")],
+          ["sell-fish", "生魚4 → エメラルド1", { fish: 4 }, stack("emerald")],
+          ["buy-bread", "エメラルド1 → パン3", { emerald: 1 }, stack("bread", 3)],
+          ["buy-pearl", "エメラルド3 → エンダーパール1", { emerald: 3 }, stack("enderPearl")],
+          ["buy-iron", "エメラルド2 → 鉄1", { emerald: 2 }, stack("iron")],
+        ] as const)
+          action(id, text, () => {
+            if (!exchange(this.session.data.inventory, costs, output))
+              this.session.notice?.("材料と所持品の空きを確認してください");
+          });
+      }
+      panel.prepend(info);
+      body.append(panel);
+    }
     if (this.session.creative) {
       const palette = document.createElement("details");
       const summary = document.createElement("summary");
@@ -273,6 +346,14 @@ export class InventoryView {
       palette.append(list);
       body.append(palette);
     }
+    const guide = document.createElement("details");
+    const guideTitle = document.createElement("summary");
+    guideTitle.textContent = "冒険ガイド：村・ネザー・エンド";
+    const guideText = document.createElement("p");
+    guideText.textContent =
+      "村の畑や釣りで食料を集め、村人を右クリックして取引。ダイヤのツルハシで黒曜石を採取し、外幅4・高さ5の枠を火打石と打ち金で点火。ゲート面を右クリックでネザーへ。炎の敵からロッド、ソウルサンドからウォートを集めよう。エンチャント台はXP 5で道具を強化。醸造台は水入り瓶・ウォート・炎の粉と追加材料でポーションを作成。エンダーパールと炎の粉でアイを作り、手に持って右クリックすると遺跡の座標が分かる。地下の4つの空き枠にアイを使い、ゲート面を右クリック。エンドでは弓で6個のクリスタルを壊し、中央へ降りたドラゴンを攻撃しよう。";
+    guide.append(guideTitle, guideText);
+    body.append(guide);
     const help = document.createElement("p");
     help.className = "inventory-help";
     help.textContent = "ドラッグまたは2回クリックで移動 · 右クリックで1個移す";
@@ -290,6 +371,8 @@ export class InventoryView {
       this.session.data.inventory,
       this.session.data.grid,
       this.container,
+      this.adventure.state.xp,
+      Object.values(this.adventure.state.brewing).map((job) => Math.ceil(job.remaining)),
     ]);
   }
 }

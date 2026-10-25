@@ -84,6 +84,36 @@ export function itemIcon(id: string): string {
         for (let i = 0; i < 9; i++) pixel(c, 5 + i, 10 - i, 2, 3);
         pixel("#54402e", 3, 9, 5, 2);
       }
+      if (def.enchanted) for (let i = 0; i < 4; i++) pixel("#bc82ef", 4 + i * 2, 8 - i, 2, 1);
+    } else if (id === "fishingRod" || id === "bow") {
+      for (let i = 0; i < 10; i++) pixel("#a27b48", 3 + i / 2, 13 - i, 2, 2);
+      pixel("#e3ded0", 10, 3, 1, 10);
+      if (id === "fishingRod") {
+        pixel("#e3ded0", 9, 12, 2, 1);
+        pixel("#df4a4a", 8, 12, 2, 2);
+      } else {
+        pixel("#a27b48", 8, 12, 3, 2);
+        pixel("#a27b48", 8, 2, 3, 2);
+      }
+    } else if (id.endsWith("Potion") || id === "bottle" || id === "waterBottle") {
+      pixel("#b6d9e3", 6, 2, 4, 4);
+      pixel("#b6d9e3", 4, 6, 8, 7);
+      if (id !== "bottle") pixel(def.color, 5, 8, 6, 4);
+      pixel("#916948", 6, 1, 4, 2);
+      pixel("#edf8fc", 4, 7, 1, 4);
+    } else if (id === "arrow") {
+      for (let i = 0; i < 10; i++) pixel("#b19a73", 3 + i, 12 - i, 1, 1);
+      pixel("#c9d2dc", 11, 1, 3, 3);
+      pixel("#eee9d9", 2, 10, 3, 3);
+    } else if (id.endsWith("Bucket") || id === "bucket") {
+      pixel("#bbc5ce", 3, 5, 10, 8);
+      pixel("#e4eaf0", 4, 3, 8, 2);
+      pixel(id === "bucket" ? "#4d5158" : def.color, 4, 6, 8, 3);
+    } else if (id === "enderEye" || id === "enderPearl" || id === "emerald") {
+      pixel(def.color, 4, 3, 8, 10);
+      pixel(def.color, 2, 5, 12, 6);
+      pixel("#b9ead0", 4, 4, 3, 2);
+      if (id === "enderEye") pixel("#28302d", 6, 5, 4, 6);
     } else if (id === "torch") {
       pixel("#79532e", 7, 5, 2, 9);
       pixel("#e68a28", 6, 2, 4, 4);

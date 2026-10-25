@@ -1,3 +1,10 @@
+import {
+  generateNether,
+  generateEnd,
+  stampAdventure,
+  type Dimension,
+  type GeneratorVersion,
+} from "./adventure-terrain";
 import { createNoise3D } from "simplex-noise";
 import { BlockId } from "./blocks";
 import { Chunk } from "./chunk";
@@ -27,6 +34,7 @@ export interface ColumnProfile {
   readonly terrainHeight: number;
   readonly isDesert: boolean;
   readonly isSnowy: boolean;
+  readonly isSwamp?: boolean;
 }
 
 /** Per-world-column terrain shape, independent of which chunk asks for it —
@@ -35,6 +43,7 @@ export interface ColumnProfile {
  * the noise field is. */
 export function createColumnSampler(
   seed: number,
+  revision: GeneratorVersion = 1,
 ): (worldX: number, worldZ: number) => ColumnProfile {
   const heightNoise = createFbmNoise2D(seed, { octaves: 4, persistence: 0.5, scale: 0.01 });
   const moistureNoise = createFbmNoise2D(deriveSeed(seed, MOISTURE_SALT), {
@@ -45,11 +54,17 @@ export function createColumnSampler(
 
   return (worldX: number, worldZ: number): ColumnProfile => {
     const raw = BASE_HEIGHT + heightNoise(worldX, worldZ) * HEIGHT_AMPLITUDE;
-    const terrainHeight = Math.max(2, Math.min(CHUNK_HEIGHT - 2, Math.round(raw)));
+    let terrainHeight = Math.max(2, Math.min(CHUNK_HEIGHT - 2, Math.round(raw)));
     const moisture = moistureNoise(worldX, worldZ);
+    const isSwamp =
+      revision === 2 &&
+      moisture > 0.12 &&
+      terrainHeight > SEA_LEVEL &&
+      terrainHeight <= SEA_LEVEL + 5;
+    if (isSwamp) terrainHeight = SEA_LEVEL - 1;
     const isDesert = moisture < DESERT_MOISTURE_THRESHOLD && terrainHeight <= DESERT_MAX_HEIGHT;
     const isSnowy = terrainHeight >= SNOW_HEIGHT;
-    return { terrainHeight, isDesert, isSnowy };
+    return { terrainHeight, isDesert, isSnowy, ...(revision === 2 ? { isSwamp } : {}) };
   };
 }
 
@@ -177,9 +192,17 @@ function stampTrees(
   }
 }
 
-export function generateChunk(cx: number, cz: number, seed: number): Chunk {
+export function generateChunk(
+  cx: number,
+  cz: number,
+  seed: number,
+  dimension: Dimension = "overworld",
+  revision: GeneratorVersion = 1,
+): Chunk {
+  if (dimension === "end") return generateEnd(cx, cz);
+  if (dimension === "nether") return generateNether(cx, cz, seed);
   const chunk = new Chunk(cx, cz);
-  const sampleColumn = createColumnSampler(seed);
+  const sampleColumn = createColumnSampler(seed, revision);
   const isCave = createCaveSampler(seed);
   const originX = cx * CHUNK_SIZE;
   const originZ = cz * CHUNK_SIZE;
@@ -194,6 +217,7 @@ export function generateChunk(cx: number, cz: number, seed: number): Chunk {
   }
 
   stampTrees(chunk, seed, sampleColumn, isCave);
+  if (revision === 2) stampAdventure(chunk, seed, sampleColumn);
 
   return chunk;
 }
