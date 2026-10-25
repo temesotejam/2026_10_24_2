@@ -300,7 +300,7 @@ export function createDriver(page, out) {
       "placed a real bridge block",
     );
     await page.keyboard.up("ShiftLeft");
-    if (previous) await equip(previous);
+    if (previous && (await count(previous))) await equip(previous);
   }
   async function tunnelTo(p) {
     for (const axis of ["x", "z"]) {
