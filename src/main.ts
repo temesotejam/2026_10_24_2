@@ -716,6 +716,7 @@ async function boot(): Promise<void> {
     adventure: () => ({
       ...structuredClone(adventure.state),
       cast: adventure.cast ? structuredClone(adventure.cast) : null,
+      shots: structuredClone(adventure.shots),
       generator: world.revision,
       dragonPosition: dragonPosition(adventure.state.dragon.phase),
       creatures: structuredClone(data.creatures),

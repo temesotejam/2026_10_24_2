@@ -460,7 +460,10 @@ export function createAdventureDriver(page, d) {
         (2.4 * distance);
       await d.aim({ x: p.x + 0.5, y: s.position.y + s.eye + tangent * distance, z: p.z + 0.5 });
       await right();
-      await wait(1400);
+      await page.waitForFunction(() => window.__mc.adventure().shots.length === 0, {
+        timeout: 12000,
+      });
+      await wait(100);
     }
     assert.equal(await d.block(p), 0, "destroy crystal with an actual arrow");
   }
@@ -474,12 +477,12 @@ export function createAdventureDriver(page, d) {
     for (const p of crystals) {
       const s = await d.info(),
         start = Math.atan2(s.position.z, s.position.x),
-        goal = Math.atan2(p.z, p.x) + Math.PI;
+        goal = Math.atan2(p.z, p.x) + Math.PI + 0.6;
       const delta = Math.atan2(Math.sin(goal - start), Math.cos(goal - start)),
         steps = Math.max(1, Math.ceil(Math.abs(delta) / 0.25));
       for (let j = 1; j <= steps; j++) {
         const a = start + (delta * j) / steps;
-        await move(Math.cos(a) * 10, Math.sin(a) * 10);
+        await move(Math.cos(a) * 12, Math.sin(a) * 12);
       }
       await shootCrystal(p);
       await d.report(`Destroyed end crystal at ${p.x},${p.y},${p.z}`);
