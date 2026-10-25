@@ -283,7 +283,7 @@ try {
   }
   if (resume <= 4) {
     if ((await d.count("enderPearl")) < 4 && (await d.count("enderEye")) < 4) {
-      await a.surfaceTo({ x: village.x, z: village.z - 3 });
+      if ((await d.count("wheat")) < 144) await a.surfaceTo({ x: village.x, z: village.z - 3 });
       const deadline = Date.now() + 240000;
       while ((await d.count("wheat")) < 144) {
         assert.ok(Date.now() < deadline, "farm the remaining wheat");

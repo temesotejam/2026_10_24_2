@@ -441,7 +441,7 @@ export function createAdventureDriver(page, d) {
     }
   }
   async function tradePearls(village) {
-    await move(village.x + 3.5, village.z + 0.5);
+    await surfaceTo({ x: village.x + 3, z: village.z });
     for (let attempt = 0; attempt < 40; attempt++) {
       const mobs = (await adventure()).creatures.filter((m) => m.species === "villager");
       const p = (await d.info()).position;
@@ -452,8 +452,18 @@ export function createAdventureDriver(page, d) {
       )[0];
       if (near) {
         if (Math.hypot(near.position.x - p.x, near.position.z - p.z) > 2.5)
-          await move(near.position.x, near.position.z);
-        await d.aim({ ...near.position, y: near.position.y + 1 });
+          await surfaceTo({ x: Math.floor(near.position.x), z: Math.floor(near.position.z) });
+        const current = (await adventure()).creatures.find((m) => m.id === near.id);
+        if (!current) continue;
+        if (
+          Math.hypot(
+            current.position.x - (await d.info()).position.x,
+            current.position.z - (await d.info()).position.z,
+          ) > 3
+        )
+          continue;
+        await d.equip("iron_sword");
+        await d.aim({ ...current.position, y: current.position.y + 1 });
         await right();
         if (await page.$('[data-action="sell-wheat"]')) break;
       }
