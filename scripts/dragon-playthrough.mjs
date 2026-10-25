@@ -294,14 +294,7 @@ try {
   }
   if (resume <= 5) {
     const c = (await a.adventure()).stronghold;
-    const entrance = (await a.adventure()).entrance ?? { x: c.x, y: c.y + 24, z: c.z + 28 };
-    const current = (await d.info()).position;
-    if (!(current.y <= c.y + 4 && Math.hypot(current.x - c.x, current.z - c.z) < 8)) {
-      await a.surfaceTo({ x: entrance.x, z: entrance.z });
-      for (let t = entrance.y - c.y; t >= 0; t--) await a.move(c.x + 0.5, c.z + 4 + t + 0.5);
-      await a.move(c.x + 0.5, c.z + 3.5);
-    }
-    await a.move(c.x + 0.5, c.z + 0.5, true);
+    await a.enterStronghold();
     await d.equip("enderEye");
     for (const [dx, dz] of [
       [-2, 0],

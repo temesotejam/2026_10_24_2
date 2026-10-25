@@ -170,6 +170,31 @@ export function createAdventureDriver(page, d) {
     }
     throw new Error("surface route limit");
   }
+  async function enterStronghold() {
+    const { stronghold: c, entrance } = await adventure();
+    const p = (await d.info()).position;
+    const nearRoom = Math.abs(p.x - c.x) < 4.5 && Math.abs(p.z - c.z) < 4.5;
+    if (nearRoom && p.y >= c.y && p.y <= c.y + 5.1) {
+      // A normal save can have the player on the roof. Dig into the room.
+      if (p.y > c.y + 3) {
+        await d.equip("iron_pick");
+        await d.mine({ x: Math.floor(p.x), y: Math.floor(p.y) - 1, z: Math.floor(p.z) });
+        await wait(1000);
+      }
+    } else {
+      // Approach the open end of the stair tunnel, rather than its roof.
+      await surfaceTo({ x: entrance.x, z: entrance.z + 2 });
+      await move(entrance.x + 0.5, entrance.z + 1.5, true);
+      await move(entrance.x + 0.5, entrance.z + 0.5, true);
+      for (let t = entrance.y - c.y - 1; t >= 0; t--) await move(c.x + 0.5, c.z + 4 + t + 0.5);
+      await move(c.x + 0.5, c.z + 3.5);
+    }
+    await move(c.x + 0.5, c.z + 0.5, true);
+    assert.ok(
+      Math.abs((await d.info()).position.y - c.y) < 1,
+      "enter the stronghold through normal movement",
+    );
+  }
   async function useAt(p) {
     await d.aim({ x: p.x + 0.5, y: p.y + 0.5, z: p.z + 0.5 });
     await right();
@@ -511,6 +536,7 @@ export function createAdventureDriver(page, d) {
     pillarTo,
     reachSurface,
     surfaceTo,
+    enterStronghold,
     useAt,
     takeChest,
     eat,

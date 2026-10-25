@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import puppeteer from "puppeteer";
+import { createDriver } from "./lib/survival-driver.mjs";
+import { createAdventureDriver } from "./lib/adventure-driver.mjs";
 const args = process.argv.slice(2),
   at = args.indexOf("--url");
 const url = new URL(at >= 0 ? args[at + 1] : "http://127.0.0.1:4173/");
@@ -232,7 +234,8 @@ try {
   );
   const endFixture = await stored(),
     c = (await state()).adventure.stronghold;
-  endFixture.position = { x: c.x + 0.5, y: c.y, z: c.z + 0.5 };
+  const entrance = (await state()).adventure.entrance;
+  endFixture.position = { x: entrance.x + 0.5, y: entrance.y, z: entrance.z + 2.5 };
   endFixture.spawn = { ...endFixture.position };
   endFixture.inventory = Array.from({ length: 36 }, () => null);
   endFixture.inventory[0] = { id: "enderEye", count: 4 };
@@ -243,6 +246,9 @@ try {
   endFixture.adventure.dragon.phase = 0;
   await importFixture(endFixture, "end-entry-fixture");
   await play();
+  const native = createAdventureDriver(page, createDriver(page, out));
+  await native.enterStronghold();
+  check("walk from daylight down the enclosed stronghold stairs into the frame ring", true);
   for (const [dx, dz] of [
     [-2, 0],
     [2, 0],
