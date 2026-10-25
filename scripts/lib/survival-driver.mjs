@@ -348,48 +348,73 @@ export function createDriver(page, out) {
     throw new Error("No gathered building material remains");
   }
   async function bridge(nx, cy, nz) {
-    const before = await info(),
-      cx = Math.floor(before.position.x),
-      cz = Math.floor(before.position.z);
-    const dx = Math.sign(nx - cx),
+    const before = await info();
+    // A player's body can overlap a ledge while its center is above air.
+    const support = await page.evaluate(
+      ({ p, cy }) => {
+        const options = [];
+        for (let x = Math.floor(p.x) - 1; x <= Math.floor(p.x) + 1; x++)
+          for (let z = Math.floor(p.z) - 1; z <= Math.floor(p.z) + 1; z++) {
+            const id = window.__mc.blockAt(x, cy - 1, z);
+            if (
+              ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id) &&
+              p.x + 0.3 > x &&
+              p.x - 0.3 < x + 1 &&
+              p.z + 0.3 > z &&
+              p.z - 0.3 < z + 1
+            )
+              options.push({ x, z, d: Math.hypot(p.x - x - 0.5, p.z - z - 0.5) });
+          }
+        return options.sort((a, b) => a.d - b.d)[0];
+      },
+      { p: before.position, cy },
+    );
+    assert.ok(support, "find the block actually supporting the player");
+    const cx = support.x,
+      cz = support.z,
+      dx = Math.sign(nx - cx),
       dz = Math.sign(nz - cz);
+    nx = cx + dx;
+    nz = cz + dz;
     const selected = await page.$eval(
       "#hotbar .selected .hotbar-key",
       (el) => Number(el.textContent) - 1,
     );
-    const previous = before.inventory[selected]?.id;
-    const material = await chooseMaterial();
+    const previous = before.inventory[selected]?.id,
+      material = await chooseMaterial();
+    narrate("足場を作って、安全に渡ります。", 1);
     await equip(material.id);
     await page.keyboard.down("ShiftLeft");
-    await aim({
-      x: cx + 0.5 + dx * 2,
-      y: (await info()).position.y + (await info()).eye,
-      z: cz + 0.5 + dz * 2,
-    });
-    await page.keyboard.down("KeyW");
     try {
+      await aim({
+        x: cx + 0.5 + dx * 2,
+        y: (await info()).position.y + (await info()).eye,
+        z: cz + 0.5 + dz * 2,
+      });
+      await page.keyboard.down("KeyW");
       const start = Date.now();
       while (true) {
         const pos = (await info()).position;
-        const progress = (pos.x - cx - 0.5) * dx + (pos.z - cz - 0.5) * dz;
-        if (progress >= 0.6) break;
+        if ((pos.x - cx - 0.5) * dx + (pos.z - cz - 0.5) * dz >= 0.6) break;
         assert.ok(Date.now() - start < 10000, "crouch to bridge edge");
         await wait(100);
       }
+      await page.keyboard.up("KeyW");
+      await aim({ x: cx + 0.5 + dx * 0.48, y: cy - 0.5, z: cz + 0.5 + dz * 0.48 });
+      await page.mouse.down({ button: "right" });
+      await page.mouse.up({ button: "right" });
+      await wait(300);
+      assert.equal(
+        await block({ x: nx, y: cy - 1, z: nz }),
+        material.block,
+        "placed a real bridge block",
+      );
     } finally {
       await page.keyboard.up("KeyW");
+      await page.keyboard.up("ShiftLeft");
     }
-    await aim({ x: cx + 0.5 + dx * 0.48, y: cy - 0.5, z: cz + 0.5 + dz * 0.48 });
-    await page.mouse.down({ button: "right" });
-    await page.mouse.up({ button: "right" });
-    await wait(300);
-    assert.equal(
-      await block({ x: nx, y: cy - 1, z: nz }),
-      material.block,
-      "placed a real bridge block",
-    );
-    await page.keyboard.up("ShiftLeft");
     if (previous && (await count(previous))) await equip(previous);
+    return { x: nx, z: nz };
   }
   async function tunnelTo(p) {
     for (const axis of ["x", "z"]) {
@@ -406,8 +431,10 @@ export function createDriver(page, out) {
           nz = cz + (axis === "z" ? step : 0);
         for (const y of [cy + 1, cy])
           if ((await block({ x: nx, y, z: nz })) !== 0) await mine({ x: nx, y, z: nz });
-        if ((await block({ x: nx, y: cy - 1, z: nz })) === 0) await bridge(nx, cy, nz);
-        await walk(nx + 0.5, nz + 0.5);
+        if ([0, 5, 26, 31, 40, 43].includes(await block({ x: nx, y: cy - 1, z: nz }))) {
+          const built = await bridge(nx, cy, nz);
+          await walk(built.x + 0.5, built.z + 0.5);
+        } else await walk(nx + 0.5, nz + 0.5);
       }
     }
   }

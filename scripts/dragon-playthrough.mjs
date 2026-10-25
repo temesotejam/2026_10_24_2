@@ -247,7 +247,7 @@ try {
       await a.travel("nether", { x: village.x - 8, y: village.y + 1, z: village.z - 10 });
     if ((await d.count("blazeRod")) < 2) {
       const netherStart = (await d.info()).position;
-      if (Math.abs(netherStart.x) <= 5 && Math.abs(netherStart.z) <= 5 && netherStart.y >= 33) {
+      if (netherStart.y >= 33.8) {
         const landing = await page.evaluate(() => {
           const mc = window.__mc,
             points = [];
@@ -268,6 +268,7 @@ try {
         });
         assert.ok(landing, "find dry Nether terrain");
         await d.tunnelTo(landing);
+        await d.center();
         const position = (await d.info()).position;
         await d.mine({
           x: Math.floor(position.x),
@@ -318,6 +319,25 @@ try {
           await d.tunnelTo({ x: Math.floor(mob.position.x), z: Math.floor(mob.position.z) });
           if ((await d.info()).position.y < Math.floor(mob.position.y))
             await a.pillarTo(Math.floor(mob.position.y));
+          else if (
+            (await d.info()).position.y > Math.floor(mob.position.y) + 1.2 &&
+            [29, 32, 28, 11, 2].includes(
+              await d.block({
+                x: Math.floor(mob.position.x),
+                y: Math.floor(mob.position.y) - 1,
+                z: Math.floor(mob.position.z),
+              }),
+            )
+          ) {
+            await d.center();
+            const feet = (await d.info()).position;
+            d.narrate("敵が落としたロッドを回収するため、地面へ降ります。", 1);
+            await d.mine({
+              x: Math.floor(feet.x),
+              y: Math.round(feet.y) - 1,
+              z: Math.floor(feet.z),
+            });
+          }
           await wait(1000);
         }
       }
