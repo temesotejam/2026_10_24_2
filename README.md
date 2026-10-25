@@ -34,6 +34,7 @@ Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サー
 | ホットバー選択               | 1〜9 / ホイール            |
 | 一人称・後方・前方の視点切替 | F5（WebGL 描画時）         |
 | メニュー・操作解除           | Esc                        |
+| 詳細情報の表示切替           | F3                         |
 
 しゃがみは視点を下げ、地上で端から落ちることを防ぎます。当たり判定の高さは変わりません。
 体力・空腹・呼吸があり、落下、溺水、窒息、溶岩、敵からダメージを受けます。
@@ -79,6 +80,7 @@ npm run preview -- --host 127.0.0.1 --port 4173 --strictPort --base /2026_10_24_
 node scripts/visual-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/survival-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/journey-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
+node scripts/polish-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/load-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
 node scripts/explore-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --distance 256
 node scripts/performance-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/ --seconds 20
@@ -110,7 +112,9 @@ GitHub Settings → Pages の Source を **GitHub Actions** に設定する必�
 
 基本サバイバルをGitHub Pagesで公開しています。Minecraft と同一仕様ではありません。
 視界は4〜12チャンクで調整でき、描画解像度は自動または25〜100%の手動指定を選べます。
-HUD に FPS・平均フレーム時間・チャンク数を表示します。
+F3またはメニューの「詳細情報」でFPS・平均フレーム時間・チャンク数を表示できます。
+メニューで効果音を切り替えられ、音と情報表示の設定はブラウザに保持します。
+足音・破壊音・設置音は独自合成し、採掘片を追加しています。
 松明・日光はプレイヤー周辺の32ブロック立方領域で伝播計算します。
 流体は近くの変更から処理数を制限して広げる簡易方式で、完全な流体シミュレーションではありません。
 CPU 代替描画ではモデル・照明を簡略化し、三人称視点を無効にしています。
@@ -126,6 +130,7 @@ CPU 代替描画ではモデル・照明を簡略化し、三人称視点を無�
 - [開発計画](docs/PLAN.md)
 - [基盤の導入記録](docs/BASELINE.md)
 - [初期の操作改善](docs/M1-CONTROLS.md)
+- [公式Classicを操作した比較と改善](docs/CLASSIC-COMPARISON.md)
 - [上流の説明](docs/UPSTREAM.md)
 
 基盤は [Vincent-P-essy/minecraft-clone](https://github.com/Vincent-P-essy/minecraft-clone)、

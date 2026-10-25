@@ -24,7 +24,7 @@ import {
   createWorkerGenerator,
 } from "./world/streamer";
 import { World } from "./world/world";
-import { BlockId } from "./world/blocks";
+import { BlockId, isSolid } from "./world/blocks";
 import { affectedChunkCoords } from "./world/coords";
 import { SurvivalSession, newSession, type SessionState } from "./survival/session";
 import { SaveRepository, saveKey, parseSave, encodeSave } from "./save/persistence";
@@ -33,6 +33,10 @@ import { EntityView, createAvatar } from "./entities/view";
 import { SkyBodies } from "./render/sky-bodies";
 import { HeldItemView } from "./render/held-item";
 import { buildLightField, LIGHT_SIZE } from "./world/light";
+import { BlockFragments } from "./render/block-fragments";
+import { BlockSounds } from "./audio/block-sounds";
+import { blockItem, ITEMS } from "./items/catalog";
+import { guiScale } from "./render/view-settings";
 const DEFAULT_SEED = 2026;
 const STREAM_RADIUS_WEBGL = 4; // greedy meshing makes the extra draw distance affordable
 const STREAM_RADIUS_CPU = 4; // rays reach ~52 blocks; a tighter ring is plenty
@@ -67,6 +71,15 @@ declare global {
       health: () => number;
       gameMode: () => string;
       time: () => number;
+      cameraFov: () => number;
+      effects: () => {
+        fragments: number;
+        soundEnabled: boolean;
+        soundReady: boolean;
+        soundsPlayed: number;
+        soundPeak: number;
+        soundCounts: { break: number; place: number; step: number };
+      };
       seed: number;
     };
   }
@@ -513,6 +526,21 @@ async function boot(): Promise<void> {
     must(terrainMaterial.uniforms.uLightField).value = lightTexture;
   }
   const hand = entityScene ? new HeldItemView(view.camera) : null;
+  const fragments = entityScene ? new BlockFragments(entityScene) : null;
+  const sounds = new BlockSounds();
+  interaction.onBreak = (position, block) => {
+    const item = blockItem(block);
+    fragments?.pool.burst(
+      position.x,
+      position.y,
+      position.z,
+      item ? (ITEMS[item]?.color ?? "#887766") : "#887766",
+    );
+    sounds.play(block, "break");
+  };
+  interaction.onPlace = (_position, block) => {
+    sounds.play(block, "place");
+  };
   if (entityScene) entityScene.add(view.camera);
   // On-screen controls for touch devices — joystick, look-drag, jump/place.
   const touchControls = isTouchDevice()
@@ -534,7 +562,61 @@ async function boot(): Promise<void> {
     : null;
   let touchVisible = false;
   const hud = new Hud(app);
+  const soundToggle = must(document.querySelector<HTMLInputElement>("#sound-enabled"));
+  const debugToggle = must(document.querySelector<HTMLInputElement>("#debug-info"));
+  const preference = (name: string, fallback: boolean): boolean => {
+    try {
+      const value = localStorage.getItem(`voxel:${name}`);
+      return value === null ? fallback : value === "true";
+    } catch {
+      return fallback;
+    }
+  };
+  const storePreference = (name: string, enabled: boolean): void => {
+    try {
+      localStorage.setItem(`voxel:${name}`, String(enabled));
+    } catch {
+      /* Preferences are optional. */
+    }
+  };
+  soundToggle.checked = preference("sound", true);
+  sounds.enabled = soundToggle.checked;
+  debugToggle.checked = preference("debug", false);
+  hud.setVisible(debugToggle.checked);
+  soundToggle.addEventListener("change", () => {
+    sounds.setEnabled(soundToggle.checked);
+    storePreference("sound", soundToggle.checked);
+  });
+  const updateDebug = () => {
+    hud.setVisible(debugToggle.checked);
+    storePreference("debug", debugToggle.checked);
+  };
+  debugToggle.addEventListener("change", updateDebug);
+  app.addEventListener(
+    "pointerdown",
+    () => {
+      sounds.unlock();
+    },
+    { capture: true },
+  );
+  window.addEventListener("keydown", (event) => {
+    if (player.isActive) sounds.unlock();
+    if (
+      event.code !== "F3" ||
+      event.repeat ||
+      (event.target instanceof Element && event.target.matches("input,select,textarea"))
+    )
+      return;
+    event.preventDefault();
+    debugToggle.checked = !debugToggle.checked;
+    updateDebug();
+  });
+  const scaleInterface = () => {
+    app.style.setProperty("--gui-scale", String(guiScale(window.innerWidth, window.innerHeight)));
+  };
+  scaleInterface();
   window.addEventListener("resize", () => {
+    scaleInterface();
     view.resize(window.innerWidth, window.innerHeight);
   });
   window.__mc = {
@@ -557,6 +639,15 @@ async function boot(): Promise<void> {
     health: () => data.vitals.health,
     gameMode: () => data.mode,
     time: () => data.time,
+    cameraFov: () => view.camera.fov,
+    effects: () => ({
+      fragments: fragments?.pool.particles.length ?? 0,
+      soundEnabled: sounds.enabled,
+      soundReady: sounds.ready,
+      soundsPlayed: sounds.played,
+      soundPeak: sounds.peak,
+      soundCounts: { ...sounds.counts },
+    }),
     seed: SEED,
   };
   let lastTime = performance.now();
@@ -606,6 +697,23 @@ async function boot(): Promise<void> {
     }
     hand?.update(session.held, player.perspective === 0, player.position);
     interaction.update(dt);
+    fragments?.update(dt, (x, y, z) => isSolid(world.getBlock(x, y, z)));
+    const feetBlock = world.getBlock(
+      Math.floor(player.position.x),
+      Math.floor(player.position.y),
+      Math.floor(player.position.z),
+    );
+    sounds.footsteps(
+      player.position,
+      player.onGround && feetBlock !== BlockId.WATER && feetBlock !== BlockId.LAVA,
+      player.isActive,
+      player.eyePosition.y - player.position.y < 1.5,
+      world.getBlock(
+        Math.floor(player.position.x),
+        Math.floor(player.position.y - 0.1),
+        Math.floor(player.position.z),
+      ),
+    );
     if (player.isActive || inventory.isOpen) {
       fluids.tick(dt);
       if (

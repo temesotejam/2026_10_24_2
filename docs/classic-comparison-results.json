@@ -1,0 +1,150 @@
+{
+  "reference": {
+    "url": "https://classic.minecraft.net/",
+    "observed_date_jst": "2026-10-25",
+    "displayed_version": "0.0.23a_01",
+    "operated": [
+      "walk",
+      "jump",
+      "remove block",
+      "toggle building mode",
+      "place selected block",
+      "block palette",
+      "pause menu",
+      "options"
+    ],
+    "input_method": "Puppeteer keyboard/mouse; exposed engine state read-only for measurement",
+    "fov_degrees": 70,
+    "eye_height": 1.62,
+    "ui_sizes": [
+      {
+        "viewport": [1280, 720],
+        "hotbar": {
+          "width": 552,
+          "height": 74
+        },
+        "fov": 70
+      },
+      {
+        "viewport": [800, 600],
+        "hotbar": {
+          "width": 552,
+          "height": 74
+        },
+        "fov": 70
+      },
+      {
+        "viewport": [1920, 1080],
+        "hotbar": {
+          "width": 552,
+          "height": 74
+        },
+        "fov": 70
+      },
+      {
+        "viewport": [640, 480],
+        "hotbar": {
+          "width": 368,
+          "height": 50
+        },
+        "fov": 70
+      }
+    ],
+    "block_interaction": {
+      "target": [81, 35, 69],
+      "idBefore": 1,
+      "idAfter": 0,
+      "placedCell": [81, 35, 69],
+      "cellBefore": 0,
+      "cellAfter": 2
+    },
+    "sampled_jump_rise": 1.274200439453125
+  },
+  "own_before_after": [
+    {
+      "label": "before",
+      "position": {
+        "x": 0.5,
+        "y": 35,
+        "z": 0.5
+      },
+      "yaw": 0,
+      "pitch": 0,
+      "hotbarWidth": 444,
+      "debugVisible": true,
+      "fov": null,
+      "asset": "index-BQG-EhK_.js"
+    },
+    {
+      "label": "after",
+      "position": {
+        "x": 0.5,
+        "y": 35,
+        "z": 0.5
+      },
+      "yaw": 0,
+      "pitch": 0,
+      "hotbarWidth": 552,
+      "debugVisible": false,
+      "fov": 70,
+      "asset": "index-B99dwT5f.js"
+    }
+  ],
+  "new_polish_checks": {
+    "completed": true,
+    "fov": 70,
+    "sizes": [
+      {
+        "width": 1280,
+        "height": 720,
+        "hotbarWidth": 552
+      },
+      {
+        "width": 800,
+        "height": 600,
+        "hotbarWidth": 552
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "hotbarWidth": 552
+      },
+      {
+        "width": 640,
+        "height": 480,
+        "hotbarWidth": 368
+      }
+    ],
+    "audible": {
+      "fragments": 0,
+      "soundEnabled": true,
+      "soundReady": true,
+      "soundsPlayed": 2,
+      "soundPeak": 0.06221776828169823,
+      "soundCounts": {
+        "break": 1,
+        "place": 1,
+        "step": 0
+      }
+    },
+    "muted": {
+      "fragments": 12,
+      "soundEnabled": false,
+      "soundReady": false,
+      "soundsPlayed": 0,
+      "soundPeak": 0,
+      "soundCounts": {
+        "break": 0,
+        "place": 0,
+        "step": 0
+      }
+    }
+  },
+  "before_fov_source": "src/render/scene.ts and cpu-renderer.ts at 969b477 use 75 degrees; the old build does not expose the cameraFov debug getter.",
+  "limits": [
+    "Reference and own terrain generators/worlds differ; no pixel-identical terrain comparison is claimed.",
+    "Classic is a creative-era game, so survival progression remains covered by separate tests.",
+    "Audio output is verified by Web Audio waveform measurement; human listening and physical-PC performance are not certified.",
+    "The old two-hour stability record applies to the initial game version, not to these new effects."
+  ]
+}

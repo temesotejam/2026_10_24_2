@@ -391,12 +391,15 @@ button:disabled {
 }
 #hotbar {
   gap: 0;
-  padding: 3px;
-  border: 3px solid #333d;
+  bottom: max(4px, env(safe-area-inset-bottom));
+  padding: calc(1px * var(--gui-scale, 3));
+  border: calc(1px * var(--gui-scale, 3)) solid #333d;
   border-radius: 0;
   background: #8c8c7dcc;
 }
 .hotbar-slot {
+  width: calc(20px * var(--gui-scale, 3));
+  height: calc(20px * var(--gui-scale, 3));
   border-radius: 0;
   border: 2px inset #c4c4ae;
   background: #74786dc9;
@@ -407,9 +410,9 @@ button:disabled {
 }
 #survival-hud {
   position: fixed;
-  bottom: 82px;
+  bottom: calc(24px * var(--gui-scale, 3) + 10px);
   left: 50%;
-  width: 432px;
+  width: calc(180px * var(--gui-scale, 3));
   transform: translateX(-50%);
   z-index: 5;
   pointer-events: none;
@@ -491,6 +494,29 @@ button:disabled {
   gap: 10px;
   flex-wrap: wrap;
 }
+.display-settings {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 8px 0;
+  font-size: 13px;
+}
+.display-settings label {
+  cursor: pointer;
+}
+.hotbar-slot .item-bitmap {
+  inset: auto;
+  width: calc(16px * var(--gui-scale, 3));
+  height: calc(16px * var(--gui-scale, 3));
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.hotbar-slot .item-count {
+  font-family: monospace;
+  font-size: calc(7px * var(--gui-scale, 3));
+  text-shadow: 2px 2px #222;
+}
 .world-settings input {
   width: 110px;
 }
@@ -562,6 +588,16 @@ button:disabled {
   #hotbar .hotbar-slot {
     width: 36px;
     height: 40px;
+  }
+  #hotbar {
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  #hotbar .item-bitmap {
+    width: 32px;
+    height: 32px;
+  }
+  #hotbar .item-count {
+    font-size: 14px;
   }
   #survival-hud {
     width: 320px;

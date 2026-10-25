@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { DEFAULT_FOV } from "./view-settings";
 
 export const SKY_COLOR = 0x87ceeb;
 export const FOG_NEAR = 32;
@@ -60,7 +61,7 @@ export function createGameScene(parent: HTMLElement): GameScene {
   scene.fog = fog;
 
   const camera = new THREE.PerspectiveCamera(
-    75,
+    DEFAULT_FOV,
     window.innerWidth / window.innerHeight,
     0.1,
     FOG_FAR + 60,
