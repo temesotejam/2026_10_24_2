@@ -96,6 +96,13 @@ export function createAdventureDriver(page, d) {
         function height(x, z) {
           const k = key(x, z);
           if (heights.has(k)) return heights.get(k);
+          // Preserve complete portal columns when planning ordinary travel.
+          // Their passable purple interior still rests on an obsidian base.
+          for (let y = Math.max(1, Math.floor(p.y) - 3); y <= Math.floor(p.y) + 8; y++)
+            if ([28, 31].includes(mc.blockAt(x, y, z))) {
+              heights.set(k, null);
+              return null;
+            }
           const candidates = [];
           const passable = (id) => [0, 5, 16, 22, 23, 25, 31, 33, 40, 43].includes(id);
           for (let y = nether ? 60 : 94; y > 0; y--)

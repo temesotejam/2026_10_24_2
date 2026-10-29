@@ -234,10 +234,9 @@ export function createDriver(page, out) {
           ) {
             const cell = { x: frontX, y: yy, z: frontZ },
               id = await block(cell);
-            assert.notEqual(
-              id,
-              28,
-              "route around obsidian structures instead of clearing their frame",
+            assert.ok(
+              ![28, 31].includes(id),
+              "route around portal structures instead of clearing their frame or interior",
             );
             if (id !== 0 && id !== 5 && id !== 8 && (await mine(cell, interrupt)) === false)
               return false;

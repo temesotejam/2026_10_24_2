@@ -112,7 +112,21 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   await h.guard();
   await a.eat();
   await a.recover(18);
-  await stashVillage(page, d, a, v);
+  await stashVillage(page, d, a, v, [
+    "sapling",
+    "snow",
+    "sand",
+    "wood_pick",
+    "stone_pick",
+    "seeds",
+    "apple",
+    "netherrack",
+    "bone",
+    "rawMeat",
+    "stoneBrick",
+    "goldOre",
+    "ironOre",
+  ]);
   if (!meta.huntingCamp) {
     meta.huntingCamp = (await chooseHuntingCamp(page, d, a, v, { radius: 40 })) ?? {
       x: v.x,
@@ -124,6 +138,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   }
   d.setGoal("見通しのよい場所へ移り、敵の素材を集めます。");
   await a.surfaceTo(meta.huntingCamp);
+  await a.reachSurface();
   d.setGoal("夜の敵と戦い、エンダーパール・弓の糸・矢の材料を集めます。");
   meta.hunting = await h.gather(targets, {
     timeoutMs: 3000000,
