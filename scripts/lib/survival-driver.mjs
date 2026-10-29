@@ -99,7 +99,11 @@ export function createDriver(page, out) {
         ["diamond_pick", "stone_pick", "wood_pick"].find((candidate) =>
           inventory.some((s) => s?.id === candidate),
         ) ?? id;
-    let index = inventory.findIndex((s) => s?.id === id);
+    let index =
+      inventory
+        .map((s, i) => ({ s, i }))
+        .filter(({ s }) => s?.id === id)
+        .sort((a, b) => (b.s.durability ?? 0) - (a.s.durability ?? 0))[0]?.i ?? -1;
     assert.ok(index >= 0, `own ${id}`);
     if (index >= 9) {
       await open();

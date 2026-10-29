@@ -53,8 +53,27 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
   // recording ended before writing its mission progress metadata.
   if ((state.eyeThrows ?? 0) > 0) mission.directionChecked = true;
   if (state.dimension === "overworld" && !state.dragon.defeated) {
+    const bestSword = () =>
+      d
+        .info()
+        .then(
+          (s) =>
+            s.inventory
+              .filter((slot) => slot?.id === "iron_sword")
+              .sort((a, b) => (b.durability ?? 0) - (a.durability ?? 0))[0],
+        );
+    if (((await bestSword())?.durability ?? 0) < 100 && (await d.count("iron")) >= 2) {
+      d.setGoal("戦闘で消耗した剣を、手持ちの鉄から作り直します。");
+      const table = await d.station("table");
+      if (!(await d.count("stick"))) await d.make("sticks");
+      await d.make("iron_sword");
+      await d.close();
+      await d.mine(table);
+      await wait(500);
+      await d.collect("table", 1);
+    }
     const inventory = (await d.info()).inventory;
-    const sword = inventory.find((slot) => slot?.id === "iron_sword");
+    const sword = await bestSword();
     const bow = inventory.find((slot) => slot?.id === "bow");
     const arrows = await d.count("arrow"),
       bread = await d.count("bread");

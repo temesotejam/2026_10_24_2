@@ -7,8 +7,18 @@ const at = process.argv.indexOf("--url");
 const url = at >= 0 ? process.argv[at + 1] : "http://127.0.0.1:4173/2026_10_24_2/watch/";
 const option = (key, fallback) =>
   process.argv.includes(key) ? process.argv[process.argv.indexOf(key) + 1] : fallback;
-const file = option("--file", null),
-  expectedDuration = Number(option("--duration", "613.033333"));
+const file = option("--file", null);
+const explicitDuration = option("--expected-duration", option("--duration", null));
+if (explicitDuration !== null)
+  assert.ok(
+    Number.isFinite(Number(explicitDuration)) && Number(explicitDuration) > 0,
+    "provide a positive expected duration",
+  );
+if (file)
+  assert.ok(
+    explicitDuration !== null,
+    "a custom --file needs --expected-duration (or the legacy --duration alias)",
+  );
 const out = file ? "visual-check/video-narrated" : "visual-check/video";
 mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
@@ -31,6 +41,24 @@ try {
   await page.waitForFunction(() => document.querySelector("video").readyState >= 1, {
     timeout: 120000,
   });
+  const expected =
+    explicitDuration !== null
+      ? { duration: Number(explicitDuration), source: "command-line" }
+      : await page.$eval("video", async (video) => {
+          const proofUrl = new URL(
+            video.dataset.proof || "./steady-camera-proof.json",
+            window.location.href,
+          ).href;
+          const response = await window.fetch(proofUrl);
+          if (!response.ok) throw new Error(`Missing video proof: ${response.status} ${proofUrl}`);
+          const proof = await response.json();
+          return { duration: proof.export?.duration ?? proof.duration, source: proofUrl };
+        });
+  const expectedDuration = Number(expected.duration);
+  assert.ok(
+    Number.isFinite(expectedDuration) && expectedDuration > 0,
+    "read the expected duration from the exported proof",
+  );
   const duration = await page.$eval("video", (video) => video.duration);
   assert.ok(Math.abs(duration - expectedDuration) < 1, `complete video duration: ${duration}`);
   await page.locator('[data-time="0"]').click();
@@ -66,6 +94,8 @@ try {
     url,
     mediaUrl,
     duration,
+    expectedDuration,
+    durationProof: expected.source,
     playbackVerified: true,
     seekToVictoryVerified: true,
     errors,
