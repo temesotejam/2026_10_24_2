@@ -15,6 +15,22 @@ assert.ok(
   metadata.final.dragon.defeated && metadata.final.eggCount === 1 && metadata.final.health > 0,
 );
 assert.ok(metadata.narration.length >= 10, "use observed actions from the new recording");
+let cameraVerification;
+if (metadata.perspective === "third-person-behind") {
+  const samples = metadata.parts.flatMap((part) => part.cameraSamples ?? []);
+  assert.ok(samples.length >= 10, "observe the actual camera during recording");
+  assert.ok(metadata.parts.every((part) => part.camera?.perspective === 1));
+  assert.ok(samples.every((sample) => sample.perspective === 1));
+  cameraVerification = {
+    perspective: "third-person-behind",
+    samples: samples.length,
+    allSamplesThirdPerson: true,
+    bodyVisibleSamples: samples.filter((sample) => sample.distance > 0.75).length,
+    minimumDistance: Math.min(...samples.map((sample) => sample.distance)),
+    maximumDistance: Math.max(...samples.map((sample) => sample.distance)),
+  };
+}
+
 assert.ok(
   existsSync("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
   "Japanese subtitle font is installed",
@@ -121,6 +137,7 @@ metadata.export = {
   captionCount: cues.length,
   subtitleFile: "commentary.srt",
   fullDecodeVerified: true,
+  cameraVerification,
 };
 writeFileSync(path.join(directory, "recording.json"), JSON.stringify(metadata, null, 2));
 console.log(JSON.stringify(metadata.export, null, 2));
