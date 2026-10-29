@@ -97,8 +97,29 @@ try {
     );
     await wait(100);
   }
-  const pos = await page.evaluate(() => window.__mc.position());
-  const ground = { x: Math.floor(pos.x) + 1, y: Math.floor(pos.y) - 1, z: Math.floor(pos.z) };
+  // Use a visible flat neighbor instead of assuming +X is below the eye.
+  // Revision3 deliberately chooses varied, open spawn orientations.
+  const ground = await page.evaluate(() => {
+    const p = window.__mc.position(),
+      y = Math.floor(p.y + 0.01) - 1;
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, -1],
+      [0, 1],
+    ]) {
+      const x = Math.floor(p.x) + dx,
+        z = Math.floor(p.z) + dz;
+      if (
+        ![0, 5, 26].includes(window.__mc.blockAt(x, y, z)) &&
+        window.__mc.blockAt(x, y + 1, z) === 0 &&
+        window.__mc.blockAt(x, y + 2, z) === 0
+      )
+        return { x, y, z };
+    }
+    return null;
+  });
+  assert.ok(ground, "a clear neighboring column exists for the effects test");
   await page.keyboard.press("Digit2");
   await aim({ x: ground.x + 0.5, y: ground.y + 0.9, z: ground.z + 0.5 });
   await page.mouse.down({ button: "right" });
