@@ -53,3 +53,14 @@ test("explains a recorded interruption without removing its gameplay", () => {
   assert.equal(explanation.start, 16);
   assert.ok(explanation.end < 20.2 / 1.5 + 30 / 1.5);
 });
+
+test("identifies an actual recorded death instead of describing it only as a checkpoint", () => {
+  const cues = narrationCues({
+    parts: [{ path: "a", duration: 30, error: "survive combat" }],
+    deaths: [{ part: "a" }],
+    narration: [],
+  });
+  assert.equal(cues.length, 1);
+  assert.match(cues[0].text, /倒されました/);
+  assert.equal(cues[0].start, 16);
+});

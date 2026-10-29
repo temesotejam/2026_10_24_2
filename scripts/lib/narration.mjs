@@ -8,11 +8,13 @@ export function narrationCues(metadata, speed = 1.5) {
   }
   const observed = [...(metadata.narration ?? [])];
   for (const part of metadata.parts)
-    if (part.error)
+    if (part.error || part.checkpointRequested)
       observed.push({
         part: part.path,
         seconds: Math.max(0, part.duration - 6),
-        text: "操作を調整するため、通常保存から再開します。",
+        text: metadata.deaths?.some((death) => death.part === part.path)
+          ? "倒されました。復活して、落とした装備の回収を目指します。"
+          : "操作を調整するため、通常保存から再開します。",
       });
   const events = observed
     .filter((event) => {

@@ -52,7 +52,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
           "dirt",
         ]);
       if ((await d.count("bread")) < 3)
-        await stockVillageFood(d, page, a, v, { breadTarget: 18, waitForGrowth: true });
+        await stockVillageFood(d, page, a, v, { breadTarget: 8, waitForGrowth: false });
       // Spend an early daytime interval on real portal construction while
       // waiting for naturally spawning night creatures, using this same input loop.
       if (
@@ -87,7 +87,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     },
     recover: async (target) => {
       if ((await d.count("bread")) < 3)
-        await stockVillageFood(d, page, a, v, { breadTarget: 18, waitForGrowth: true });
+        await stockVillageFood(d, page, a, v, { breadTarget: 8, waitForGrowth: false });
       await a.eat();
       await a.recover(target);
     },
