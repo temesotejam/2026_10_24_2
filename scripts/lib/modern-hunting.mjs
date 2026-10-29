@@ -173,17 +173,43 @@ export function createModernHunting(page, d, a, options = {}) {
       };
     });
   async function surfaceForAir(state) {
-    if (state.eyeBlock !== 5) return false;
+    const shore = await page.evaluate((p) => {
+      const mc = window.__mc;
+      if (mc.blockAt(Math.floor(p.x), Math.floor(p.y + 0.1), Math.floor(p.z)) !== 5) return null;
+      const sites = [];
+      for (let x = Math.floor(p.x) - 10; x <= p.x + 10; x++)
+        for (let z = Math.floor(p.z) - 10; z <= p.z + 10; z++)
+          for (let y = Math.floor(p.y); y <= Math.floor(p.y) + 4; y++) {
+            if (
+              [1, 2, 3, 4, 9, 11].includes(mc.blockAt(x, y - 1, z)) &&
+              mc.blockAt(x, y, z) === 0 &&
+              mc.blockAt(x, y + 1, z) === 0
+            )
+              sites.push({
+                x: x + 0.5,
+                y,
+                z: z + 0.5,
+                d: Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z) + 2 * Math.abs(y - p.y),
+              });
+          }
+      return sites.sort((a, b) => a.d - b.d)[0] ?? null;
+    }, state.position);
+    if (state.eyeBlock !== 5 && !shore) return false;
     const open = await page.evaluate(() => !document.querySelector("#inventory-panel").hidden);
     if (open) await d.close();
     await release();
     d.narrate("水中なので、作業より先に水面へ泳いで息をします。", 2);
     try {
+      if (shore) {
+        await d.aim({ x: shore.x, y: state.position.y + state.eye, z: shore.z }, 0);
+        await page.keyboard.down("KeyW");
+      }
       await page.keyboard.down("Space");
-      await wait(1000);
+      await wait(shore ? 450 : 1000);
       stats.swims++;
     } finally {
       await page.keyboard.up("Space");
+      await page.keyboard.up("KeyW");
     }
     return true;
   }

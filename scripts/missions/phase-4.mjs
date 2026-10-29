@@ -139,7 +139,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   h.activate();
   await h.guard();
   await a.eat();
-  await a.recover(18);
+  if (await carriedFoodUnits(d)) await a.recover(18);
   const stashPosition = (await d.info()).position;
   if (
     !v.cacheChest ||

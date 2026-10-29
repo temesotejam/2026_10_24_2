@@ -34,7 +34,7 @@ export async function run({ page, d, a, meta, flush, chapter }) {
             [-1, 0],
             [0, 1],
             [0, -1],
-          ].every(([dx, dz]) => [y - 3, y - 2, y - 1].every((yy) => soil(b(x + dx, yy, z + dz))))
+          ].every(([dx, dz]) => [y - 3, y - 2].every((yy) => soil(b(x + dx, yy, z + dz))))
         )
           sites.push({ x: x + 0.5, y, z: z + 0.5, d: Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z) });
       }
@@ -62,6 +62,7 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   const x = Math.floor(selected.x),
     z = Math.floor(selected.z),
     top = plan.y;
+  if (await d.count("stone_shovel")) await d.equip("stone_shovel");
   for (let i = 1; i <= 3; i++) {
     await d.mine({ x, y: top - i, z });
     await wait(200);
@@ -76,6 +77,14 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   assert.equal(await d.block(roof), material.block, "seal the well with an actually mined block");
   meta.rescueWell = { x, y: Math.round(p.y), z, top, roof };
   flush();
+  if (
+    !(await d.info()).inventory.some(
+      (s) => s && ["meat", "bread", "rawMeat", "apple", "cookedFish"].includes(s.id),
+    )
+  ) {
+    await chapter("夜の敵から、ふさいだ避難穴へ退避", 4.77);
+    return;
+  }
   const until = Date.now() + 150000;
   while ((await d.info()).health < 20) {
     assert.ok((await d.info()).health > 0, "survive inside the sealed natural well");
