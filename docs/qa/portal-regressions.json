@@ -1,0 +1,19 @@
+{
+  "fixture": true,
+  "freshDefaultGenerator": 3,
+  "contactTravel": true,
+  "rightClickNoTeleport": true,
+  "deadNetherRespawnsInOverworld": true,
+  "victoryExitRequiresPlayerEntry": true,
+  "scaledArrival": {
+    "x": 12.5,
+    "y": 26,
+    "z": 1.5
+  },
+  "returnPosition": {
+    "x": 2,
+    "y": 34,
+    "z": 1.5
+  },
+  "errors": []
+}

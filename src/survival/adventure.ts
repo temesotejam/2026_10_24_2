@@ -227,8 +227,11 @@ export class Adventure {
       dragon.defeated = true;
       this.state.xp = Math.min(1000000, this.state.xp + 100);
       this.session.collect(stack("dragonEgg"));
+      // Keep the exit at the island center. Creating it under the melee
+      // approach (z=4) would forcibly teleport a victorious gen3 player.
+      const exitZ = this.session.world.revision >= 3 ? 0 : 5;
       for (let x = -1; x <= 1; x++)
-        for (let z = 4; z <= 6; z++) this.session.edit(x, 34, z, BlockId.END_GATE);
+        for (let z = exitZ - 1; z <= exitZ + 1; z++) this.session.edit(x, 34, z, BlockId.END_GATE);
       this.session.notice?.(
         this.session.world.revision >= 3
           ? "エンダードラゴンを討伐しました！卵を獲得。帰還ゲートへ入ると通常世界へ戻れます"

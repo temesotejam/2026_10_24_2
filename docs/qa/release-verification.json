@@ -1,0 +1,36 @@
+{
+  "unitTestsPassed": 437,
+  "nodePolicyAndSubtitleTestsPassed": 12,
+  "combatBrowserRegressionScenariosPassed": 10,
+  "fixtureBossMaximumHealth": 200,
+  "fixtureBossFinalPlayerHealth": 17,
+  "fixtureBossEggCount": 1,
+  "independentNormalPlayAgents": 3,
+  "ordinaryNewGenerationJourney": {
+    "fixtureImports": false,
+    "completedObjective": "PASS: natural survival journey, cave lighting, save and reload",
+    "finalHealth": 20,
+    "scope": "Natural wood, stone, iron, diamond, cave lighting, save and reload; not Nether/End completion"
+  },
+  "lateGameBrowserRegressions": {
+    "fixture": true,
+    "freshDefaultGenerator": 3,
+    "contactTravel": true,
+    "rightClickNoTeleport": true,
+    "deadNetherRespawnsInOverworld": true,
+    "victoryExitRequiresPlayerEntry": true,
+    "scaledArrival": {
+      "x": 12.5,
+      "y": 26,
+      "z": 1.5
+    },
+    "returnPosition": {
+      "x": 2,
+      "y": 34,
+      "z": 1.5
+    },
+    "errors": []
+  },
+  "finalIntegrationAsset": "index-BO-kpD8f.js",
+  "fullNewRulesZeroInventoryToDragonCompleted": false
+}
