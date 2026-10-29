@@ -60,6 +60,29 @@ export function blockBeforeTargetSphere(eye, center, block, radius = 0.55) {
   return exit >= entry && entry < length - radius - 0.03;
 }
 
+/** Preserve urgent nearby threats, but do not chase an unreachable lower
+ * spider/zombie while a visible shooter is already within a real sword ray. */
+export function prioritizeReachableSkeleton(state, candidates, blockAt) {
+  const nearest = candidates[0];
+  if (!nearest) return null;
+  const eye = { ...state.position, y: state.position.y + state.eye };
+  const reachable = (mob) => {
+    const body = { ...mob.position, y: mob.position.y + 0.7 };
+    return distance(eye, body) <= 2.95 && clearSight(eye, body, blockAt);
+  };
+  if (
+    !["spider", "zombie"].includes(nearest.species) ||
+    Math.abs(nearest.position.y - state.position.y) < 0.75 ||
+    reachable(nearest)
+  )
+    return nearest;
+  return (
+    candidates.find(
+      (m) => m.species === "skeleton" && m.visibleToPlayer !== false && reachable(m),
+    ) ?? nearest
+  );
+}
+
 export function createModernHunting(page, d, a, options = {}) {
   const stats = {
     kills: {},
@@ -169,8 +192,8 @@ export function createModernHunting(page, d, a, options = {}) {
     return (x, y, z) => cells.get(`${x},${y},${z}`) ?? 0;
   };
   const alive = (state) => state.creatures.filter((m) => m.hp > 0);
-  const nearestDanger = (state) =>
-    alive(state)
+  const nearestDanger = (state) => {
+    const candidates = alive(state)
       .filter(
         (m) =>
           hostile(m) &&
@@ -180,9 +203,9 @@ export function createModernHunting(page, d, a, options = {}) {
             canMelee(state.position, state.eye, m.position)) &&
           distance(m.position, state.position) < (m.species === "skeleton" ? 14 : 5.5),
       )
-      .sort(
-        (x, y) => distance(x.position, state.position) - distance(y.position, state.position),
-      )[0];
+      .sort((x, y) => distance(x.position, state.position) - distance(y.position, state.position));
+    return prioritizeReachableSkeleton(state, candidates, blockQuery(state));
+  };
   const rangedVisible = (state, mob) =>
     page.evaluate(
       ({ from, to }) => {
@@ -535,6 +558,22 @@ export function createModernHunting(page, d, a, options = {}) {
                     terrainCache = null;
                     continue;
                   }
+                }
+                // Dry-ground BFS cannot start during a fall. Let physics
+                // establish real support before declaring withdrawal impossible.
+                const terrain = blockQuery(latest),
+                  p = latest.position;
+                const pass = [0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43];
+                let supported = false;
+                for (let x = Math.floor(p.x - 0.3 + 1e-4); x <= Math.floor(p.x + 0.3 - 1e-4); x++)
+                  for (let z = Math.floor(p.z - 0.3 + 1e-4); z <= Math.floor(p.z + 0.3 - 1e-4); z++)
+                    if (!pass.includes(terrain(x, Math.floor(p.y - 0.05), z))) supported = true;
+                const feetWet =
+                  terrain(Math.floor(p.x), Math.floor(p.y + 0.4), Math.floor(p.z)) === 5;
+                if (!supported && !feetWet && latest.eyeBlock !== 5) {
+                  await release();
+                  await wait(120);
+                  continue;
                 }
                 const covered = await takeCover(latest);
                 if (!covered)
