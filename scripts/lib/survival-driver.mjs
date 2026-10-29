@@ -93,7 +93,13 @@ export function createDriver(page, out) {
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
   async function equip(id) {
-    let index = (await info()).inventory.findIndex((s) => s?.id === id);
+    const inventory = (await info()).inventory;
+    if (id === "iron_pick" && !inventory.some((s) => s?.id === id))
+      id =
+        ["diamond_pick", "stone_pick", "wood_pick"].find((candidate) =>
+          inventory.some((s) => s?.id === candidate),
+        ) ?? id;
+    let index = inventory.findIndex((s) => s?.id === id);
     assert.ok(index >= 0, `own ${id}`);
     if (index >= 9) {
       await open();
@@ -121,6 +127,13 @@ export function createDriver(page, out) {
           29: "ネザーの地形を掘り、通り道を作ります。",
         }[original],
       );
+      if ([3, 11, 12, 13, 17, 18, 19, 20, 28, 29, 30, 36, 41].includes(original)) {
+        const inventory = (await info()).inventory;
+        const tool = ["diamond_pick", "iron_pick", "stone_pick", "wood_pick"].find((id) =>
+          inventory.some((s) => s?.id === id),
+        );
+        if (tool) await equip(tool);
+      }
       assert.notEqual(original, 8, "do not mine bedrock");
       assert.ok((await info()).health > 0, "survive mining");
       await aim({ x: p.x + 0.5, y: p.y + 0.5, z: p.z + 0.5 });
@@ -142,6 +155,15 @@ export function createDriver(page, out) {
           const start = Date.now();
           if (await checkThreat()) {
             deadline += Date.now() - start;
+            const now = await info();
+            if (
+              Math.hypot(
+                hit.x + 0.5 - now.position.x,
+                hit.y + 0.5 - now.position.y - now.eye,
+                hit.z + 0.5 - now.position.z,
+              ) > 4.5
+            )
+              return false;
             await aim({ x: p.x + 0.5, y: p.y + 0.5, z: p.z + 0.5 });
             await page.mouse.down();
           }

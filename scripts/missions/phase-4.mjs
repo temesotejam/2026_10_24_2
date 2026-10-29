@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { stashVillage } from "../lib/modern-storage.mjs";
 import { stockVillageFood } from "../lib/modern-resources.mjs";
+import { craftArchery } from "../lib/modern-archery.mjs";
 import { wait } from "../lib/survival-driver.mjs";
 export async function run({ page, d, a, meta, flush, chapter, out }) {
   const v = meta.village,
     events = (meta.huntingEvents ??= []);
+  const targets = { enderPearl: 13, string: (await d.count("bow")) ? 0 : 3, ammo: 36 };
 
   const h = createModernHunting(page, d, a, {
     onEvent: async (e) => {
@@ -60,7 +62,25 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       ) {
         const construction = await import("./phase-5.mjs");
         await construction.run({ page, d, a, meta, flush, chapter, out });
+        h.activate();
         d.setGoal("夜の敵との戦いに戻り、残りのエンダーパールを集めます。");
+      }
+      const dayTime = await page.evaluate(() => window.__mc.time() % 1200);
+      if (
+        meta.portal &&
+        (await d.count("blazeRod")) < 7 &&
+        dayTime >= 24 &&
+        dayTime < 420 &&
+        !state.creatures.some((m) => m.species === "wanderer" && m.hp > 0) &&
+        (await d.count("arrow")) + 4 * (await d.count("feather")) >= 36 &&
+        (await d.count("string")) >= 3
+      ) {
+        await craftArchery(d, 36);
+        targets.string = 0;
+        const expedition = await import("./phase-6.mjs");
+        await expedition.run({ page, d, a, meta, flush, chapter, out });
+        h.activate();
+        d.setGoal("ネザーから戻りました。残りのエンダーパールを集めます。");
       }
     },
     recover: async (target) => {
@@ -70,27 +90,35 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       await a.recover(target);
     },
   });
-  a.setGuard(h.guard);
+  if (!(await d.count("diamond_pick"))) {
+    d.setThreatHandler(null);
+    d.setGoal("復活地点から村へ戻り、落とした装備と素材を回収します。");
+    await page.keyboard.down("ControlLeft");
+    try {
+      await a.surfaceTo(meta.lastDeath);
+      await a.move(meta.lastDeath.x, meta.lastDeath.z);
+    } finally {
+      await page.keyboard.up("ControlLeft");
+    }
+    await wait(1000);
+    assert.ok(
+      await d.count("diamond_pick"),
+      "recover the actual equipment dropped during the night battle",
+    );
+  }
+  h.activate();
+  await h.guard();
+  await a.eat();
+  await a.recover(18);
   await stashVillage(page, d, a, v);
   d.setGoal("夜の敵と戦い、エンダーパール・弓の糸・矢の材料を集めます。");
-  meta.hunting = await h.gather(
-    { enderPearl: 13, string: 3, ammo: 36 },
-    { timeoutMs: 3000000, arrowReserve: Infinity, home: { x: v.x, y: v.y, z: v.z } },
-  );
+  meta.hunting = await h.gather(targets, {
+    timeoutMs: 3000000,
+    arrowReserve: 0,
+    home: { x: v.x, y: v.y, z: v.z },
+  });
   await a.surfaceTo({ x: v.x - 6, z: v.z + 1 });
-  const table = await d.station("table");
-  while ((await d.count("stick")) < 12) await d.make("sticks");
-  if (!(await d.count("bow"))) await d.make("bow");
-  while ((await d.count("arrow")) < 36 && (await d.count("feather")) && (await d.count("flint"))) {
-    if (!(await d.count("stick"))) await d.make("sticks");
-    await d.make("arrow");
-  }
-  await d.close();
-  await d.equip("iron_pick");
-  await d.mine(table);
-  await wait(600);
-  await d.collect("table", 1);
-  assert.ok((await d.count("arrow")) >= 32, "carry actual arrows for Nether and End");
+  await craftArchery(d, 36);
   await stockVillageFood(d, page, a, v, { breadTarget: 24, waitForGrowth: true });
   flush();
   await chapter("戦闘でエンダーパールと糸を集め、弓と矢を製作", 5);

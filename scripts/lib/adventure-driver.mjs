@@ -168,6 +168,7 @@ export function createAdventureDriver(page, d) {
       }
       for (let index = 0; index < route.length; index++) {
         const p = route[index];
+        let replan = false;
         const current = await d.info(),
           foot = Math.min(p.h, Math.floor(current.position.y) + 1);
         for (let y = foot; y <= Math.max(foot + 2, Math.floor(current.position.y) + 2); y++) {
@@ -175,9 +176,13 @@ export function createAdventureDriver(page, d) {
             block = await d.block(cell);
           if (![0, 5, 22, 23, 25, 31, 33, 40].includes(block)) {
             if (await d.count("iron_pick")) await d.equip("iron_pick");
-            await d.mine(cell);
+            if ((await d.mine(cell)) === false) {
+              replan = true;
+              break;
+            }
           }
         }
+        if (replan) break;
         const water = (await d.block({ x: p.x, y: p.h - 1, z: p.z })) === 5;
         if (water && current.position.y - p.h > 3) d.narrate("水へ降りて、先へ進みます。", 1);
         let end = index;
@@ -197,13 +202,14 @@ export function createAdventureDriver(page, d) {
             end++;
           }
         }
-        await d.walk(
+        const arrived = await d.walk(
           route[end].x + 0.5,
           route[end].z + 0.5,
           p.h > current.position.y + 0.1 || water,
           0.25,
           0,
         );
+        if (!arrived) break;
         index = end;
       }
     }

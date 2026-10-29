@@ -342,7 +342,7 @@ export function createModernPortal(page, d, a) {
       const countBefore = await d.count("obsidian");
       if (!pending) {
         await d.equip("diamond_pick");
-        await d.mine(next);
+        await d.mine(next, async () => (await d.block(next)) !== 28);
         mined.push({ ...next });
         pending = { ...next };
         await progress();

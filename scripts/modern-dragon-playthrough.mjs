@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { setInterval, clearInterval } from "node:timers";
-import { execFileSync } from "node:child_process";
+import { execFileSync, fork } from "node:child_process";
 import puppeteer from "puppeteer";
 import { createDriver, initialJourney, wait } from "./lib/survival-driver.mjs";
 import { createAdventureDriver } from "./lib/adventure-driver.mjs";
@@ -69,7 +69,7 @@ let cameraSampler;
 meta.narration ??= [];
 let lastNarrationAt = -Infinity;
 const lastTextAt = new Map();
-d.setNarrator((text, priority = 0) => {
+const recordNarration = (text, priority = 0) => {
   if (!part.startedAt) return;
   const seconds = (Date.now() - Date.parse(part.startedAt)) / 1000;
   const gap = priority >= 2 ? 4 : 6;
@@ -78,10 +78,13 @@ d.setNarrator((text, priority = 0) => {
   lastNarrationAt = seconds;
   lastTextAt.set(text, seconds);
   flush();
-});
+};
+d.setNarrator(recordNarration);
 const startRecording = async () => {
   const generation = await page.evaluate(() => window.__mc.adventure().generator);
   assert.equal(generation, 3, "new survival recording requires generator3");
+  part.generator = generation;
+  meta.generator = generation;
   await page.select("#render-scale", "0.5");
   part.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
   part.initial = await d.info();
@@ -146,9 +149,46 @@ try {
       await page.waitForFunction(() => window.__mc.mode() === "pointer");
     }
   }
-  for (let phase = Math.max(1, resume); phase < until; phase++) {
-    const mission = await import(`./missions/phase-${phase}.mjs?run=${Date.now()}`);
-    await mission.run({ page, d, a, meta, flush, chapter, out });
+  if (Math.max(1, resume) < until) {
+    const child = fork(
+      path.resolve("scripts/lib/recorded-mission-worker.mjs"),
+      [browser.wsEndpoint(), out, String(resume), String(until)],
+      { stdio: ["ignore", "inherit", "inherit", "ipc"] },
+    );
+    writeFileSync(path.join(out, "controller-pid"), String(child.pid));
+    let childFailure;
+    const requestCheckpoint = () => {
+      part.checkpointRequested = true;
+      child.kill("SIGTERM");
+    };
+    process.on("SIGUSR2", requestCheckpoint);
+    child.on("message", (message) => {
+      if (message.kind === "narration") recordNarration(message.text, message.priority);
+      if (message.kind === "failure") childFailure = message.error;
+      if (message.kind === "mission") {
+        for (const [key, value] of Object.entries(message.data))
+          if (!["parts", "narration", "chapters"].includes(key)) meta[key] = value;
+        if (meta.completed) delete meta.error;
+        flush();
+      }
+      if (message.kind === "chapter") {
+        meta.chapters.push({
+          name: message.name,
+          phase: message.phase,
+          part: part.path,
+          at: new Date().toISOString(),
+          seconds: (Date.now() - Date.parse(part.startedAt)) / 1000,
+        });
+        flush();
+      }
+    });
+    const code = await new Promise((resolve) =>
+      child.once("exit", (code, signal) =>
+        resolve(signal === "SIGTERM" && part.checkpointRequested ? 0 : (code ?? 1)),
+      ),
+    );
+    process.off("SIGUSR2", requestCheckpoint);
+    if (code !== 0) throw new Error(childFailure ?? `Mission controller exited with ${code}`);
   }
   await a.save();
   await wait(1000);
@@ -161,7 +201,15 @@ try {
     await d.releaseAttack();
     await page.keyboard.up("KeyW");
     await page.keyboard.up("Space");
-    await a.save();
+    if ((await d.info()).health <= 0) {
+      meta.lastDeath = (await d.info()).position;
+      (meta.deaths ??= []).push({ part: part.path, position: meta.lastDeath, cause: part.error });
+      await page.evaluate(() => document.exitPointerLock());
+      await page.locator("#save-button").click();
+      await page.waitForFunction(
+        () => document.querySelector("#save-status").textContent === "保存済み",
+      );
+    } else await a.save();
   } catch {
     /* Preserve failure evidence. */
   }

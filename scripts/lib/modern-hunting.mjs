@@ -3,7 +3,8 @@
  * Desired quantities are total inventory counts, not an assumed number of kills. */
 import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
-import { canMelee, clearSight, hostile, safeRetreat, solid } from "./combat-policy.mjs";
+import { huntingCoverPath, huntingPath } from "./hunting-path.mjs";
+import { canMelee, clearSight, hostile, safeRetreat } from "./combat-policy.mjs";
 
 const DROPS = {
   enderPearl: ["wanderer"],
@@ -44,7 +45,10 @@ export function createModernHunting(page, d, a, options = {}) {
     arrowsSpent: 0,
     patrols: 0,
     waits: 0,
+    swims: 0,
     blockedTargets: 0,
+    pathPlans: 0,
+    terrainFallbacks: 0,
   };
   const ignored = new Map();
   const corpses = [];
@@ -77,14 +81,55 @@ export function createModernHunting(page, d, a, options = {}) {
       return {
         position: p,
         eye: window.__mc.eyeHeight(),
+        eyeBlock: window.__mc.blockAt(
+          Math.floor(p.x),
+          Math.floor(p.y + window.__mc.eyeHeight()),
+          Math.floor(p.z),
+        ),
         health: window.__mc.health(),
         time: window.__mc.time(),
         dimension: state.dimension,
-        creatures: state.creatures,
+        creatures: state.creatures.map((mob) => {
+          const from = { ...mob.position, y: mob.position.y + 1.2 },
+            to = { ...p, y: p.y + 1 };
+          const dx = to.x - from.x,
+            dy = to.y - from.y,
+            dz = to.z - from.z,
+            length = Math.hypot(dx, dy, dz);
+          let visibleToPlayer = true;
+          if (length <= 16)
+            for (let t = 0.15; t < length - 0.2; t += 0.2) {
+              const id = window.__mc.blockAt(
+                Math.floor(from.x + (dx * t) / length),
+                Math.floor(from.y + (dy * t) / length),
+                Math.floor(from.z + (dz * t) / length),
+              );
+              if (![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id)) {
+                visibleToPlayer = false;
+                break;
+              }
+            }
+          return { ...mob, visibleToPlayer };
+        }),
         inventory: window.__mc.inventory(),
         cells,
       };
     });
+  async function surfaceForAir(state) {
+    if (state.eyeBlock !== 5) return false;
+    const open = await page.evaluate(() => !document.querySelector("#inventory-panel").hidden);
+    if (open) await d.close();
+    await release();
+    d.narrate("水中なので、作業より先に水面へ泳いで息をします。", 2);
+    try {
+      await page.keyboard.down("Space");
+      await wait(1000);
+      stats.swims++;
+    } finally {
+      await page.keyboard.up("Space");
+    }
+    return true;
+  }
   const blockQuery = (state) => {
     const cells = new Map(state.cells);
     return (x, y, z) => cells.get(`${x},${y},${z}`) ?? 0;
@@ -95,7 +140,9 @@ export function createModernHunting(page, d, a, options = {}) {
       .filter(
         (m) =>
           hostile(m) &&
-          ((ignored.get(m.id) ?? 0) < Date.now() ||
+          m.visibleToPlayer !== false &&
+          (m.species === "skeleton" ||
+            (ignored.get(m.id) ?? 0) < Date.now() ||
             canMelee(state.position, state.eye, m.position)) &&
           distance(m.position, state.position) < (m.species === "skeleton" ? 14 : 5.5),
       )
@@ -153,12 +200,55 @@ export function createModernHunting(page, d, a, options = {}) {
     await record("mob-defeated", { id: mob.id, species: mob.species, position: mob.position });
     return true;
   };
-  async function stepToward(state, target, away = false) {
-    const at = state.position,
-      blockAt = blockQuery(state),
-      y = Math.round(at.y);
+  let terrainCache = null;
+  async function combatTerrain(state) {
+    const p = state.position;
+    if (
+      !terrainCache ||
+      Date.now() - terrainCache.at > 400 ||
+      Math.hypot(p.x - terrainCache.player.x, p.z - terrainCache.player.z) > 1.5 ||
+      Math.abs(p.y - terrainCache.player.y) > 1
+    ) {
+      const grid = await page.evaluate(
+        ({ p, ys }) => {
+          const minX = Math.floor(p.x) - 14,
+            minZ = Math.floor(p.z) - 14,
+            minY = Math.max(1, Math.floor(Math.min(p.y - 4, ...ys.map((y) => y - 1)))),
+            maxY = Math.min(95, Math.floor(Math.max(p.y + 6, ...ys.map((y) => y + 3)))),
+            blocks = [];
+          for (let y = minY; y <= maxY; y++)
+            for (let z = minZ; z < minZ + 29; z++)
+              for (let x = minX; x < minX + 29; x++) blocks.push(window.__mc.blockAt(x, y, z));
+          return { minX, minZ, minY, maxY, blocks };
+        },
+        {
+          p,
+          ys: state.creatures
+            .filter((mob) => distance(mob.position, p) <= 16)
+            .map((mob) => mob.position.y),
+        },
+      );
+      terrainCache = { at: Date.now(), player: { ...p }, grid };
+    }
+    const grid = terrainCache.grid;
+    return {
+      minimumY: grid.minY + 1,
+      maximumY: grid.maxY - 2,
+      blockAt: (x, y, z) =>
+        x < grid.minX ||
+        x >= grid.minX + 29 ||
+        z < grid.minZ ||
+        z >= grid.minZ + 29 ||
+        y < grid.minY ||
+        y > grid.maxY
+          ? 8
+          : grid.blocks[((y - grid.minY) * 29 + z - grid.minZ) * 29 + x - grid.minX],
+    };
+  }
+  async function stepToward(state, target, away = false, reposition = false) {
+    const at = state.position;
     if (away) {
-      const retreat = safeRetreat(at, target.position, blockAt);
+      const retreat = safeRetreat(at, target.position, blockQuery(state));
       if (!retreat) return false;
       await d.aim({ x: retreat.x, y: at.y + state.eye, z: retreat.z }, 0);
       await page.keyboard.down("ControlLeft");
@@ -168,53 +258,110 @@ export function createModernHunting(page, d, a, options = {}) {
       await release();
       return true;
     }
-    const choices = [];
-    for (let i = 0; i < 8; i++) {
-      const angle = (i * Math.PI) / 4,
-        dx = Math.cos(angle),
-        dz = Math.sin(angle);
-      const x = Math.floor(at.x + dx * 0.85),
-        z = Math.floor(at.z + dz * 0.85);
-      const height = [y, y + 1, y - 1].find(
-        (h) =>
-          solid(blockAt(x, h - 1, z)) &&
-          !solid(blockAt(x, h, z)) &&
-          !solid(blockAt(x, h + 1, z)) &&
-          ![5, 26, 43].includes(blockAt(x, h, z)) &&
-          ![5, 26, 43].includes(blockAt(x, h - 1, z)),
-      );
-      if (height === undefined) continue;
-      choices.push({
-        x: at.x + dx * 1.3,
-        z: at.z + dz * 1.3,
-        jump: height > y,
-        score:
-          Math.hypot(at.x + dx - target.position.x, at.z + dz - target.position.z) +
-          Math.abs(height - target.position.y) * 0.3,
+    const terrain = await combatTerrain(state);
+    const plan = huntingPath(at, target.position, terrain.blockAt, {
+      ...terrain,
+      radius: 14,
+      skipStartGoal: reposition,
+    });
+    stats.pathPlans++;
+    if (options.debugNavigation)
+      await record("combat-navigation-plan", {
+        player: at,
+        target: target.position,
+        next: plan.path[0],
+        reached: plan.reached,
+        visited: plan.visited,
+        path: plan.path.slice(0, 4),
       });
-    }
-    choices.sort((x, y) => x.score - y.score);
-    if (!choices.length) return false;
-    const next = choices[0];
+    const next = plan.path[0];
+    if (!next) return false;
+    return walkWaypoint(state, next);
+  }
+  async function walkWaypoint(state, next) {
+    const at = state.position,
+      travel = Math.hypot(next.x - at.x, next.z - at.z);
+    if (travel < 0.12 && Math.abs(next.y - at.y) < 0.2) return false;
     await d.aim({ x: next.x, y: at.y + state.eye, z: next.z }, 0);
+    if (next.y > at.y + 0.2) {
+      await page.keyboard.down("Space");
+      await wait(160);
+    }
     await page.keyboard.down("ControlLeft");
     await page.keyboard.down("KeyW");
-    if (next.jump) await page.keyboard.down("Space");
-    await wait(140);
+    await wait(Math.max(35, Math.min(140, (travel / 5.6) * 850)));
     await release();
     return true;
+  }
+  const shootingEnemies = (state) =>
+    alive(state).filter(
+      (mob) =>
+        mob.species === "skeleton" &&
+        mob.visibleToPlayer !== false &&
+        distance(mob.position, state.position) < 15,
+    );
+  async function takeCover(state) {
+    const until = Date.now() + 6500;
+    while (Date.now() < until) {
+      const shooters = shootingEnemies(state);
+      if (!shooters.length) return true;
+      const terrain = await combatTerrain(state);
+      const route = huntingCoverPath(state.position, shooters, terrain.blockAt, {
+        ...terrain,
+        radius: 14,
+      });
+      if (!route.path.length) break;
+      if (!(await walkWaypoint(state, route.path[0]))) break;
+      state = await observe();
+      assert.ok(state.health > 0, "survive withdrawal from ranged enemies");
+    }
+    return !shootingEnemies(await observe()).length;
+  }
+  async function shoot(state, mob) {
+    const before = await d.count("arrow");
+    await d.equip("bow");
+    const range = distance(mob.position, state.position),
+      t = range / 22;
+    await d.aim(
+      {
+        x: mob.position.x + mob.velocity.x * t,
+        y: mob.position.y + 1 + 1.2 * t * t,
+        z: mob.position.z + mob.velocity.z * t,
+      },
+      0,
+    );
+    await a.right();
+    await wait(550);
+    stats.arrowsSpent += Math.max(0, before - (await d.count("arrow")));
+    await enqueueKill(mob, await observe());
+  }
+  async function terrainStep(state, mob) {
+    // A closed doorway can require real digging. Limit fallback to the next
+    // column; never hand a long pursuit to an unobserved blocking operation.
+    const p = state.position,
+      dx = mob.position.x - p.x,
+      dz = mob.position.z - p.z;
+    const next = { x: Math.floor(p.x), z: Math.floor(p.z) };
+    if (Math.abs(dx) >= Math.abs(dz)) next.x += Math.sign(dx);
+    else next.z += Math.sign(dz);
+    stats.terrainFallbacks++;
+    await a.surfaceTo(next);
+    terrainCache = null;
   }
   async function fight(id) {
     if (fighting) return false;
     fighting = true;
     const until = Date.now() + (currentConfig.fightTimeoutMs ?? 15000);
     let bestRange = Infinity,
-      lastProgress = Date.now();
+      lastProgress = Date.now(),
+      failedSwings = 0,
+      previousPosition = null;
     try {
       await release();
       while (Date.now() < until) {
         const state = await observe();
         assert.ok(state.health > 0, "survive ordinary-input hunting combat");
+        if (await surfaceForAir(state)) continue;
         const primary = alive(state).find((m) => m.id === id);
         if (!primary) return true;
         const danger = nearestDanger(state);
@@ -237,9 +384,26 @@ export function createModernHunting(page, d, a, options = {}) {
           await stepToward(state, mob, true);
           await a.eat();
         }
+        const reserve = currentConfig.arrowReserve ?? options.arrowReserve ?? 32;
+        const arrows = state.inventory
+          .filter((stack) => stack?.id === "arrow")
+          .reduce((n, stack) => n + stack.count, 0);
+        const bowReady = state.inventory.some((stack) => stack?.id === "bow") && arrows > reserve;
+        const rangedTarget = ["skeleton", "ember"].includes(mob.species);
+        if (
+          rangedTarget &&
+          (range > 3 || Math.abs(mob.position.y - state.position.y) > 1) &&
+          bowReady &&
+          (await rangedVisible(state, mob))
+        ) {
+          await shoot(state, mob);
+          lastProgress = Date.now();
+          continue;
+        }
         await chooseWeapon(state);
         if (
           canMelee(state.position, state.eye, mob.position) &&
+          failedSwings < 2 &&
           clearSight(
             { ...state.position, y: state.position.y + state.eye },
             { ...mob.position, y: mob.position.y + 1 },
@@ -253,7 +417,11 @@ export function createModernHunting(page, d, a, options = {}) {
           stats.meleeSwings++;
           const after = await observe();
           await enqueueKill(mob, after);
-          lastProgress = Date.now();
+          const remaining = alive(after).find((candidate) => candidate.id === mob.id);
+          if (!remaining || remaining.hp < mob.hp) {
+            lastProgress = Date.now();
+            failedSwings = 0;
+          } else failedSwings++;
           if (!alive(after).some((m) => m.id === id)) return true;
         } else {
           const reserve = currentConfig.arrowReserve ?? options.arrowReserve ?? 32;
@@ -282,14 +450,34 @@ export function createModernHunting(page, d, a, options = {}) {
             stats.arrowsSpent++;
             await enqueueKill(mob, await observe());
             lastProgress = Date.now();
-          } else if (!(await stepToward(state, mob)) || Date.now() - lastProgress > 4500) {
-            ignored.set(id, Date.now() + 20000);
-            stats.blockedTargets++;
-            return false;
+          } else {
+            const moved = await stepToward(state, mob, false, failedSwings >= 2);
+            if (moved) {
+              if (previousPosition && distance(state.position, previousPosition) > 0.15)
+                failedSwings = 0;
+              previousPosition = { ...state.position };
+            }
+            if (!moved || Date.now() - lastProgress > 2500) {
+              const latest = await observe();
+              if (shootingEnemies(latest).length) {
+                const covered = await takeCover(latest);
+                if (!covered)
+                  throw new Error(
+                    "Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+                  );
+                ignored.set(id, Date.now() + 20000);
+                await record("withdrew-for-ranged-equipment", { species: mob.species });
+                return false;
+              }
+              await terrainStep(latest, mob);
+              failedSwings = 0;
+              lastProgress = Date.now();
+            }
           }
         }
       }
-      ignored.set(id, Date.now() + 30000);
+      const remaining = alive(await observe()).find((mob) => mob.id === id);
+      if (remaining?.species !== "skeleton") ignored.set(id, Date.now() + 30000);
       stats.blockedTargets++;
       return false;
     } finally {
@@ -308,11 +496,12 @@ export function createModernHunting(page, d, a, options = {}) {
             m.id === focus.id &&
             distance(m.position, state.position) < 4.5 &&
             ((ignored.get(m.id) ?? 0) < Date.now() ||
-              canMelee(state.position, state.eye, m.position)),
+              (m.visibleToPlayer !== false && canMelee(state.position, state.eye, m.position))),
         );
       return danger ?? selected;
     };
     const saved = await observe();
+    if (await surfaceForAir(saved)) return true;
     let target = pickTarget(saved);
     if (!target) {
       const idle = await page.evaluate(() => ({
@@ -486,7 +675,8 @@ export function createModernHunting(page, d, a, options = {}) {
           .filter((m) => missing.some((item) => DROPS[item].includes(m.species)))
           .filter(
             (m) =>
-              (ignored.get(m.id) ?? 0) < Date.now() || distance(m.position, latest.position) < 3,
+              (ignored.get(m.id) ?? 0) < Date.now() ||
+              (m.visibleToPlayer !== false && distance(m.position, latest.position) < 3),
           )
           .sort(
             (x, y) => distance(x.position, latest.position) - distance(y.position, latest.position),
