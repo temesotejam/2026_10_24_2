@@ -1,3 +1,4 @@
+import { PlayerAvatar } from "./render/player-avatar";
 import { portalInterior } from "./survival/adventure";
 import { dragonPosition } from "./survival/dragon";
 import { structuresNear, stronghold, strongholdEntrance } from "./world/adventure-terrain";
@@ -37,7 +38,7 @@ import { affectedChunkCoords } from "./world/coords";
 import { SurvivalSession, newSession, type SessionState } from "./survival/session";
 import { SaveRepository, saveKey, parseSave, encodeSave } from "./save/persistence";
 import { InventoryView } from "./ui/inventory";
-import { EntityView, createAvatar } from "./entities/view";
+import { EntityView } from "./entities/view";
 import { SkyBodies } from "./render/sky-bodies";
 import { HeldItemView } from "./render/held-item";
 import { buildLightField, LIGHT_SIZE } from "./world/light";
@@ -80,6 +81,7 @@ declare global {
       gameMode: () => string;
       time: () => number;
       cameraFov: () => number;
+      cameraView: () => { perspective: number; distance: number };
       adventure: () => unknown;
       effects: () => {
         fragments: number;
@@ -298,7 +300,12 @@ async function boot(): Promise<void> {
   fluids.wake(player.position);
   let lastFluidWake = { ...player.position };
   player.thirdPersonEnabled = view.kind === "webgl";
-  const avatar = entityScene ? createAvatar(entityScene) : null;
+  if (
+    player.thirdPersonEnabled &&
+    new URLSearchParams(location.search).get("view") === "third-person"
+  )
+    player.perspective = 1;
+  const avatar = entityScene ? new PlayerAvatar(entityScene) : null;
   player.canSprint = () => session.creative || data.vitals.hunger > 6;
   const hotbar = new Hotbar(hotbarContainer, session);
   const adventure = new Adventure(session);
@@ -701,7 +708,7 @@ async function boot(): Promise<void> {
     },
     pitch: () => player.eyePitch,
     yaw: () => player.eyeYaw,
-    eyeHeight: () => view.camera.position.y - player.position.y,
+    eyeHeight: () => player.eyePosition.y - player.position.y,
     mode: () => player.mode,
     renderer: () => view.kind,
     touch: () => touchControls !== null,
@@ -713,6 +720,7 @@ async function boot(): Promise<void> {
     gameMode: () => data.mode,
     time: () => data.time,
     cameraFov: () => view.camera.fov,
+    cameraView: () => ({ perspective: player.perspective, distance: player.cameraSeparation }),
     adventure: () => ({
       ...structuredClone(adventure.state),
       cast: adventure.cast ? structuredClone(adventure.cast) : null,
@@ -775,9 +783,7 @@ async function boot(): Promise<void> {
     }
     player.update(dt);
     if (avatar) {
-      avatar.visible = player.perspective !== 0;
-      avatar.position.set(player.position.x, player.position.y, player.position.z);
-      avatar.rotation.y = player.eyeYaw;
+      avatar.update(player, session.held, dt);
     }
     hand?.update(session.held, player.perspective === 0, player.position);
     interaction.update(dt);

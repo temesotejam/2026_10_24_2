@@ -194,26 +194,3 @@ export class EntityView {
       }
   }
 }
-
-/** Original single-player avatar, deliberately made from simple colored boxes. */
-export function createAvatar(scene: THREE.Scene): THREE.Group {
-  const avatar = new THREE.Group();
-  for (const [w, h, d, x, y, z, color] of [
-    [0.5, 0.5, 0.5, 0, 1.55, 0, 0xc8a180],
-    [0.55, 0.65, 0.3, 0, 1, 0, 0x637b76],
-    [0.2, 0.7, 0.2, -0.4, 1, 0, 0xc8a180],
-    [0.2, 0.7, 0.2, 0.4, 1, 0, 0xc8a180],
-    [0.22, 0.65, 0.25, -0.16, 0.325, 0, 0x4a5672],
-    [0.22, 0.65, 0.25, 0.16, 0.325, 0, 0x4a5672],
-  ]) {
-    const part = new THREE.Mesh(
-      new THREE.BoxGeometry(w, h, d),
-      new THREE.MeshLambertMaterial({ color: color ?? 0xc8a180 }),
-    );
-    part.position.set(x ?? 0, y ?? 0, z ?? 0);
-    avatar.add(part);
-  }
-  scene.add(avatar);
-  avatar.visible = false;
-  return avatar;
-}

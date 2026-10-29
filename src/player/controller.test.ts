@@ -16,7 +16,9 @@ function setup(coarse = true) {
   vi.stubGlobal("document", doc);
   vi.stubGlobal("window", win);
   const camera = new THREE.PerspectiveCamera();
-  const world = { getBlock: (_x: number, y: number) => (y <= 1 ? BlockId.STONE : BlockId.AIR) };
+  const world = {
+    getBlock: (_x: number, y: number, _z: number) => (y <= 1 ? BlockId.STONE : BlockId.AIR),
+  };
   const canvas = Object.assign(new EventTarget(), {
     requestPointerLock: vi.fn(() => Promise.resolve()),
   });
@@ -29,7 +31,7 @@ function setup(coarse = true) {
   function advance() {
     for (let i = 0; i < 60; i++) player.update(1 / 60);
   }
-  return { player, camera, doc, win, play, key, advance, canvas };
+  return { player, camera, doc, win, play, key, advance, canvas, world };
 }
 
 afterEach(() => {
@@ -123,15 +125,51 @@ it("F5 cycles behind/front/first person without moving the physical player or ai
   expect(key("F5").defaultPrevented).toBe(true);
   player.update(1 / 60);
   expect(player.perspective).toBe(1);
-  expect(camera.position.z).toBeCloseTo(start.z + 3.5);
+  expect(camera.position.z).toBeCloseTo(start.z + 4);
   key("F5");
   player.update(1 / 60);
   expect(player.perspective).toBe(2);
-  expect(camera.position.z).toBeCloseTo(start.z - 3.5);
+  expect(camera.position.z).toBeCloseTo(start.z - 4);
   key("F5");
   player.update(1 / 60);
   expect(player.perspective).toBe(0);
   expect(camera.position.z).toBeCloseTo(start.z);
   expect(player.position.x).toBe(start.x);
   expect(player.lookDirection).toEqual(aim);
+});
+
+it("keeps camera corners in front of a wall that misses the center ray", () => {
+  const { player, camera, play, key, world } = setup();
+  player.restore({ x: 0.9, y: 2, z: 0.5 });
+  vi.spyOn(world, "getBlock").mockImplementation((x, y, z) =>
+    y <= 1 || (x === 1 && z === 2) ? BlockId.STONE : BlockId.AIR,
+  );
+  play.dispatchEvent(new Event("click"));
+  key("F5");
+  player.update(1 / 60);
+  expect(camera.position.z).toBeLessThan(1.8);
+  expect(player.cameraSeparation).toBeLessThan(1.3);
+  expect(player.eyePosition.y - player.position.y).toBe(PLAYER_EYE_HEIGHT);
+});
+
+it("contracts immediately at a wall and eases outward after it is removed", () => {
+  const { player, play, key, world } = setup();
+  let blocked = true;
+  vi.spyOn(world, "getBlock").mockImplementation((_x, y, z) =>
+    y <= 1 || (blocked && z === 2) ? BlockId.STONE : BlockId.AIR,
+  );
+  play.dispatchEvent(new Event("click"));
+  key("F5");
+  player.update(1 / 60);
+  const close = player.cameraSeparation;
+  expect(close).toBeLessThan(1.3);
+  blocked = false;
+  player.update(1 / 60);
+  expect(player.cameraSeparation).toBeGreaterThan(close);
+  expect(player.cameraSeparation).toBeLessThan(2);
+  for (let i = 0; i < 90; i++) player.update(1 / 60);
+  expect(player.cameraSeparation).toBeCloseTo(4, 3);
+  blocked = true;
+  player.update(1 / 60);
+  expect(player.cameraSeparation).toBeCloseTo(close);
 });

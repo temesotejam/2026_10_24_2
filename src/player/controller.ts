@@ -55,6 +55,8 @@ export class PlayerController {
   perspective: 0 | 1 | 2 = 0;
   thirdPersonEnabled = true;
   onMenu: (() => void) | undefined;
+  private cameraDistance = 4;
+  private lastPerspective = 0;
   private yaw = 0;
   private pitch = 0;
   private readonly pressed = new Set<string>();
@@ -262,7 +264,7 @@ export class PlayerController {
     const cos = Math.cos(this.pitch);
     return { x: -Math.sin(this.yaw) * cos, y: Math.sin(this.pitch), z: -Math.cos(this.yaw) * cos };
   }
-  private syncCamera(): void {
+  private syncCamera(dt = 0): void {
     const eye = this.eyePosition;
     this.camera.position.set(eye.x, eye.y, eye.z);
     this.camera.rotation.x = this.pitch;
@@ -271,10 +273,24 @@ export class PlayerController {
       const dir = this.lookDirection;
       const sign = this.perspective === 1 ? -1 : 1;
       const behind = { x: dir.x * sign, y: dir.y * sign, z: dir.z * sign };
-      const obstacle = raycastVoxels(eye, behind, 3.5, (x, y, z) =>
-        isSolid(this.world.getBlock(x, y, z)),
-      );
-      const distance = obstacle ? Math.max(0.2, obstacle.distance - 0.2) : 3.5;
+      // Test the camera's volume, not only its center ray. This also protects
+      // the near-plane corners when turning beside a wall or under a ceiling.
+      let allowed = 4;
+      for (const x of [-0.15, 0.15])
+        for (const y of [-0.15, 0.15])
+          for (const z of [-0.15, 0.15]) {
+            const hit = raycastVoxels(
+              { x: eye.x + x, y: eye.y + y, z: eye.z + z },
+              behind,
+              4,
+              (bx, by, bz) => isSolid(this.world.getBlock(bx, by, bz)),
+            );
+            if (hit) allowed = Math.min(allowed, Math.max(0, hit.distance - 0.18));
+          }
+      if (this.lastPerspective !== this.perspective || allowed < this.cameraDistance)
+        this.cameraDistance = allowed;
+      else this.cameraDistance += (allowed - this.cameraDistance) * (1 - Math.exp(-8 * dt));
+      const distance = this.cameraDistance;
       this.camera.position.addScaledVector(
         new THREE.Vector3(behind.x, behind.y, behind.z),
         distance,
@@ -284,6 +300,15 @@ export class PlayerController {
         this.camera.rotation.x = -this.pitch;
       }
     }
+    this.lastPerspective = this.perspective;
+  }
+
+  get cameraSeparation(): number {
+    return this.perspective === 0 ? 0 : this.cameraDistance;
+  }
+
+  get isCrouching(): boolean {
+    return this.crouching;
   }
 
   update(dt: number): void {
@@ -300,7 +325,7 @@ export class PlayerController {
         );
       });
     }
-    this.syncCamera();
+    this.syncCamera(dt);
   }
 
   pause(): void {

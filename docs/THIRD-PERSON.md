@@ -1,0 +1,23 @@
+# 三人称カメラと録画
+
+F5で一人称→背後→正面→一人称を切り替えます。WebGL版ではURLに `view=third-person` を指定して背後視点から開始できます。CPU描画では一人称を使います。
+
+## 参考にしたMinecraft関連資料
+
+- [FabricMC Yarn 1.21.1 / Camera mappings](https://github.com/FabricMC/yarn/blob/33ac4315404792c41a162869b19161f475b89bfb/mappings/net/minecraft/client/render/Camera.mapping): Minecraft Java版のカメラに `thirdPerson`、`inverseView`、`clipToSpace`、独立した目の高さがあることを確認しました。マッピングは処理の名前と引数であり、実装コードや映像ではありません。
+- [Prismarine Viewer / lib/index.js](https://github.com/PrismarineJS/prismarine-viewer/blob/8a3ce60b40f1ff7a26422a8f8904fbedbe808688/lib/index.js): 実際のMinecraft世界を表示する外部ビューアの、一人称とキャラクターを外から見る視点の分離、プレイヤー位置を追うターゲット更新を確認しました。こちらは離れた軌道カメラなので、その20ブロックの距離は採用していません。
+
+Minecraft本体の新しい三人称プレイ映像との直接比較は、この環境では行っていません。公式サイトとMinecraft Wikiへのアクセスが403だったため、上記の公開資料を確認し、独自ゲームのブラウザ画面で見え方を検証しました。コード・スキン・モデルはコピーしていません。
+
+## 実装
+
+- 基本距離4ブロック。8本の角のレイで壁・床・天井を検出し、即座に近づき、障害物がなくなると滑らかに離れます。
+- 体は実際の位置・向きで描画。移動距離から手足を振り、頭は照準の上下へ向き、持ち物と採掘・攻撃の腕の動きを表示します。
+- 近すぎる場合は体を非表示にして視界を確保します。狭い坑道では一人称に近い映像になります。壁越しに地形を表示しません。
+- 攻撃・採掘・設置の射程と照準はプレイヤーの実際の目から計算し、カメラの位置を変えても届く距離は変わりません。自動操作の目の高さの観測も表示カメラから分離しました。
+
+## 撮り直し
+
+`PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node scripts/dragon-playthrough.mjs --third-person --out visual-check/dragon-playthrough/run-6-third-person`
+
+新規プロファイル・所持品ゼロから通常操作で記録し、`render-narrated-playthrough.mjs` で日本語字幕と1.5倍速を付けます。途中の通常セーブ再開は各パートに記録します。`cameraSamples` は録画中の実際の視点と距離の読み取りです。

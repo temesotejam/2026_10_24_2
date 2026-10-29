@@ -14,6 +14,8 @@ const resume = Number(option("--resume", "0"));
 const url = new URL(option("--url", "http://127.0.0.1:4173/2026_10_24_2/"));
 url.searchParams.set("seed", "2026");
 url.searchParams.set("mode", "survival");
+const thirdPerson = args.includes("--third-person");
+if (thirdPerson) url.searchParams.set("view", "third-person");
 mkdirSync(out, { recursive: true });
 const profile = path.join(out, "profile");
 assert.ok(resume > 0 || !existsSync(profile), "new run must use a genuinely fresh browser profile");
@@ -27,6 +29,7 @@ const meta =
         fixtureImports: false,
         stateMutationAPI: false,
         speedRequested: 1.5,
+        perspective: thirdPerson ? "third-person-behind" : "first-person",
         parts: [],
         chapters: [],
       };
@@ -57,6 +60,7 @@ await page.setViewport({ width: 1280, height: 720 });
 const d = createDriver(page, out),
   a = createAdventureDriver(page, d);
 let recorder;
+let cameraSampler;
 meta.narration ??= [];
 let lastNarrationAt = -Infinity;
 const lastTextAt = new Map();
@@ -75,6 +79,15 @@ const startRecording = async () => {
   part.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
   part.initial = await d.info();
   part.dimension = (await a.adventure()).dimension;
+  part.camera = await page.evaluate(() => window.__mc.cameraView());
+  part.cameraSamples = [];
+  cameraSampler = setInterval(async () => {
+    try {
+      part.cameraSamples.push(await page.evaluate(() => window.__mc.cameraView()));
+    } catch {
+      /* The final sample may overlap browser shutdown. */
+    }
+  }, 2000);
   part.startedAt = new Date().toISOString();
   flush();
   recorder = await page.screencast({
@@ -87,7 +100,9 @@ const startRecording = async () => {
   });
   d.setGoal(
     resume === 0
-      ? "所持品ゼロで出発。まずは木を探して材料を集めます。"
+      ? thirdPerson
+        ? "三人称で出発。所持品ゼロから、ドラゴン討伐を目指します。"
+        : "所持品ゼロで出発。まずは木を探して材料を集めます。"
       : "通常セーブから再開し、冒険を続けます。",
   );
 };
@@ -502,6 +517,7 @@ try {
   );
   process.exitCode = 1;
 } finally {
+  clearInterval(cameraSampler);
   if (recorder) await recorder.stop();
   part.finishedAt = new Date().toISOString();
   flush();
