@@ -61,7 +61,7 @@ try {
     (fixture.edits[key] ??= {})[index] = id;
   };
   for (let x = -12; x <= 12; x++)
-    for (let z = -12; z <= 12; z++) for (let y = 33; y <= 40; y++) put(x, y, z, y === 33 ? 3 : 0);
+    for (let z = -12; z <= 12; z++) for (let y = 33; y < 96; y++) put(x, y, z, y === 33 ? 3 : 0);
   for (const [x, z] of [
     [-5, 0],
     [5, 0],
