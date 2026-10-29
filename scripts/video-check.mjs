@@ -8,7 +8,7 @@ const url = at >= 0 ? process.argv[at + 1] : "http://127.0.0.1:4173/2026_10_24_2
 const option = (key, fallback) =>
   process.argv.includes(key) ? process.argv[process.argv.indexOf(key) + 1] : fallback;
 const file = option("--file", null),
-  expectedDuration = Number(option("--duration", "606.366667"));
+  expectedDuration = Number(option("--duration", "646.566667"));
 const out = file ? "visual-check/video-narrated" : "visual-check/video";
 mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });

@@ -1,0 +1,2736 @@
+{
+  "seed": 2026,
+  "mode": "survival",
+  "url": "http://127.0.0.1:4173/2026_10_24_2/?seed=2026&mode=survival&view=third-person",
+  "fixtureImports": false,
+  "stateMutationAPI": false,
+  "speedRequested": 1.5,
+  "perspective": "third-person-behind",
+  "parts": [
+    {
+      "path": "part-1.mp4",
+      "resumePhase": 0,
+      "startedAt": "2026-10-29T08:15:26.073Z",
+      "completed": false,
+      "sourceCommit": "e9b912395780c823a1c83d853c4d91195c89e188",
+      "assets": ["./assets/index-DVRa4iFf.js"],
+      "initial": {
+        "position": {
+          "x": 0.5,
+          "y": 35,
+          "z": 0.5
+        },
+        "eye": 1.6199999999999974,
+        "pitch": 0,
+        "yaw": 0,
+        "inventory": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "health": 20
+      },
+      "dimension": "overworld",
+      "camera": {
+        "perspective": 1,
+        "distance": 0.16999999999999998
+      },
+      "cameraSamples": [
+        {
+          "perspective": 1,
+          "distance": 3.9994226923223843
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999707847
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 2.6473045744894317
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999998667049557
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999805
+        },
+        {
+          "perspective": 1,
+          "distance": 2.6473045744894477
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999462249410533
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999939435
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2817840304229158
+        },
+        {
+          "perspective": 1,
+          "distance": 0.9850317356333889
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999313751925043
+        },
+        {
+          "perspective": 1,
+          "distance": 3.997501819430333
+        },
+        {
+          "perspective": 1,
+          "distance": 1.953742064206936
+        },
+        {
+          "perspective": 1,
+          "distance": 3.7726706274271424
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999982837779
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999999998
+        },
+        {
+          "perspective": 1,
+          "distance": 2.261163798613931
+        },
+        {
+          "perspective": 1,
+          "distance": 1.1736302308737592
+        },
+        {
+          "perspective": 1,
+          "distance": 1.1736302308737592
+        },
+        {
+          "perspective": 1,
+          "distance": 1.1808995079435747
+        },
+        {
+          "perspective": 1,
+          "distance": 1.4679625904666096
+        },
+        {
+          "perspective": 1,
+          "distance": 3.0441652012927123
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999967782683273
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999995856
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 0.3336466577490492
+        },
+        {
+          "perspective": 1,
+          "distance": 0.3469561840637689
+        },
+        {
+          "perspective": 1,
+          "distance": 0.3469561840637689
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.12785878384143218
+        },
+        {
+          "perspective": 1,
+          "distance": 0.07435724525994392
+        },
+        {
+          "perspective": 1,
+          "distance": 0.44108990526658287
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1321975481378453
+        },
+        {
+          "perspective": 1,
+          "distance": 1.9382179405932132
+        },
+        {
+          "perspective": 1,
+          "distance": 2.345530284671185
+        },
+        {
+          "perspective": 1,
+          "distance": 1.7803582568336702
+        },
+        {
+          "perspective": 1,
+          "distance": 0.129095511475043
+        },
+        {
+          "perspective": 1,
+          "distance": 0.129095511475043
+        },
+        {
+          "perspective": 1,
+          "distance": 1.1673508715954406
+        },
+        {
+          "perspective": 1,
+          "distance": 1.1842059475392244
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1278822580979488
+        },
+        {
+          "perspective": 1,
+          "distance": 0.07462239967215678
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869412782899
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480451
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.1284869453480459
+        },
+        {
+          "perspective": 1,
+          "distance": 0.12360046400946516
+        },
+        {
+          "perspective": 1,
+          "distance": 0.05001146656921579
+        },
+        {
+          "perspective": 1,
+          "distance": 1.7320627291819868
+        },
+        {
+          "perspective": 1,
+          "distance": 3.049557243905817
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999990090130075
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999998885
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 0.3503262148848825
+        },
+        {
+          "perspective": 1,
+          "distance": 1.3696151495032585
+        },
+        {
+          "perspective": 1,
+          "distance": 2.5689443934151472
+        },
+        {
+          "perspective": 1,
+          "distance": 1.3158271726025372
+        },
+        {
+          "perspective": 1,
+          "distance": 0.08721956021288672
+        },
+        {
+          "perspective": 1,
+          "distance": 0.07462239967218232
+        },
+        {
+          "perspective": 1,
+          "distance": 1.0865573498452377
+        },
+        {
+          "perspective": 1,
+          "distance": 0.04864894791612865
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2914777996165923
+        },
+        {
+          "perspective": 1,
+          "distance": 1.276233961382526
+        },
+        {
+          "perspective": 1,
+          "distance": 0.9172354150779397
+        },
+        {
+          "perspective": 1,
+          "distance": 0.04656547675798406
+        },
+        {
+          "perspective": 1,
+          "distance": 0.01649735383274802
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2914327679451019
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2887965222965518
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2762459702273419
+        },
+        {
+          "perspective": 1,
+          "distance": 0.9178441141389836
+        },
+        {
+          "perspective": 1,
+          "distance": 0.04974359084668347
+        },
+        {
+          "perspective": 1,
+          "distance": 0.04737606809532171
+        },
+        {
+          "perspective": 1,
+          "distance": 1.0502173637010837
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2896828864536811
+        },
+        {
+          "perspective": 1,
+          "distance": 1.162867025408758
+        },
+        {
+          "perspective": 1,
+          "distance": 0.048674414457382846
+        },
+        {
+          "perspective": 1,
+          "distance": 0
+        },
+        {
+          "perspective": 1,
+          "distance": 1.0502173637010979
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2874724472216923
+        },
+        {
+          "perspective": 1,
+          "distance": 1.1626624177808327
+        },
+        {
+          "perspective": 1,
+          "distance": 0.049426252000278406
+        },
+        {
+          "perspective": 1,
+          "distance": 0.01649738853058683
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2913457798371986
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999733088338
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999999966
+        },
+        {
+          "perspective": 1,
+          "distance": 2.5311837566014272
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9998541655962248
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999754974
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 2.9369864984405254
+        },
+        {
+          "perspective": 1,
+          "distance": 1.8873379965520438
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999982383583292
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999982627
+        },
+        {
+          "perspective": 1,
+          "distance": 1.4184237474174421
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999998559902642
+        },
+        {
+          "perspective": 1,
+          "distance": 3.8946850439334417
+        },
+        {
+          "perspective": 1,
+          "distance": 2.5631036903518827
+        },
+        {
+          "perspective": 1,
+          "distance": 2.114793354798467
+        },
+        {
+          "perspective": 1,
+          "distance": 3.99999366913612
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999992872
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 1.369990943557834
+        },
+        {
+          "perspective": 1,
+          "distance": 2.028440409493405
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999989649685626
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999998836
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999665722723843
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999967035
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999900989253754
+        },
+        {
+          "perspective": 1,
+          "distance": 0.4623386059236004
+        },
+        {
+          "perspective": 1,
+          "distance": 0.4623386059236004
+        },
+        {
+          "perspective": 1,
+          "distance": 0.4623386059236004
+        },
+        {
+          "perspective": 1,
+          "distance": 1.4962698687511693
+        },
+        {
+          "perspective": 1,
+          "distance": 1.366045076290566
+        },
+        {
+          "perspective": 1,
+          "distance": 1.85916172534458
+        },
+        {
+          "perspective": 1,
+          "distance": 3.3493859840783125
+        },
+        {
+          "perspective": 1,
+          "distance": 0.007629300629952734
+        },
+        {
+          "perspective": 1,
+          "distance": 0.007629300629952734
+        },
+        {
+          "perspective": 1,
+          "distance": 0.007629300629952734
+        },
+        {
+          "perspective": 1,
+          "distance": 0.007629300629952734
+        },
+        {
+          "perspective": 1,
+          "distance": 0.007629300629952734
+        },
+        {
+          "perspective": 1,
+          "distance": 0.007629300629952734
+        },
+        {
+          "perspective": 1,
+          "distance": 0.007629300629952734
+        },
+        {
+          "perspective": 1,
+          "distance": 3.3993033088192877
+        },
+        {
+          "perspective": 1,
+          "distance": 3.882675821136806
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999977487934
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999982
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999992317462425
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999998708
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999339274965
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999942
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        }
+      ],
+      "error": "AssertionError [ERR_ASSERTION]: mining target changed or blocked {\"x\":190,\"y\":34,\"z\":-80}\n    at mine (file:///workspace/2026_10_24_2/scripts/lib/survival-driver.mjs:134:18)\n    at async Object.walk (file:///workspace/2026_10_24_2/scripts/lib/survival-driver.mjs:208:51)\n    at async move (file:///workspace/2026_10_24_2/scripts/lib/adventure-driver.mjs:30:5)\n    at async Object.harvest (file:///workspace/2026_10_24_2/scripts/lib/adventure-driver.mjs:506:11)\n    at async file:///workspace/2026_10_24_2/scripts/dragon-playthrough.mjs:271:5",
+      "finishedAt": "2026-10-29T08:21:37.734Z",
+      "duration": 371.066667
+    },
+    {
+      "path": "part-2.mp4",
+      "resumePhase": 2,
+      "startedAt": "2026-10-29T08:23:02.872Z",
+      "completed": true,
+      "sourceCommit": "f39541bb88a1d62b270a79d96ac3ff5d5cae461b",
+      "assets": ["./assets/index-DVRa4iFf.js"],
+      "initial": {
+        "position": {
+          "x": 190.5001956344677,
+          "y": 35.00000002755058,
+          "z": -79.31834728022542
+        },
+        "eye": 1.6199999999999974,
+        "pitch": -1.4595963267948964,
+        "yaw": 12.568599999999986,
+        "inventory": [
+          {
+            "id": "iron_pick",
+            "count": 1,
+            "durability": 192
+          },
+          {
+            "id": "seeds",
+            "count": 12
+          },
+          {
+            "id": "sapling",
+            "count": 2
+          },
+          {
+            "id": "wood_pick",
+            "count": 1,
+            "durability": 40
+          },
+          {
+            "id": "furnace",
+            "count": 1
+          },
+          {
+            "id": "stick",
+            "count": 1
+          },
+          {
+            "id": "stone_pick",
+            "count": 1,
+            "durability": 113
+          },
+          {
+            "id": "cobble",
+            "count": 33
+          },
+          {
+            "id": "torch",
+            "count": 2
+          },
+          {
+            "id": "dirt",
+            "count": 10
+          },
+          {
+            "id": "table",
+            "count": 1
+          },
+          {
+            "id": "planks",
+            "count": 2
+          },
+          {
+            "id": "ironOre",
+            "count": 1
+          },
+          {
+            "id": "coal",
+            "count": 1
+          },
+          {
+            "id": "diamond",
+            "count": 1
+          },
+          {
+            "id": "sand",
+            "count": 7
+          },
+          {
+            "id": "apple",
+            "count": 1
+          },
+          {
+            "id": "bread",
+            "count": 5
+          },
+          {
+            "id": "iron",
+            "count": 1
+          },
+          {
+            "id": "string",
+            "count": 3
+          },
+          {
+            "id": "book",
+            "count": 1
+          },
+          {
+            "id": "obsidian",
+            "count": 4
+          },
+          {
+            "id": "iron_sword",
+            "count": 1,
+            "durability": 251
+          },
+          {
+            "id": "bow",
+            "count": 1,
+            "durability": 385
+          },
+          {
+            "id": "flintSteel",
+            "count": 1,
+            "durability": 65
+          },
+          {
+            "id": "arrow",
+            "count": 32
+          },
+          {
+            "id": "wheat",
+            "count": 16
+          },
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "health": 20
+      },
+      "dimension": "overworld",
+      "camera": {
+        "perspective": 1,
+        "distance": 4
+      },
+      "cameraSamples": [
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 0.19015618028213965
+        },
+        {
+          "perspective": 1,
+          "distance": 3.8033933347397433
+        },
+        {
+          "perspective": 1,
+          "distance": 3.991454813868153
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999263261
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 0.23867947306559154
+        },
+        {
+          "perspective": 1,
+          "distance": 0.10398902590646353
+        },
+        {
+          "perspective": 1,
+          "distance": 0.9245511667079223
+        },
+        {
+          "perspective": 1,
+          "distance": 2.7004861103202242
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999755000545809
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999978877
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 0.3497842775353317
+        },
+        {
+          "perspective": 1,
+          "distance": 1.017882696552527
+        },
+        {
+          "perspective": 1,
+          "distance": 1.9501471386955544
+        },
+        {
+          "perspective": 1,
+          "distance": 1.6595295181752245
+        },
+        {
+          "perspective": 1,
+          "distance": 3.5095598585431143
+        },
+        {
+          "perspective": 1,
+          "distance": 3.230830618085482
+        },
+        {
+          "perspective": 1,
+          "distance": 3.960383654444675
+        },
+        {
+          "perspective": 1,
+          "distance": 1.6296197022116952
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2733318209706908
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999944433478243
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999993743
+        },
+        {
+          "perspective": 1,
+          "distance": 3.4115381344579068
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999933777341
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999925
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 2.6981218555014848
+        },
+        {
+          "perspective": 1,
+          "distance": 1.292307371482971
+        },
+        {
+          "perspective": 1,
+          "distance": 1.292307371482971
+        },
+        {
+          "perspective": 1,
+          "distance": 1.292307371482971
+        },
+        {
+          "perspective": 1,
+          "distance": 1.292307371482971
+        },
+        {
+          "perspective": 1,
+          "distance": 1.292307371482971
+        },
+        {
+          "perspective": 1,
+          "distance": 1.292307371482971
+        },
+        {
+          "perspective": 1,
+          "distance": 3.945463297905582
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999929798506
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999432904820504
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999904716
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 1.335833635908583
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999991119536784
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999986957
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 2.1849793725216253
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999733183096
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999999977
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9708131396319866
+        },
+        {
+          "perspective": 1,
+          "distance": 3.5931283480142815
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999316385995
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 0.3137949179130849
+        },
+        {
+          "perspective": 1,
+          "distance": 0.3635976649359415
+        },
+        {
+          "perspective": 1,
+          "distance": 0.34660221140091013
+        },
+        {
+          "perspective": 1,
+          "distance": 0.4140765747807915
+        },
+        {
+          "perspective": 1,
+          "distance": 0.4140766705230358
+        },
+        {
+          "perspective": 1,
+          "distance": 0.41407667052304303
+        },
+        {
+          "perspective": 1,
+          "distance": 2.2170567510654298
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999994188043404
+        },
+        {
+          "perspective": 1,
+          "distance": 3.1175336619569434
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999984662097003
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999876443315
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999999988
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 0.44083692282756204
+        },
+        {
+          "perspective": 1,
+          "distance": 0.18443241801396504
+        },
+        {
+          "perspective": 1,
+          "distance": 0.18443241801396504
+        },
+        {
+          "perspective": 1,
+          "distance": 0.18443241801396504
+        },
+        {
+          "perspective": 1,
+          "distance": 3.785569542922486
+        },
+        {
+          "perspective": 1,
+          "distance": 2.1021402777068006
+        },
+        {
+          "perspective": 1,
+          "distance": 2.326819523625151
+        },
+        {
+          "perspective": 1,
+          "distance": 2.1361015920627913
+        },
+        {
+          "perspective": 1,
+          "distance": 2.9319578738974488
+        },
+        {
+          "perspective": 1,
+          "distance": 2.9330141640161393
+        },
+        {
+          "perspective": 1,
+          "distance": 3.991820656624794
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999987975965
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.973517720298365
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999965911113
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999997135725771
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999997176
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9598173000008714
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999995474414
+        },
+        {
+          "perspective": 1,
+          "distance": 3.6101932119037845
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999892760404
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9981389855143235
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999998771716
+        },
+        {
+          "perspective": 1,
+          "distance": 2.7218307086526043
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9506006014861046
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999891664393
+        },
+        {
+          "perspective": 1,
+          "distance": 3.999999999999999
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9677428467477944
+        },
+        {
+          "perspective": 1,
+          "distance": 0.4314231549289071
+        },
+        {
+          "perspective": 1,
+          "distance": 3.7962757968437573
+        },
+        {
+          "perspective": 1,
+          "distance": 2.248353120988496
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999994981896516
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999436
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.998758112301963
+        },
+        {
+          "perspective": 1,
+          "distance": 1.777584713066026
+        },
+        {
+          "perspective": 1,
+          "distance": 1.0828393707086705
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9993842820756877
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999535163
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999996
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9952870950350112
+        },
+        {
+          "perspective": 1,
+          "distance": 1.1789330693647366
+        },
+        {
+          "perspective": 1,
+          "distance": 2.1104784922865796
+        },
+        {
+          "perspective": 1,
+          "distance": 1.9398754220464325
+        },
+        {
+          "perspective": 1,
+          "distance": 3.99991165382865
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999830482
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2923073736054482
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2923073736054482
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2923073736054482
+        },
+        {
+          "perspective": 1,
+          "distance": 1.2923073736054482
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 4
+        },
+        {
+          "perspective": 1,
+          "distance": 3.98292727403648
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999980771803
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999987
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999987
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999987
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999987
+        },
+        {
+          "perspective": 1,
+          "distance": 3.9999999999999987
+        },
+        {
+          "perspective": 1,
+          "distance": 2.0771292561561734
+        },
+        {
+          "perspective": 1,
+          "distance": 2.0771292561561734
+        }
+      ],
+      "finishedAt": "2026-10-29T08:33:01.909Z",
+      "duration": 598.8
+    }
+  ],
+  "chapters": [
+    {
+      "name": "空の所持品から木・石・鉄の道具を作り、自然のダイヤを採掘",
+      "phase": 1,
+      "part": "part-1.mp4",
+      "at": "2026-10-29T08:18:12.900Z",
+      "seconds": 166.827
+    },
+    {
+      "name": "地上へ帰還し、村の家と自然生成の宝箱を探索",
+      "phase": 2,
+      "part": "part-1.mp4",
+      "at": "2026-10-29T08:20:38.279Z",
+      "seconds": 312.206
+    },
+    {
+      "name": "弓と剣を作成、畑を収穫して植え直し、廃ゲートを修理・点火",
+      "phase": 3,
+      "part": "part-2.mp4",
+      "at": "2026-10-29T08:25:01.195Z",
+      "seconds": 118.323
+    },
+    {
+      "name": "ネザーで素材を入手し、持ち物を持って村へ帰還",
+      "phase": 4,
+      "part": "part-2.mp4",
+      "at": "2026-10-29T08:26:29.492Z",
+      "seconds": 206.62
+    },
+    {
+      "name": "育った小麦を村人と交換し、4個のエンダーアイを作成",
+      "phase": 5,
+      "part": "part-2.mp4",
+      "at": "2026-10-29T08:29:43.217Z",
+      "seconds": 400.345
+    },
+    {
+      "name": "地下遺跡のゲートを開き、エンドの島へ到達",
+      "phase": 6,
+      "part": "part-2.mp4",
+      "at": "2026-10-29T08:32:08.197Z",
+      "seconds": 545.325
+    },
+    {
+      "name": "討伐報酬を持って通常世界へ帰還・保存",
+      "phase": 7,
+      "part": "part-2.mp4",
+      "at": "2026-10-29T08:32:59.146Z",
+      "seconds": 596.274
+    }
+  ],
+  "narration": [
+    {
+      "part": "part-1.mp4",
+      "seconds": 0.439,
+      "text": "三人称で出発。所持品ゼロから、ドラゴン討伐を目指します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 20.799,
+      "text": "三人称で出発。所持品ゼロから、ドラゴン討伐を目指します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 29.705,
+      "text": "木を切って、道具の材料を集めます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 36.224,
+      "text": "作業台を置いて、最初の道具を作ります。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 42.509,
+      "text": "木のツルハシを作っています。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 51.105,
+      "text": "石を掘って、丸石を集めます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 59.302,
+      "text": "石炭を採掘。精錬と明かりに使います。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 71.68,
+      "text": "石を掘って、丸石を集めます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 79.847,
+      "text": "石のツルハシを作っています。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 86.599,
+      "text": "鉄鉱石を採掘します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 92.839,
+      "text": "石炭と鉄鉱石を探して掘り進めます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 106.271,
+      "text": "鉄を精錬して、地下へ進む道具を作ります。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 136.404,
+      "text": "鉄を精錬して、地下へ進む道具を作ります。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 143.6,
+      "text": "石を掘って、丸石を集めます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 153.507,
+      "text": "鉄鉱石を採掘します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 159.7,
+      "text": "鉄のツルハシで、自然のダイヤを探します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 166.827,
+      "text": "ダイヤを採掘できました。地上へ戻ります。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 173.409,
+      "text": "石を掘って、丸石を集めます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 195.206,
+      "text": "石を掘って、丸石を集めます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 217.86,
+      "text": "村を目指して、地上を進みます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 239.275,
+      "text": "村を目指して、地上を進みます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 260.565,
+      "text": "村を目指して、地上を進みます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 281.241,
+      "text": "村を目指して、地上を進みます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 302.371,
+      "text": "村を目指して、地上を進みます。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 312.21,
+      "text": "地上へ帰還し、村の家と自然生成の宝箱を探索"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 320.699,
+      "text": "村の素材で、剣と弓、矢を準備します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 327.128,
+      "text": "矢を作っています。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 340.771,
+      "text": "村の素材で、剣と弓、矢を準備します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 347.629,
+      "text": "畑を収穫し、小麦を食料と取引に回します。"
+    },
+    {
+      "part": "part-1.mp4",
+      "seconds": 353.926,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 0.177,
+      "text": "通常セーブから再開し、冒険を続けます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 25.346,
+      "text": "畑を収穫し、小麦を食料と取引に回します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 32.571,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 46.405,
+      "text": "畑を収穫し、小麦を食料と取引に回します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 55.1,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 67.021,
+      "text": "畑を収穫し、小麦を食料と取引に回します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 76.829,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 87.439,
+      "text": "畑を収穫し、小麦を食料と取引に回します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 99.105,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 107.625,
+      "text": "畑を収穫し、小麦を食料と取引に回します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 113.975,
+      "text": "壊れたゲートを修理して、ネザーへ向かいます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 118.325,
+      "text": "弓と剣を作成、畑を収穫して植え直し、廃ゲートを修理・点火"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 125.248,
+      "text": "ネザーの敵を倒して、ロッドを集めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 133.952,
+      "text": "ネザーの地形を掘り、通り道を作ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 145.235,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 152.571,
+      "text": "ネザーの敵を倒して、ロッドを集めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 158.598,
+      "text": "近接攻撃の届かない敵には、弓を使います。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 165.768,
+      "text": "敵への対応を終えたので、元の作業に戻ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 170.6,
+      "text": "ネザーの敵を倒し、炎のロッドを2本回収"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 176.879,
+      "text": "ロッドを回収できたので、帰還ゲートへ戻ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 183.904,
+      "text": "足場を作って、安全に渡ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 192.055,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 197.78,
+      "text": "敵への対応を終えたので、元の作業に戻ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 203.329,
+      "text": "帰還ゲートを使って、通常世界へ戻ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 209.672,
+      "text": "小麦を育て、村人との取引でパールを集めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 224.407,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 242.56,
+      "text": "小麦を育て、村人との取引でパールを集めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 248.608,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 267.299,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 272.058,
+      "text": "敵への対応を終えたので、元の作業に戻ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 280.498,
+      "text": "近接攻撃の届かない敵には、弓を使います。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 299.368,
+      "text": "小麦を育て、村人との取引でパールを集めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 306.712,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 311.911,
+      "text": "敵への対応を終えたので、元の作業に戻ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 319.407,
+      "text": "小麦を育て、村人との取引でパールを集めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 326.829,
+      "text": "村人を探し、小麦と交換してパールを手に入れます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 341.822,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 348.701,
+      "text": "近づいた敵を、近接攻撃で倒します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 356.414,
+      "text": "遠出に備えて、パンを補充し体力を回復します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 367.252,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 377.068,
+      "text": "遠出に備えて、パンを補充し体力を回復します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 388.615,
+      "text": "育った小麦を収穫しています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 394.721,
+      "text": "パンを作っています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 400.205,
+      "text": "通常の農業とクラフトで食料を補充し、体力を回復"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 404.659,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 411.219,
+      "text": "矢を作っています。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 417.361,
+      "text": "エンダーアイを持って、地下遺跡へ向かいます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 435.247,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 441.77,
+      "text": "エンダーアイを持って、地下遺跡へ向かいます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 461.812,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 465.974,
+      "text": "囲まれる前に、距離を取って応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 471.533,
+      "text": "敵への対応を終えたので、元の作業に戻ります。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 484.761,
+      "text": "敵が近づいたので、作業を中断して応戦します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 492.202,
+      "text": "エンダーアイを持って、地下遺跡へ向かいます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 504.284,
+      "text": "近接攻撃の届かない敵には、弓を使います。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 513.514,
+      "text": "エンダーアイを持って、地下遺跡へ向かいます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 523.916,
+      "text": "水へ降りて、先へ進みます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 534.264,
+      "text": "遺跡に到着。空いている枠にアイを入れます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 544.118,
+      "text": "ゲートを開けました。エンドへ進みます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 550.68,
+      "text": "まずクリスタルを弓で壊し、ドラゴンの回復を止めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 560.271,
+      "text": "塔のクリスタルを狙って、矢を放ちます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 571.44,
+      "text": "まずクリスタルを弓で壊し、ドラゴンの回復を止めます。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 581.426,
+      "text": "クリスタルを6個破壊。降りてきたドラゴンを剣で攻撃します。"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 591.43,
+      "text": "エンダードラゴン討伐。クリスタル6個破壊、卵1個を獲得"
+    },
+    {
+      "part": "part-2.mp4",
+      "seconds": 596.283,
+      "text": "討伐報酬を持って通常世界へ帰還・保存"
+    }
+  ],
+  "nextPhase": 7,
+  "village": {
+    "x": 196,
+    "z": -77,
+    "y": 35,
+    "kind": "village"
+  },
+  "completed": true,
+  "combat": {
+    "interruptions": 19,
+    "melee": 17,
+    "ranged": 32,
+    "retreats": 8
+  },
+  "final": {
+    "health": 10,
+    "dragon": {
+      "health": 0,
+      "phase": 45.32500000057712,
+      "defeated": true
+    },
+    "eggCount": 1,
+    "dimension": "overworld"
+  },
+  "export": {
+    "file": "survival-narrated-1.5x.mp4",
+    "speed": 1.5,
+    "rawDuration": 969.866667,
+    "duration": 646.566667,
+    "audio": false,
+    "outputFps": 30,
+    "captions": "Japanese, burned into the picture",
+    "captionCount": 96,
+    "subtitleFile": "commentary.srt",
+    "fullDecodeVerified": true,
+    "cameraVerification": {
+      "perspective": "third-person-behind",
+      "samples": 482,
+      "allSamplesThirdPerson": true,
+      "bodyVisibleSamples": 418,
+      "minimumDistance": 0,
+      "maximumDistance": 4
+    }
+  },
+  "download": {
+    "file": "survival-third-person.mp4",
+    "bytes": 18263163,
+    "sha256": "f9393e6b192090325d8051a14b4b379efb9a015f4678b92a664219681c933944"
+  }
+}

@@ -71,32 +71,41 @@
   <body>
     <main>
       <a href="../">← ゲームへ</a>
-      <h1>字幕実況付き：所持品ゼロから、エンダードラゴン討伐まで</h1>
+      <h1>三人称・字幕実況付き：所持品ゼロから、ドラゴン討伐まで</h1>
       <p>
-        新しいプレイの全工程・約1.5倍速・10分6秒。日本語の軽い実況字幕を付けました。ロッドとエンダーアイの入手、討伐後の帰還まで収録しています。
+        三人称で撮り直した全工程・約1.5倍速・10分47秒。日本語の実況字幕付きです。所持品ゼロからロッドとエンダーアイの入手、ドラゴン討伐と帰還まで収録しています。
       </p>
       <video
         id="recording"
         controls
         playsinline
         preload="metadata"
-        poster="./poster-narrated.jpg"
+        poster="./poster-third-person.jpg"
         aria-label="サバイバル討伐の全工程"
       >
-        <source src="./survival-narrated.mp4" type="video/mp4" />
-        <a href="./survival-narrated.mp4">動画ファイルを直接開く</a>
+        <source src="./survival-third-person.mp4" type="video/mp4" />
+        <a href="./survival-third-person.mp4">動画ファイルを直接開く</a>
       </video>
       <nav aria-label="動画の再生とダウンロード">
         <button type="button" data-time="0">最初から再生</button>
-        <a class="download" href="./survival-narrated.mp4" download="survival-narrated-1.5x.mp4"
-          >字幕付きMP4をダウンロード（約17MB）</a
+        <a
+          class="download"
+          href="./survival-third-person.mp4"
+          download="survival-third-person-1.5x.mp4"
+          >三人称のMP4をダウンロード（約18MB）</a
+        >
+        <a class="download" href="./survival-narrated.mp4" download="survival-first-person-1.5x.mp4"
+          >前回の動画（一人称・字幕付き）</a
+        >
+        <a class="download" href="../?view=third-person&amp;mode=survival"
+          >三人称でゲームを始める</a
         >
         <a class="download" href="./survival.mp4" download="survival-original-1.5x.mp4"
-          >前回の動画（字幕なし）</a
+          >最初の動画（字幕なし）</a
         >
       </nav>
       <p>
-        字幕は映像に入っているので設定は不要です。平地の小刻みな停止を減らした、自動操作の実録です。途中の通常セーブからの再開と一時停止を含みます。音声はありません。Web再生用に画質を軽量化していますが、全工程と再生時間は同じです。
+        字幕は映像に入っているので設定は不要です。キャラクターの背後から追う、自動操作の実録です。狭い坑道や壁際ではカメラが近づき、体が視界を塞ぐ場合は非表示になります。途中に通常セーブからの再開を1回含みます。ゲーム内ではF5で一人称・背後・正面を切り替えられます。音声はありません。
       </p>
       <p id="status" role="status" aria-live="polite"></p>
     </main>

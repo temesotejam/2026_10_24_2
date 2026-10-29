@@ -21,3 +21,13 @@ Minecraft本体の新しい三人称プレイ映像との直接比較は、こ�
 `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node scripts/dragon-playthrough.mjs --third-person --out visual-check/dragon-playthrough/run-6-third-person`
 
 新規プロファイル・所持品ゼロから通常操作で記録し、`render-narrated-playthrough.mjs` で日本語字幕と1.5倍速を付けます。途中の通常セーブ再開は各パートに記録します。`cameraSamples` は録画中の実際の視点と距離の読み取りです。
+
+## 今回の録画結果
+
+- 空の所持品から始め、ロッド2本、エンダーアイ4個、クリスタル6個の破壊、ドラゴン討伐、卵を持った帰還まで記録しました。最後の体力は10、ドラゴンの体力は0、卵は1個です。
+- 録画は2パートで、畑で操作を調整した通常セーブからの再開が1回あります。ゲームプレイの途中はカットしていません。
+- 視点の観測は482回すべて背後視点でした。うち418回は体を描画できるカメラ距離でした。狭い場所で体が非表示になるのは視界確保の処理です。
+- MP4は10分47秒、約18MB、H.264、960×540、字幕96件を焼き込み、約1.5倍速です。音声はありません。実際の収録は15fpsで、出力は30fpsです。
+- 1パート目の画面観察時に短時間表示サイズが変わり、1280×720に戻しています。以後の観察接続は表示サイズを変えない設定に修正しました。所持品やワールド状態の直接変更はありません。
+
+[MP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-third-person.mp4) / [記録・視点の検証データ](../public/watch/third-person-proof.json)
