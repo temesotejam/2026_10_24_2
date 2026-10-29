@@ -134,7 +134,16 @@ export function createModernHunting(page, d, a, options = {}) {
                 break;
               }
             }
-          return { ...mob, visibleToPlayer };
+          return {
+            ...mob,
+            visibleToPlayer,
+            inWater:
+              window.__mc.blockAt(
+                Math.floor(mob.position.x),
+                Math.floor(mob.position.y + 0.1),
+                Math.floor(mob.position.z),
+              ) === 5,
+          };
         }),
         inventory: window.__mc.inventory(),
         cells,
@@ -762,7 +771,10 @@ export function createModernHunting(page, d, a, options = {}) {
               missing.findIndex((item) => DROPS[item].includes(mob.species));
             return (
               priority(x) - priority(y) ||
-              distance(x.position, latest.position) - distance(y.position, latest.position)
+              distance(x.position, latest.position) +
+                (x.inWater ? 30 : 0) -
+                distance(y.position, latest.position) -
+                (y.inWater ? 30 : 0)
             );
           });
         focus = candidates[0] ?? null;
@@ -788,7 +800,10 @@ export function createModernHunting(page, d, a, options = {}) {
                 )
                 .sort(
                   (x, y) =>
-                    distance(x.position, latest.position) - distance(y.position, latest.position),
+                    distance(x.position, latest.position) +
+                    (x.inWater ? 30 : 0) -
+                    distance(y.position, latest.position) -
+                    (y.inWater ? 30 : 0),
                 )[0] ?? null;
         }
         if (focus) {
@@ -814,7 +829,16 @@ export function createModernHunting(page, d, a, options = {}) {
               Math.hypot(target.position.x - at.position.x, target.position.z - at.position.z) < 1.6
             ) {
               const dy = target.position.y - at.position.y;
-              if (dy > 1.2) {
+              const supported = await page.evaluate((p) => {
+                if (Math.abs(p.y - Math.round(p.y)) > 0.1) return false;
+                const pass = [0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43];
+                for (let x = Math.floor(p.x - 0.3); x <= Math.floor(p.x + 0.3); x++)
+                  for (let z = Math.floor(p.z - 0.3); z <= Math.floor(p.z + 0.3); z++)
+                    if (!pass.includes(window.__mc.blockAt(x, Math.round(p.y) - 1, z))) return true;
+                return false;
+              }, at.position);
+              if (!supported) ignored.set(target.id, Date.now() + 30000);
+              else if (dy > 1.2) {
                 await a.pillarTo(Math.round(target.position.y));
               } else if (dy < -1.2) {
                 await d.center();

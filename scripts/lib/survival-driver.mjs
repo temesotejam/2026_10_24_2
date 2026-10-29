@@ -150,10 +150,7 @@ export function createDriver(page, out) {
         let deadline = Date.now() + 12000;
         while ((await block(hit)) === before) {
           if (interrupt && (await interrupt())) return false;
-          assert.ok(
-            Date.now() < deadline,
-            `mining target changed or blocked ${JSON.stringify(hit)}`,
-          );
+          if (Date.now() >= deadline) return false;
           await wait(100);
           const at = (await info()).position;
           const eye = (await info()).eye;

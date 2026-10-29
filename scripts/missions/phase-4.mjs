@@ -140,21 +140,26 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   await h.guard();
   await a.eat();
   await a.recover(18);
-  await stashVillage(page, d, a, v, [
-    "sapling",
-    "snow",
-    "sand",
-    "wood_pick",
-    "stone_pick",
-    "seeds",
-    "apple",
-    "netherrack",
-    "bone",
-    "rawMeat",
-    "stoneBrick",
-    "goldOre",
-    "ironOre",
-  ]);
+  const stashPosition = (await d.info()).position;
+  if (
+    !v.cacheChest ||
+    Math.hypot(stashPosition.x - v.cacheChest.x, stashPosition.z - v.cacheChest.z) < 24
+  )
+    await stashVillage(page, d, a, v, [
+      "sapling",
+      "snow",
+      "sand",
+      "wood_pick",
+      "stone_pick",
+      "seeds",
+      "apple",
+      "netherrack",
+      "bone",
+      "rawMeat",
+      "stoneBrick",
+      "goldOre",
+      "ironOre",
+    ]);
   flush();
   if (
     v.cacheChest &&
@@ -182,7 +187,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   d.setGoal("見通しのよい場所へ移り、敵の素材を集めます。");
   const currentPosition = (await d.info()).position;
   if (
-    Math.hypot(currentPosition.x - meta.huntingCamp.x, currentPosition.z - meta.huntingCamp.z) > 48
+    Math.hypot(currentPosition.x - meta.huntingCamp.x, currentPosition.z - meta.huntingCamp.z) > 96
   ) {
     await a.surfaceTo(meta.huntingCamp);
     await a.reachSurface();
