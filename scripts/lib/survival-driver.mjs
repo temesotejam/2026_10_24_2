@@ -142,7 +142,7 @@ export function createDriver(page, out) {
       assert.ok((await info()).health > 0, "survive mining");
       await aim({ x: p.x + 0.5, y: p.y + 0.5, z: p.z + 0.5 });
       const hit = await page.evaluate(() => window.__mc.target());
-      assert.ok(hit, `target ${JSON.stringify(p)}`);
+      if (!hit) return false;
       const before = await block(hit);
       assert.notEqual(before, 8, "target is not bedrock");
       await page.mouse.down();
@@ -155,6 +155,14 @@ export function createDriver(page, out) {
             `mining target changed or blocked ${JSON.stringify(hit)}`,
           );
           await wait(100);
+          const at = (await info()).position;
+          const eye = (await info()).eye;
+          const near = Math.hypot(
+            Math.max(hit.x - at.x, 0, at.x - hit.x - 1),
+            Math.max(hit.y - at.y - eye, 0, at.y + eye - hit.y - 1),
+            Math.max(hit.z - at.z, 0, at.z - hit.z - 1),
+          );
+          if (near > 4.5) return false;
           await aim({ x: hit.x + 0.5, y: hit.y + 0.5, z: hit.z + 0.5 }, 0);
           const start = Date.now();
           if (await checkThreat()) {

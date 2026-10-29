@@ -180,8 +180,13 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     flush();
   }
   d.setGoal("見通しのよい場所へ移り、敵の素材を集めます。");
-  await a.surfaceTo(meta.huntingCamp);
-  await a.reachSurface();
+  const currentPosition = (await d.info()).position;
+  if (
+    Math.hypot(currentPosition.x - meta.huntingCamp.x, currentPosition.z - meta.huntingCamp.z) > 48
+  ) {
+    await a.surfaceTo(meta.huntingCamp);
+    await a.reachSurface();
+  }
   d.setGoal("夜の敵と戦い、エンダーパール・弓の糸・矢の材料を集めます。");
   meta.hunting = await h.gather(targets, {
     timeoutMs: 3000000,
