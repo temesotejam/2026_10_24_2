@@ -1,6 +1,7 @@
+import { respawnCandidate } from "./survival/respawn";
 import { PlayerAvatar } from "./render/player-avatar";
-import { portalInterior } from "./survival/adventure";
-import { dragonPosition } from "./survival/dragon";
+import { portalInterior, PortalContact } from "./survival/portal";
+import { dragonPosition, dragonMaxHealth } from "./survival/dragon";
 import { structuresNear, stronghold, strongholdEntrance } from "./world/adventure-terrain";
 import { Adventure } from "./survival/adventure";
 import { travelCandidate } from "./survival/adventure-state";
@@ -164,7 +165,7 @@ async function boot(): Promise<void> {
     if (saved && (saved.seed !== SEED || saved.mode !== mode))
       throw new Error("保存先とワールド情報が一致しません");
   }
-  const world = new World(SEED, saved?.adventure?.dimension ?? "overworld", saved?.generator ?? 2);
+  const world = new World(SEED, saved?.adventure?.dimension ?? "overworld", saved?.generator ?? 3);
   let entityScene: THREE.Scene | null = null;
   let terrainMaterial: THREE.ShaderMaterial | null = null;
   let lightDirty = true;
@@ -277,6 +278,7 @@ async function boot(): Promise<void> {
   streamer.warmUp(saved?.position.x ?? spawn.x, saved?.position.z ?? spawn.z, WARMUP_RADIUS_CHUNKS);
   const player = new PlayerController(view.camera, view.domElement, world, spawn.x, spawn.z);
   if (saved) player.restore(saved.position, saved.yaw, saved.pitch);
+  else player.restore(player.position, spawn.yaw, 0);
   const data = saved ?? newSession(SEED, mode, { ...player.position });
   let fluids: FluidSimulator | null = null;
   const editedChunks = new Map<string, { cx: number; cz: number }>();
@@ -394,6 +396,7 @@ async function boot(): Promise<void> {
     return true;
   };
   let traveling = false;
+  const portalContact = new PortalContact();
   adventure.onTravel = (destination) => {
     if (traveling) return;
     if (!repository) {
@@ -422,6 +425,14 @@ async function boot(): Promise<void> {
     })();
   };
   interaction.onUseBlock = (x, y, z, id) => {
+    if (world.revision >= 3 && (id === BlockId.PORTAL || id === BlockId.END_GATE)) {
+      session.notice?.(
+        id === BlockId.PORTAL
+          ? "ゲートの中に入り、少し待つと移動します"
+          : "ゲートに入ると移動します",
+      );
+      return true;
+    }
     if (id === BlockId.END_GATE) {
       adventure.onTravel?.(world.dimension === "end" ? "overworld" : "end");
       return true;
@@ -461,7 +472,27 @@ async function boot(): Promise<void> {
     must(document.querySelector<HTMLElement>("#death-panel")).hidden = false;
     void save();
   };
-  must(document.querySelector("#respawn")).addEventListener("click", () => {
+  const respawnButton = must(document.querySelector<HTMLButtonElement>("#respawn"));
+  respawnButton.addEventListener("click", () => {
+    if (data.generator >= 3 && world.dimension !== "overworld") {
+      if (!repository || traveling) return;
+      traveling = true;
+      restoring = true;
+      respawnButton.disabled = true;
+      void (async () => {
+        try {
+          if (saveTask) await saveTask;
+          await repository.save(respawnCandidate(snapshot()));
+          location.reload();
+        } catch {
+          traveling = false;
+          restoring = false;
+          respawnButton.disabled = false;
+          session.notice?.("通常世界への復活を保存できませんでした。もう一度試してください");
+        }
+      })();
+      return;
+    }
     streamer.warmUp(data.spawn.x, data.spawn.z, 1);
     session.respawn();
     player.restore(data.position);
@@ -728,8 +759,8 @@ async function boot(): Promise<void> {
       generator: world.revision,
       dragonPosition: dragonPosition(adventure.state.dragon.phase),
       creatures: structuredClone(data.creatures),
-      stronghold: stronghold(SEED),
-      entrance: strongholdEntrance(SEED, sampleColumn),
+      stronghold: stronghold(SEED, world.revision),
+      entrance: strongholdEntrance(SEED, sampleColumn, world.revision),
       structures: structuresNear(SEED, player.position.x, player.position.z, sampleColumn),
     }),
     effects: () => ({
@@ -782,6 +813,17 @@ async function boot(): Promise<void> {
       lightDirty = false;
     }
     player.update(dt);
+    if (world.revision >= 3 && !traveling) {
+      const destination = portalContact.update(
+        dt,
+        player.position,
+        player.isActive && !session.dead,
+        session.creative,
+        world.dimension,
+        (x, y, z) => world.getBlock(x, y, z),
+      );
+      if (destination) adventure.onTravel?.(destination);
+    }
     if (avatar) {
       avatar.update(player, session.held, dt);
     }
@@ -824,15 +866,22 @@ async function boot(): Promise<void> {
     if (time - lastUi > 100) {
       dimensionLabel.textContent =
         world.dimension === "nether"
-          ? "ネザー · 帰還ゲートを右クリック"
+          ? world.revision >= 3
+            ? "ネザー · 帰還ゲートに入って待つ"
+            : "ネザー · 帰還ゲートを右クリック"
           : world.dimension === "end"
             ? "エンド"
             : "通常世界";
+      if (portalContact.progress > 0)
+        dimensionLabel.textContent = `ゲートで移動中… ${Math.round(portalContact.progress * 100)}%`;
       bossHud.hidden = world.dimension !== "end";
       bossHud.textContent = adventure.state.dragon.defeated
         ? "エンダードラゴン討伐！ · 帰還ゲートが開きました"
-        : `エンダードラゴン ${Math.ceil(adventure.state.dragon.health)} / 120`;
-      bossHud.style.setProperty("--boss-health", `${(adventure.state.dragon.health / 120) * 100}%`);
+        : `エンダードラゴン ${Math.ceil(adventure.state.dragon.health)} / ${dragonMaxHealth(data.generator)}`;
+      bossHud.style.setProperty(
+        "--boss-health",
+        `${(adventure.state.dragon.health / dragonMaxHealth(data.generator)) * 100}%`,
+      );
       lastUi = time;
       hotbar.refresh();
       inventory.refresh();
@@ -852,7 +901,7 @@ async function boot(): Promise<void> {
             : session.creative
               ? "クリエイティブ · E：所持品 / 作業台"
               : data.inventory.some((s) => s?.id === "diamond")
-                ? "村・廃ゲート → ネザー → アイで地下遺跡へ → エンド · E：冒険ガイド"
+                ? "黒曜石でゲート作り → ネザー → アイの方角を探索 → エンド · E：冒険ガイド"
                 : "原木 → 作業台 → 木・石・鉄のツルハシ → ダイヤ · E：所持品 / レシピ集 · 右クリック：使用";
     }
     let meshBudget = MESH_BUDGET_PER_FRAME;

@@ -123,6 +123,9 @@ try {
     () => document.querySelector("#save-status").textContent === "保存済み",
   );
   const fixture = await stored();
+  // Explicit historical-world fixture: gen3 progression has a separate audit check.
+  fixture.generator = 2;
+  fixture.adventure.dragon.health = 120;
   fixture.position = { x: 1.5, y: 34, z: 1.5 };
   fixture.spawn = { ...fixture.position };
   fixture.edits = {};
@@ -242,6 +245,7 @@ try {
   endFixture.inventory[1] = { id: "iron_sword", count: 1, durability: 251 };
   endFixture.inventory[2] = { id: "bow", count: 1, durability: 385 };
   endFixture.inventory[3] = { id: "arrow", count: 32 };
+  endFixture.inventory[4] = { id: "bread", count: 16 };
   endFixture.vitals.health = 20;
   endFixture.adventure.dragon.phase = 0;
   await importFixture(endFixture, "end-entry-fixture");
@@ -296,28 +300,14 @@ try {
   for (const p of crystals) {
     const here = await state(),
       startAngle = Math.atan2(here.p.z, here.p.x),
-      goalAngle = Math.atan2(p.z, p.x) + Math.PI;
+      goalAngle = Math.atan2(p.z, p.x) + Math.PI + 0.6;
     const delta = Math.atan2(Math.sin(goalAngle - startAngle), Math.cos(goalAngle - startAngle));
     const steps = Math.max(1, Math.ceil(Math.abs(delta) / 0.25));
     for (let j = 1; j <= steps; j++) {
       const a = startAngle + (delta * j) / steps;
       await walkEnd(Math.cos(a) * 10, Math.sin(a) * 10);
     }
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (await page.evaluate((p) => window.__mc.blockAt(p.x, p.y, p.z) === 0, p)) break;
-      const s = await state(),
-        distance = Math.hypot(p.x + 0.5 - s.p.x, p.z + 0.5 - s.p.z),
-        dy = p.y + 0.9 - s.p.y - s.eye;
-      const velocity = 22,
-        gravity = 2.4;
-      const tangent =
-        (velocity ** 2 -
-          Math.sqrt(velocity ** 4 - gravity * (gravity * distance ** 2 + 2 * dy * velocity ** 2))) /
-        (gravity * distance);
-      await aim({ x: p.x + 0.5, y: s.p.y + s.eye + tangent * distance, z: p.z + 0.5 });
-      await right();
-      await wait(1000);
-    }
+    await native.shootCrystal(p);
     assert.equal(
       await page.evaluate((p) => window.__mc.blockAt(p.x, p.y, p.z), p),
       0,
@@ -325,17 +315,7 @@ try {
     );
   }
   check("bow and paid arrows destroy all six crystals", true);
-  await equip("iron_sword");
-  await walkEnd(0.5, 4);
-  for (let i = 0; i < 90; i++) {
-    const s = await state();
-    if (s.adventure.dragon.defeated) break;
-    assert.ok(await page.evaluate(() => window.__mc.health() > 0), "survive boss fight");
-    await aim(s.adventure.dragonPosition);
-    await page.mouse.down();
-    await wait(450);
-    await page.mouse.up();
-  }
+  await native.defeatDragon();
   check(
     "survival combat defeats dragon and awards a single egg",
     (await state()).adventure.dragon.defeated && (await count("dragonEgg")) === 1,

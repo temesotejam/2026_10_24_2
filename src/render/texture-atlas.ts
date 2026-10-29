@@ -15,6 +15,7 @@ interface TileStyle {
 }
 
 const TILE_STYLES: Record<TileKind, TileStyle> = {
+  [TileKind.GRAVEL]: { base: [131, 124, 120], alpha: 255, speckleAmount: 40 },
   [TileKind.OBSIDIAN]: { base: [48, 30, 65], alpha: 255, speckleAmount: 24 },
   [TileKind.NETHERRACK]: { base: [117, 53, 47], alpha: 255, speckleAmount: 24 },
   [TileKind.GLOWSTONE]: { base: [241, 192, 91], alpha: 255, speckleAmount: 24 },

@@ -1,0 +1,102 @@
+{
+  "agentRole": "independent combat audit and playtest",
+  "differentVendorOrModelClaim": false,
+  "baselineOrdinarySurvival": {
+    "sourceCommit": "e67b7dfc51b8547506265af52c54ec8d78e96241",
+    "fixtureImports": false,
+    "initialInventoryEmpty": true,
+    "chaptersCompleted": [
+      "空の所持品から木・石・鉄の道具を作り、自然のダイヤを採掘",
+      "地上へ帰還し、村の家と自然生成の宝箱を探索",
+      "弓と剣を作成、畑を収穫して植え直し、廃ゲートを修理・点火",
+      "ネザーで素材を入手し、持ち物を持って村へ帰還"
+    ],
+    "completedToDragon": false,
+    "outcome": "died during village food replenishment after returning from Nether",
+    "foundControllerIssue": "new threats ignored during the return to the pre-combat work position"
+  },
+  "updatedOrdinarySurvival": {
+    "fixtureImports": false,
+    "stateMutationAPI": false,
+    "initialInventoryEmpty": true,
+    "stepsCompleted": [
+      "natural logs",
+      "wooden pickaxe at placed table",
+      "stone tools and furnace",
+      "coal and iron ore",
+      "smelted iron and iron pickaxe",
+      "naturally generated diamond"
+    ],
+    "finalHealth": 20,
+    "naturallyMinedDiamonds": 1,
+    "completedToDragon": false,
+    "sourceStage": "combat-fix snapshot before final terrain/spawn integration",
+    "url": "http://127.0.0.1:4184/?seed=2026&mode=survival",
+    "assetMode": "isolated Vite dev source modules",
+    "initialPosition": {
+      "x": 0.5,
+      "y": 35,
+      "z": 0.5
+    },
+    "sourceModuleSha256": {
+      "src/main.ts": "1eae752caa2556eaa2ec39c5ad2c6917af0be3298c32922285c09f1d51f956a8",
+      "src/world/world.ts": "4b54e864f41583d88eca83a2f3da8179d08d9e9ef187053e518e048724560e38",
+      "src/world/terrain.ts": "376bacc6937afdc27c2a07dc8de0334a93b1c93189b9c0a7d166e6974eb47547",
+      "src/world/spawn.ts": "2deefb3805463ca589fa2cc00cfdfdd455ea0e0a13fb6b072e77e5ffd2ba503c",
+      "src/survival/dragon.ts": "ed4d20b0b56c7a92f33bbd1b5f29ca7ddafadde09f0c5d549a6cc4c99d3fb253",
+      "src/survival/adventure.ts": "6e5cf0c7570a374852b6369fbb4cd44ee49cf8f154c0c5c16dc02452eb8688ca"
+    }
+  },
+  "firstIntegratedCombatFixtures": {
+    "fixtureBased": true,
+    "checks": [
+      "dragon attack is blocked by shelter and resumes after mining an opening",
+      "normal melee hits the dragon when a wall is behind its visible body",
+      "a sword swing beyond actual melee reach does not damage the dragon",
+      "observed landing stays continuous in the real browser simulation"
+    ],
+    "landingSamples": 294,
+    "maximumLandingSpeed": 11.898762274818958
+  },
+  "finalIntegratedCombatFixtures": {
+    "fixtureBased": true,
+    "fullBattle": {
+      "maximumHealth": 200,
+      "finalHealth": 17,
+      "dragon": {
+        "health": 0,
+        "phase": 228.19999999979245,
+        "defeated": true
+      },
+      "eggCount": 1,
+      "arrowsConsumed": 6
+    },
+    "checks": [
+      "dragon attack is blocked by shelter and resumes after mining an opening",
+      "normal melee hits the dragon when a wall is behind its visible body",
+      "a sword swing beyond actual melee reach does not damage the dragon",
+      "observed landing stays continuous in the real browser simulation",
+      "normal-input survival battle destroys six crystals, recovers with food and defeats the full-health dragon"
+    ],
+    "landingSamples": 391,
+    "maximumLandingSpeed": 9.787847377154307,
+    "productionAsset": "index-BfC1_0Ju.js"
+  },
+  "finalControllerRegression": {
+    "fixtureBased": true,
+    "checks": [
+      "craft interrupted for live melee/ranged enemies, combat completed, UI restored and craft resumed",
+      "defeat one close enemy with melee",
+      "approaching enemy interrupted travel and the original movement goal was reached afterwards",
+      "continuous walking: 0/32 stationary samples",
+      "return walking and mining yield promptly to a new threat signal and release controls",
+      "bridge from the actual supporting ledge even when the center is already over the target cell",
+      "mine a normal walkable passage when surface routing is enclosed",
+      "route down from a high ledge into water",
+      "retreat early and defeat four pursuing enemies after landing damage",
+      "enemy on a lower ledge is defeated with reserve arrows instead of repeating out-of-range melee"
+    ],
+    "passed": true,
+    "newReturnInterruptionCase": "timed interruption callback during walking and mining; controls released before reaching destination"
+  }
+}

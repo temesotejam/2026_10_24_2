@@ -53,6 +53,7 @@ export const BLOCK_COLORS: Readonly<Record<BlockId, BlockColor>> = {
   [BlockId.DIRT]: uniform(122, 84, 51),
   [BlockId.STONE]: uniform(130, 130, 134),
   [BlockId.SAND]: uniform(219, 196, 120),
+  [BlockId.GRAVEL]: uniform(131, 124, 120),
   [BlockId.WATER]: uniform(59, 111, 209),
   [BlockId.WOOD]: uniform(95, 66, 40),
   [BlockId.LEAVES]: uniform(58, 117, 45),

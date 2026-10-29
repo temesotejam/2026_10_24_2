@@ -104,8 +104,9 @@ export function createDriver(page, out) {
     }
     await page.keyboard.press(`Digit${index + 1}`);
   }
-  async function mine(p) {
+  async function mine(p, interrupt = null) {
     for (let attempt = 0; attempt < 16; attempt++) {
+      if (interrupt && (await interrupt())) return false;
       await checkThreat();
       const original = await block(p);
       if ([0, 5, 26, 31, 40].includes(original)) return;
@@ -131,6 +132,7 @@ export function createDriver(page, out) {
       try {
         let deadline = Date.now() + 12000;
         while ((await block(hit)) === before) {
+          if (interrupt && (await interrupt())) return false;
           assert.ok(
             Date.now() < deadline,
             `mining target changed or blocked ${JSON.stringify(hit)}`,
@@ -152,7 +154,7 @@ export function createDriver(page, out) {
     }
     throw new Error(`Cannot reach ${JSON.stringify(p)}`);
   }
-  async function walk(x, z, jump = false, tolerance = 0.3, settle = 80) {
+  async function walk(x, z, jump = false, tolerance = 0.3, settle = 80, interrupt = null) {
     narrate(goal);
     const start = Date.now();
     let combatTime = 0,
@@ -179,6 +181,7 @@ export function createDriver(page, out) {
         }
       }
       while (true) {
+        if (interrupt && (await interrupt())) return false;
         const checkedAt = Date.now();
         if (await checkThreat()) combatTime += Date.now() - checkedAt;
         const s = await info();
@@ -209,7 +212,8 @@ export function createDriver(page, out) {
           ) {
             const cell = { x: frontX, y: yy, z: frontZ },
               id = await block(cell);
-            if (id !== 0 && id !== 5 && id !== 8) await mine(cell);
+            if (id !== 0 && id !== 5 && id !== 8 && (await mine(cell, interrupt)) === false)
+              return false;
           }
           lastProgress = Date.now();
         }
@@ -225,6 +229,7 @@ export function createDriver(page, out) {
       await page.keyboard.up("Space");
     }
     if (settle) await wait(settle);
+    return true;
   }
   async function center() {
     const p = (await info()).position;

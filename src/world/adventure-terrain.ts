@@ -4,7 +4,7 @@ import { deriveSeed } from "./rng";
 import type { ColumnProfile } from "./terrain";
 
 export type Dimension = "overworld" | "nether" | "end";
-export type GeneratorVersion = 1 | 2;
+export type GeneratorVersion = 1 | 2 | 3;
 export interface Structure {
   x: number;
   y: number;
@@ -38,7 +38,7 @@ export function structuresNear(
   return result;
 }
 
-export function structureBlocks(s: Structure): StructureBlock[] {
+export function structureBlocks(s: Structure, revision: GeneratorVersion = 3): StructureBlock[] {
   const result: StructureBlock[] = [];
   const put = (x: number, y: number, z: number, id: BlockId) =>
     result.push({ x: s.x + x, y: s.y + y, z: s.z + z, id });
@@ -93,7 +93,8 @@ export function structureBlocks(s: Structure): StructureBlock[] {
     }
   put(-2, 0, 0, BlockId.TORCH);
   put(2, 0, 0, BlockId.TORCH);
-  // A weathered gateway beside the settlement: one bottom block needs repair.
+  if (revision !== 2) return result;
+  // Legacy worlds preserve their previously generated gateway.
   for (let x = -10; x <= -4; x++)
     for (let z = -12; z <= -8; z++) {
       put(x, -1, z, BlockId.COBBLE);
@@ -110,18 +111,19 @@ export function stampAdventure(
   chunk: Chunk,
   seed: number,
   sample: (x: number, z: number) => ColumnProfile,
+  revision: GeneratorVersion = 3,
 ): void {
   const ox = chunk.worldOriginX,
     oz = chunk.worldOriginZ;
   for (const s of structuresNear(seed, ox, oz, sample)) {
     if (Math.abs(s.x - ox - 8) > 20 || Math.abs(s.z - oz - 8) > 20) continue;
-    for (const p of structureBlocks(s)) {
+    for (const p of structureBlocks(s, revision)) {
       if (p.x >= ox && p.x < ox + 16 && p.z >= oz && p.z < oz + 16 && p.y > 0 && p.y < 95)
         chunk.setBlock(p.x - ox, p.y, p.z - oz, p.id);
     }
   }
-  const room = stronghold(seed),
-    entrance = strongholdEntrance(seed, sample);
+  const room = stronghold(seed, revision),
+    entrance = strongholdEntrance(seed, sample, revision);
   const stairLength = entrance.y - room.y;
   if (Math.abs(ox + 8 - room.x) < 32 && oz + 16 >= room.z - 6 && oz <= entrance.z + 1) {
     const put = (x: number, y: number, z: number, id: BlockId) => {
@@ -139,7 +141,7 @@ export function stampAdventure(
               ? BlockId.STONE_BRICK
               : BlockId.AIR,
           );
-    for (const p of endFrames(seed))
+    for (const p of endFrames(seed, revision))
       put(p.x, p.y, p.z, p.empty ? BlockId.END_FRAME : BlockId.END_FRAME_FILLED);
     // Stairs connect the underground room to daylight, rather than a sealed box.
     for (let t = 0; t <= stairLength; t++)
@@ -158,27 +160,49 @@ export function stampAdventure(
   }
 }
 
-export function stronghold(seed: number): { x: number; y: number; z: number } {
-  return { x: 24 + ((seed >>> 0) % 16), y: 18, z: -40 - ((seed >>> 4) % 16) };
+export function stronghold(
+  seed: number,
+  revision: GeneratorVersion = 3,
+): { x: number; y: number; z: number } {
+  if (revision < 3) return { x: 24 + ((seed >>> 0) % 16), y: 18, z: -40 - ((seed >>> 4) % 16) };
+  const h = deriveSeed(seed, 0x57a09) >>> 0;
+  const angle = (h / 0x100000000) * Math.PI * 2;
+  const radius = 256 + ((h >>> 12) % 129);
+  return {
+    x: Math.round(Math.cos(angle) * radius),
+    y: 18,
+    z: Math.round(Math.sin(angle) * radius),
+  };
 }
 export function strongholdEntrance(
   seed: number,
   sample: (x: number, z: number) => ColumnProfile,
+  revision: GeneratorVersion = 3,
 ): { x: number; y: number; z: number } {
-  const c = stronghold(seed);
+  const c = stronghold(seed, revision);
   for (let t = 8; t <= 60; t++) {
     const z = c.z + 4 + t;
     if (c.y + t > Math.max(32, sample(c.x, z).terrainHeight)) return { x: c.x, y: c.y + t, z };
   }
   return { x: c.x, y: c.y + 60, z: c.z + 64 };
 }
-export function endFrames(seed: number): (StructureBlock & { empty: boolean })[] {
-  const c = stronghold(seed),
+export function endFrames(
+  seed: number,
+  revision: GeneratorVersion = 3,
+): (StructureBlock & { empty: boolean })[] {
+  const c = stronghold(seed, revision),
     result: (StructureBlock & { empty: boolean })[] = [];
   for (const axis of ["x", "z"] as const)
     for (const side of [-2, 2])
       for (let along = -1; along <= 1; along++) {
-        const p = { x: c.x, y: c.y, z: c.z, id: BlockId.END_FRAME, empty: along === 0 };
+        const p = {
+          x: c.x,
+          y: c.y,
+          z: c.z,
+          id: BlockId.END_FRAME,
+          empty:
+            revision < 3 ? along === 0 : (deriveSeed(seed, result.length ^ 0xe1e) >>> 0) % 10 !== 0,
+        };
         p[axis] += side;
         p[axis === "x" ? "z" : "x"] += along;
         result.push(p);
@@ -210,7 +234,12 @@ export function generateEnd(cx: number, cz: number): Chunk {
 }
 
 /** A separate deterministic cavern realm, with a safe return gateway at origin. */
-export function generateNether(cx: number, cz: number, seed: number): Chunk {
+export function generateNether(
+  cx: number,
+  cz: number,
+  seed: number,
+  revision: GeneratorVersion = 3,
+): Chunk {
   const chunk = new Chunk(cx, cz);
   for (let x = 0; x < 16; x++)
     for (let z = 0; z < 16; z++) {
@@ -232,7 +261,7 @@ export function generateNether(cx: number, cz: number, seed: number): Chunk {
         if (y === floor && floor > 24 && (wx + wz) % 7 === 0) id = BlockId.SOUL_SAND;
         if (y === floor + 1 && floor > 24 && (wx + wz) % 7 === 0) id = BlockId.NETHER_WART;
         // Landing zone is never flooded or intersected by ceiling terrain.
-        if (Math.abs(wx) <= 5 && Math.abs(wz) <= 5) {
+        if (revision < 3 && Math.abs(wx) <= 5 && Math.abs(wz) <= 5) {
           if (y >= 28 && y <= 33) id = BlockId.OBSIDIAN;
           else if (y >= 34 && y <= 40) id = BlockId.AIR;
           if (wz === -3 && wx >= -1 && wx <= 2 && y >= 33 && y <= 37)

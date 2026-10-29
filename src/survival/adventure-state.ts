@@ -1,3 +1,5 @@
+import { dragonMaxHealth } from "./dragon";
+import { placeLinkedPortal } from "./nether-travel";
 import type { SessionState } from "./session";
 import type { Dimension } from "../world/adventure-terrain";
 import type { Vec3 } from "../player/physics";
@@ -21,6 +23,7 @@ export type RealmState = Pick<SessionState, (typeof REALM_FIELDS)[number]>;
 export type Potion = "healingPotion" | "firePotion" | "strengthPotion";
 export interface AdventureState {
   dimension: Dimension;
+  eyeThrows?: number;
   dragon: { health: number; phase: number; defeated: boolean };
   opened: Record<string, true>;
   xp: number;
@@ -29,9 +32,10 @@ export interface AdventureState {
   realms: Partial<Record<Dimension, RealmState>>;
   brewing: Record<string, { remaining: number; output: Potion }>;
 }
-export function newAdventure(): AdventureState {
+export function newAdventure(generator = 3): AdventureState {
   return {
-    dragon: { health: 120, phase: 0, defeated: false },
+    eyeThrows: 0,
+    dragon: { health: dragonMaxHealth(generator), phase: 0, defeated: false },
     opened: {},
     dimension: "overworld",
     xp: 0,
@@ -53,9 +57,11 @@ export function travelCandidate(
   netherSpawn: Vec3,
 ): SessionState {
   const next = structuredClone(data);
-  const adventure = (next.adventure ??= newAdventure());
+  const adventure = (next.adventure ??= newAdventure(next.generator));
   if (adventure.dimension === destination) return next;
   adventure.realms[adventure.dimension] = realmSnapshot(next);
+  const sourceDimension = adventure.dimension;
+  const sourcePosition = { ...data.position };
   const target = adventure.realms[destination];
   if (target)
     for (const key of REALM_FIELDS) Object.assign(next, { [key]: structuredClone(target[key]) });
@@ -75,6 +81,8 @@ export function travelCandidate(
     next.fluidLevels = {};
     next.nextId = 1;
   }
+  if (next.generator >= 3 && sourceDimension !== "end" && destination !== "end")
+    placeLinkedPortal(next, destination, sourcePosition, !target);
   // A brewing stand belongs to its dimension; keep jobs with an explicit prefix.
   adventure.dimension = destination;
   return next;

@@ -44,6 +44,7 @@ export const BlockId = {
   END_STONE: 41,
   END_CRYSTAL: 42,
   FIRE: 43,
+  GRAVEL: 44,
 } as const;
 
 export type BlockId = (typeof BlockId)[keyof typeof BlockId];
@@ -101,6 +102,7 @@ export const BLOCKS: Readonly<Record<BlockId, BlockDef>> = {
   [BlockId.DIRT]: block(BlockId.DIRT, "dirt"),
   [BlockId.STONE]: block(BlockId.STONE, "stone"),
   [BlockId.SAND]: block(BlockId.SAND, "sand"),
+  [BlockId.GRAVEL]: block(BlockId.GRAVEL, "gravel"),
   [BlockId.WATER]: block(BlockId.WATER, "water", {
     solid: false,
     transparent: true,

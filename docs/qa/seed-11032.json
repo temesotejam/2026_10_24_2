@@ -1,0 +1,583 @@
+{
+  "seed": 11032,
+  "round": "updated",
+  "fixtureImports": false,
+  "stateMutationAPI": false,
+  "actions": [
+    "Start fresh survival with empty inventory and engage pointer lock",
+    "Walk and jump forward from the selected spawn facing without digging terrain",
+    "Walk to naturally generated tree {\"x\":0,\"y\":35,\"z\":-9,\"id\":6,\"d\":6.193949999999997}",
+    "Gather four natural logs with bare hands and pick up drops",
+    "Craft planks, crafting table and sticks in inventory",
+    "Place a crafting table, interact with it, and craft a wooden pickaxe",
+    "Craft a wooden sword through the placed table before exploring",
+    "Reach a generated village by normal overland travel",
+    "Inspect naturally generated village chest through the actual UI"
+  ],
+  "findings": [],
+  "completed": true,
+  "initial": {
+    "position": {
+      "x": 0.5,
+      "y": 35,
+      "z": 0.5
+    },
+    "eye": 1.6199999999999974,
+    "pitch": 0,
+    "yaw": 0,
+    "inventory": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "health": 20
+  },
+  "initialAdventure": {
+    "eyeThrows": 0,
+    "dragon": {
+      "health": 120,
+      "phase": 0,
+      "defeated": false
+    },
+    "opened": {},
+    "dimension": "overworld",
+    "xp": 0,
+    "fire": 0,
+    "strength": 0,
+    "realms": {},
+    "brewing": {},
+    "cast": null,
+    "shots": [],
+    "generator": 3,
+    "dragonPosition": {
+      "x": 18,
+      "y": 43,
+      "z": 0
+    },
+    "creatures": [],
+    "stronghold": {
+      "x": -347,
+      "y": 18,
+      "z": 147
+    },
+    "entrance": {
+      "x": -347,
+      "y": 35,
+      "z": 168
+    },
+    "structures": [
+      {
+        "x": -74,
+        "z": -53,
+        "y": 39,
+        "kind": "village"
+      },
+      {
+        "x": 69,
+        "z": -55,
+        "y": 38,
+        "kind": "ruin"
+      },
+      {
+        "x": 59,
+        "z": 197,
+        "y": 36,
+        "kind": "ruin"
+      }
+    ]
+  },
+  "sourceAssets": ["./assets/index-BW7myy18.js"],
+  "openingWalk": {
+    "position": {
+      "x": 0.5,
+      "y": 35,
+      "z": -2.3060500000000026
+    },
+    "eye": 1.6199999999999974,
+    "pitch": 0,
+    "yaw": 0,
+    "inventory": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "health": 20
+  },
+  "openingDisplacement": 2.8060500000000026,
+  "tree": {
+    "x": 0,
+    "y": 35,
+    "z": -9,
+    "id": 6,
+    "d": 6.193949999999997
+  },
+  "table": {
+    "x": 1,
+    "y": 34,
+    "z": -9
+  },
+  "firstTools": {
+    "position": {
+      "x": 0.4087668380563173,
+      "y": 34.00000000000001,
+      "z": -8.496542468367322
+    },
+    "eye": 1.6199999999999974,
+    "pitch": -0.7986,
+    "yaw": -45.55100000000001,
+    "inventory": [
+      {
+        "id": "wood_pick",
+        "count": 1,
+        "durability": 60
+      },
+      {
+        "id": "dirt",
+        "count": 3
+      },
+      {
+        "id": "seeds",
+        "count": 1
+      },
+      {
+        "id": "planks",
+        "count": 5
+      },
+      {
+        "id": "stick",
+        "count": 6
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "health": 20
+  },
+  "village": {
+    "x": -74,
+    "z": -53,
+    "y": 39,
+    "kind": "village"
+  },
+  "villageArrival": {
+    "position": {
+      "x": -79.58684008929511,
+      "y": 39.00000000000006,
+      "z": -51.505587994868534
+    },
+    "eye": 1.6199999999999974,
+    "pitch": 4.440892098500626e-16,
+    "yaw": -67.60600000000004,
+    "inventory": [
+      {
+        "id": "wood_pick",
+        "count": 1,
+        "durability": 60
+      },
+      {
+        "id": "dirt",
+        "count": 7
+      },
+      {
+        "id": "seeds",
+        "count": 4
+      },
+      {
+        "id": "planks",
+        "count": 3
+      },
+      {
+        "id": "stick",
+        "count": 5
+      },
+      {
+        "id": "wood_sword",
+        "count": 1,
+        "durability": 51
+      },
+      {
+        "id": "apple",
+        "count": 1
+      },
+      {
+        "id": "sapling",
+        "count": 1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "health": 20
+  },
+  "oldGatewayBlocks": [],
+  "villageLoot": [
+    {
+      "title": "パン",
+      "text": "4"
+    },
+    {
+      "title": "種",
+      "text": "6"
+    },
+    {
+      "title": "鉄インゴット",
+      "text": "3"
+    }
+  ],
+  "final": {
+    "position": {
+      "x": -79.50603969958054,
+      "y": 39.00000000000006,
+      "z": -50.3572271034142
+    },
+    "eye": 1.6199999999999974,
+    "pitch": -0.35419999999999957,
+    "yaw": -66.30800000000006,
+    "inventory": [
+      {
+        "id": "wood_pick",
+        "count": 1,
+        "durability": 60
+      },
+      {
+        "id": "dirt",
+        "count": 7
+      },
+      {
+        "id": "seeds",
+        "count": 4
+      },
+      {
+        "id": "planks",
+        "count": 3
+      },
+      {
+        "id": "stick",
+        "count": 5
+      },
+      {
+        "id": "wood_sword",
+        "count": 1,
+        "durability": 51
+      },
+      {
+        "id": "apple",
+        "count": 1
+      },
+      {
+        "id": "sapling",
+        "count": 1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "health": 20
+  },
+  "finalAdventure": {
+    "eyeThrows": 0,
+    "dragon": {
+      "health": 120,
+      "phase": 0,
+      "defeated": false
+    },
+    "opened": {
+      "overworld:-81,39,-48": true
+    },
+    "dimension": "overworld",
+    "xp": 0,
+    "fire": 0,
+    "strength": 0,
+    "realms": {},
+    "brewing": {},
+    "cast": null,
+    "shots": [],
+    "generator": 3,
+    "dragonPosition": {
+      "x": 18,
+      "y": 43,
+      "z": 0
+    },
+    "creatures": [
+      {
+        "id": 12,
+        "species": "chicken",
+        "position": {
+          "x": -52.74887701939842,
+          "y": 43.00000000000002,
+          "z": 1.4626575937917847
+        },
+        "velocity": {
+          "x": -0.10510700503300209,
+          "y": 0,
+          "z": 0.5072651763062318
+        },
+        "onGround": true,
+        "hp": 8,
+        "age": 43.200000000000344,
+        "cooldown": 0,
+        "intent": 3.642105280875444,
+        "love": 0
+      },
+      {
+        "id": 18,
+        "species": "pig",
+        "position": {
+          "x": -55.05394588289036,
+          "y": 36.000000033908385,
+          "z": -38.50816467165592
+        },
+        "velocity": {
+          "x": 0.33505474510033834,
+          "y": 0,
+          "z": -0.39509968284693336
+        },
+        "onGround": true,
+        "hp": 8,
+        "age": 33.0000000000002,
+        "cooldown": 0,
+        "intent": 5.579838454760015,
+        "love": 0
+      },
+      {
+        "id": 19,
+        "species": "chicken",
+        "position": {
+          "x": -59.0937432242713,
+          "y": 35.00000000000001,
+          "z": -39.14080648696489
+        },
+        "velocity": {
+          "x": -0.26461440729014013,
+          "y": 0,
+          "z": -0.44535902040318864
+        },
+        "onGround": true,
+        "hp": 8,
+        "age": 27.900000000000126,
+        "cooldown": 0,
+        "intent": 0.5361141372943014,
+        "love": 0
+      },
+      {
+        "id": 23,
+        "species": "villager",
+        "position": {
+          "x": -74.93042804378962,
+          "y": 39,
+          "z": -47.48867027127159
+        },
+        "velocity": {
+          "x": -0.45544048020231864,
+          "y": 0,
+          "z": -0.24685909056196695
+        },
+        "onGround": true,
+        "hp": 8,
+        "age": 22.800000000000054,
+        "cooldown": 0,
+        "intent": 1.0740983256951662,
+        "love": 0
+      },
+      {
+        "id": 25,
+        "species": "villager",
+        "position": {
+          "x": -69.29990000259052,
+          "y": 39,
+          "z": -48.39658881783956
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": -0.48042102111155527
+        },
+        "onGround": true,
+        "hp": 8,
+        "age": 17.69999999999998,
+        "cooldown": 0,
+        "intent": 5.899742418307018,
+        "love": 0
+      }
+    ],
+    "stronghold": {
+      "x": -347,
+      "y": 18,
+      "z": 147
+    },
+    "entrance": {
+      "x": -347,
+      "y": 35,
+      "z": 168
+    },
+    "structures": [
+      {
+        "x": -208,
+        "z": -186,
+        "y": 35,
+        "kind": "village"
+      },
+      {
+        "x": -74,
+        "z": -53,
+        "y": 39,
+        "kind": "village"
+      },
+      {
+        "x": 69,
+        "z": -55,
+        "y": 38,
+        "kind": "ruin"
+      }
+    ]
+  },
+  "camera": {
+    "perspective": 1,
+    "distance": 0.29606642790378546
+  },
+  "errors": []
+}

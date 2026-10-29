@@ -23,7 +23,10 @@ function assert(ok: unknown, field: string): asserts ok {
 export function validateSave(value: unknown): SessionState {
   assert(record(value), "root");
   const d = value;
-  assert(d.version === 1 && (d.generator === 1 || d.generator === 2), "version / generator");
+  assert(
+    d.version === 1 && (d.generator === 1 || d.generator === 2 || d.generator === 3),
+    "version / generator",
+  );
   assert(
     integer(d.seed, -2147483648, 2147483647) && (d.mode === "survival" || d.mode === "creative"),
     "world",
@@ -165,12 +168,13 @@ export function validateSave(value: unknown): SessionState {
     );
     assert(
       record(a.dragon) &&
-        numeric(a.dragon.health, 0, 120) &&
+        numeric(a.dragon.health, 0, 200) &&
         numeric(a.dragon.phase) &&
         typeof a.dragon.defeated === "boolean" &&
         a.dragon.defeated === (a.dragon.health === 0),
       "dragon",
     );
+    if (a.eyeThrows !== undefined) assert(integer(a.eyeThrows, 0, 1000000), "eye throws");
     assert(record(a.opened) && Object.keys(a.opened).length <= 10000, "opened structures");
     for (const [key, opened] of Object.entries(a.opened))
       assert(

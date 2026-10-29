@@ -1,15 +1,18 @@
+import { meleeDamage } from "./melee-damage";
 import { must } from "../core/assert";
 import { ITEMS, stack, type Stack } from "../items/catalog";
 import { addItem, removeItem, wearTool } from "../items/inventory";
 import type { Vec3 } from "../player/physics";
 import { raycastVoxels } from "../player/raycast";
 import { BlockId } from "../world/blocks";
-import type { World } from "../world/world";
 import type { SurvivalSession } from "./session";
 import { BREWS, newAdventure, type Potion } from "./adventure-state";
 import { endFrames, stronghold, END_CRYSTALS } from "../world/adventure-terrain";
-import { dragonPosition, rayHitsSphere } from "./dragon";
+import { dragonMaxHealth, dragonPosition, raySphereDistance } from "./dragon";
 import { isSolid } from "../world/blocks";
+import { portalInterior } from "./portal";
+import { eyeDirection, eyeBreaks } from "./eye-guidance";
+export { portalInterior } from "./portal";
 
 export { BREWS } from "./adventure-state";
 /** Small atomic inventory transaction: no partial payment or lost output. */
@@ -35,31 +38,6 @@ export function exchange(
   return true;
 }
 
-/** Both upright orientations, a 4x5 frame (corners optional), 2x3 clear interior. */
-export function portalInterior(world: World, hit: Vec3): Vec3[] | null {
-  for (const axis of ["x", "z"] as const)
-    for (let dx = -3; dx <= 0; dx++)
-      for (let dy = -4; dy <= 0; dy++) {
-        const base = { ...hit, [axis]: hit[axis] + dx, y: hit.y + dy };
-        if (base.y < 1 || base.y + 4 >= 95) continue;
-        const cells: Vec3[] = [];
-        let valid = true;
-        for (let u = 0; u < 4; u++)
-          for (let v = 0; v < 5; v++) {
-            const p = { ...base, [axis]: base[axis] + u, y: base.y + v };
-            const id = world.getBlock(p.x, p.y, p.z);
-            if ((u === 0 || u === 3) && (v === 0 || v === 4)) continue;
-            if (u === 0 || u === 3 || v === 0 || v === 4) valid &&= id === BlockId.OBSIDIAN;
-            else {
-              valid &&= id === BlockId.AIR || id === BlockId.PORTAL;
-              cells.push(p);
-            }
-          }
-        if (valid) return cells;
-      }
-  return null;
-}
-
 export class Adventure {
   shots: { position: Vec3; velocity: Vec3; age: number }[] = [];
   private attackCooldown = 0;
@@ -69,7 +47,7 @@ export class Adventure {
   readonly session: SurvivalSession;
   constructor(session: SurvivalSession) {
     this.session = session;
-    session.data.adventure ??= newAdventure();
+    session.data.adventure ??= newAdventure(session.data.generator);
   }
   get state() {
     return must(this.session.data.adventure);
@@ -129,12 +107,21 @@ export class Adventure {
       const crystals = END_CRYSTALS.filter(
         (p) => this.session.world.getBlock(p.x, p.y, p.z) === BlockId.END_CRYSTAL,
       ).length;
-      dragon.health = Math.min(120, dragon.health + crystals * dt * 2);
+      dragon.health = Math.min(
+        dragonMaxHealth(this.session.world.revision),
+        dragon.health + crystals * dt * 2,
+      );
       const p = dragonPosition(dragon.phase),
         player = this.session.data.position;
       if (
         this.dragonCooldown === 0 &&
-        Math.hypot(p.x - player.x, p.y - player.y, p.z - player.z) < 7
+        Math.hypot(p.x - player.x, p.y - player.y, p.z - player.z) < 7 &&
+        raycastVoxels(
+          p,
+          { x: player.x - p.x, y: player.y + 0.9 - p.y, z: player.z - p.z },
+          Math.hypot(player.x - p.x, player.y + 0.9 - p.y, player.z - p.z),
+          (x, y, z) => isSolid(this.session.world.getBlock(x, y, z)),
+        ) === null
       ) {
         this.session.hurt(3);
         this.dragonCooldown = 2;
@@ -210,22 +197,23 @@ export class Adventure {
     }
   }
   attackDragon(origin: Vec3, direction: Vec3): boolean {
-    if (
-      this.state.dimension !== "end" ||
-      this.state.dragon.defeated ||
-      !rayHitsSphere(origin, direction, dragonPosition(this.state.dragon.phase), 2.5, 4.5)
-    )
-      return false;
-    const block = raycastVoxels(origin, direction, 4.5, (x, y, z) =>
+    if (this.state.dimension !== "end" || this.state.dragon.defeated) return false;
+    const contact = raySphereDistance(
+      origin,
+      direction,
+      dragonPosition(this.state.dragon.phase),
+      2.5,
+    );
+    // Use the same three-block melee reach as ordinary creature attacks.
+    if (contact === null || contact > 3) return false;
+    const block = raycastVoxels(origin, direction, contact, (x, y, z) =>
       isSolid(this.session.world.getBlock(x, y, z)),
     );
     if (block) return false;
     if (this.attackCooldown > 0) return true;
     const item = this.session.held ? ITEMS[this.session.held.id] : undefined;
     this.damageDragon(
-      (item?.tool === "sword" ? 4 + (item.tier ?? 1) * 2 : 1) +
-        (item?.enchanted ? 2 : 0) +
-        (this.state.strength > 0 ? 4 : 0),
+      meleeDamage(item) + (item?.enchanted ? 2 : 0) + (this.state.strength > 0 ? 4 : 0),
     );
     if (!this.session.creative) wearTool(this.session.data.inventory, this.session.data.selected);
     this.attackCooldown = 0.5;
@@ -242,7 +230,9 @@ export class Adventure {
       for (let x = -1; x <= 1; x++)
         for (let z = 4; z <= 6; z++) this.session.edit(x, 34, z, BlockId.END_GATE);
       this.session.notice?.(
-        "エンダードラゴンを討伐しました！卵を獲得。帰還ゲートを右クリックで通常世界へ戻れます",
+        this.session.world.revision >= 3
+          ? "エンダードラゴンを討伐しました！卵を獲得。帰還ゲートへ入ると通常世界へ戻れます"
+          : "エンダードラゴンを討伐しました！卵を獲得。帰還ゲートを右クリックで通常世界へ戻れます",
       );
     }
     this.session.onChange?.();
@@ -305,6 +295,11 @@ export class Adventure {
     if (item.id === "bucket") {
       if (hit) {
         const block = s.world.getBlock(hit.blockX, hit.blockY, hit.blockZ);
+        const level = s.data.fluidLevels[`${hit.blockX},${hit.blockY},${hit.blockZ}`] ?? 0;
+        if ((block === BlockId.WATER || block === BlockId.LAVA) && level > 0) {
+          s.notice?.("流れている液体は汲めません。水源・溶岩源を探してください");
+          return true;
+        }
         if (
           (block === BlockId.WATER || block === BlockId.LAVA) &&
           exchange(
@@ -355,7 +350,11 @@ export class Adventure {
       }
       for (const p of cells) s.edit(p.x, p.y, p.z, BlockId.PORTAL);
       if (!s.creative) wearTool(s.data.inventory, s.data.selected);
-      s.notice?.("ゲートが開きました。紫の面を右クリックして移動できます");
+      s.notice?.(
+        s.world.revision >= 3
+          ? "ゲートが開きました。紫の面の中に入り、少し待つと移動できます"
+          : "ゲートが開きました。紫の面を右クリックして移動できます",
+      );
       return true;
     }
     if (item.id === "enderEye") {
@@ -374,18 +373,35 @@ export class Adventure {
         s.edit(normalHit.blockX, normalHit.blockY, normalHit.blockZ, BlockId.END_FRAME_FILLED);
         if (!s.creative) removeItem(s.data.inventory, s.data.selected);
         if (
-          endFrames(s.data.seed).every(
+          endFrames(s.data.seed, s.world.revision).every(
             (p) => s.world.getBlock(p.x, p.y, p.z) === BlockId.END_FRAME_FILLED,
           )
         ) {
-          const c = stronghold(s.data.seed);
+          const c = stronghold(s.data.seed, s.world.revision);
           for (let x = -1; x <= 1; x++)
             for (let z = -1; z <= 1; z++) s.edit(c.x + x, c.y, c.z + z, BlockId.END_GATE);
-          s.notice?.("エンドへのゲートが開きました。中央の面を右クリックで移動できます");
+          s.notice?.(
+            s.world.revision >= 3
+              ? "エンドへのゲートが開きました。中央の面へ入ると移動できます"
+              : "エンドへのゲートが開きました。中央の面を右クリックで移動できます",
+          );
         }
       } else {
-        const c = stronghold(s.data.seed);
-        s.notice?.(`エンダーアイが遺跡を示しています：X ${c.x} / Z ${c.z}。階段で地下へ進もう`);
+        const c = stronghold(s.data.seed, s.world.revision);
+        if (s.world.revision < 3) {
+          s.notice?.(`エンダーアイが遺跡を示しています：X ${c.x} / Z ${c.z}。階段で地下へ進もう`);
+        } else {
+          const attempts = this.state.eyeThrows ?? 0;
+          const broken = !s.creative && eyeBreaks(s.data.seed, attempts);
+          if (!s.creative) {
+            this.state.eyeThrows = attempts + 1;
+            if (broken) removeItem(s.data.inventory, s.data.selected);
+          }
+          s.notice?.(
+            `アイが${eyeDirection(origin, c)}を示しました。${broken ? "アイは砕けました" : "アイを回収しました"}`,
+          );
+          s.onChange?.();
+        }
       }
       return true;
     }

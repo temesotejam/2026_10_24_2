@@ -57,6 +57,7 @@ export const TileKind = {
   END_STONE: 43,
   END_CRYSTAL: 44,
   FIRE: 45,
+  GRAVEL: 46,
 } as const;
 
 export type TileKind = (typeof TileKind)[keyof typeof TileKind];
@@ -91,6 +92,8 @@ export function tileForBlockFace(id: BlockId, face: Face): TileKind {
       return TileKind.STONE;
     case BlockId.SAND:
       return TileKind.SAND;
+    case BlockId.GRAVEL:
+      return TileKind.GRAVEL;
     case BlockId.WATER:
       return TileKind.WATER;
     case BlockId.WOOD:

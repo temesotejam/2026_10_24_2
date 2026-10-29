@@ -1,3 +1,5 @@
+import { meleeDamage } from "./melee-damage";
+import { structureLoot } from "../items/structure-loot";
 import { BREWS, newAdventure, type AdventureState } from "./adventure-state";
 import { structureBlocks, structuresNear } from "../world/adventure-terrain";
 import { createColumnSampler } from "../world/terrain";
@@ -36,7 +38,7 @@ import { deriveSeed, mulberry32 } from "../world/rng";
 export type GameMode = "survival" | "creative";
 export interface SessionState {
   version: 1;
-  generator: 1 | 2;
+  generator: 1 | 2 | 3;
   adventure?: AdventureState;
   seed: number;
   mode: GameMode;
@@ -72,7 +74,7 @@ export function newSession(seed: number, mode: GameMode, spawn: Vec3): SessionSt
     );
   return {
     version: 1,
-    generator: 2,
+    generator: 3,
     adventure: newAdventure(),
     seed,
     mode,
@@ -124,7 +126,7 @@ export class SurvivalSession {
     this.world = world;
     this.edit = edit;
     this.data = data;
-    data.adventure ??= newAdventure();
+    data.adventure ??= newAdventure(data.generator);
     this.random = mulberry32(deriveSeed(data.seed, 10247));
   }
   get held(): Stack | null {
@@ -320,9 +322,7 @@ export class SurvivalSession {
     if (!mob) return;
     const item = this.held ? ITEMS[this.held.id] : undefined;
     mob.hp -=
-      (this.data.adventure?.strength ? 4 : 0) +
-      (item?.enchanted ? 2 : 0) +
-      (item?.tool === "sword" ? 4 + (item.tier ?? 1) * 2 : item?.tool ? 3 : 1);
+      (this.data.adventure?.strength ? 4 : 0) + (item?.enchanted ? 2 : 0) + meleeDamage(item);
     mob.cooldown = 0.7;
     if (mob.species === "wanderer") mob.fuse = 2;
     this.attackCooldown = 0.4;
@@ -360,6 +360,11 @@ export class SurvivalSession {
     }
   }
   private die(): void {
+    if (this.data.generator >= 3 && this.data.adventure) {
+      this.data.adventure.xp = 0;
+      this.data.adventure.fire = 0;
+      this.data.adventure.strength = 0;
+    }
     for (const item of this.data.inventory) if (item) this.drop(item);
     this.data.inventory = emptySlots(36);
     for (const item of this.data.grid) if (item) this.drop(item);
@@ -669,7 +674,7 @@ export class SurvivalSession {
       return;
     }
     if (
-      this.world.revision === 2 &&
+      this.world.revision >= 2 &&
       d.creatures.filter((m) => m.species === "villager").length < 2
     ) {
       const village = structuresNear(
@@ -713,7 +718,7 @@ export class SurvivalSession {
       if (m.hp <= 0) {
         if (!this.creative && hostile(m))
           must(this.data.adventure).xp = Math.min(1000000, must(this.data.adventure).xp + 2);
-        for (const item of creatureDrops(m)) this.drop(item, m.position);
+        for (const item of creatureDrops(m, this.random())) this.drop(item, m.position);
       }
     this.data.creatures = this.data.creatures.filter(
       (m) =>
@@ -727,7 +732,7 @@ export class SurvivalSession {
       const slots = emptySlots(27);
       if (
         this.world.dimension === "overworld" &&
-        this.world.revision === 2 &&
+        this.world.revision >= 2 &&
         this.world.getBlock(x, y, z) === BlockId.CHEST
       ) {
         const generated = structuresNear(
@@ -735,8 +740,8 @@ export class SurvivalSession {
           x,
           z,
           createColumnSampler(this.data.seed, this.world.revision),
-        ).some((s) =>
-          structureBlocks(s).some(
+        ).find((s) =>
+          structureBlocks(s, this.world.revision).some(
             (p) => p.x === x && p.y === y && p.z === z && p.id === BlockId.CHEST,
           ),
         );
@@ -748,13 +753,16 @@ export class SurvivalSession {
         const treasureKey = `${this.world.dimension}:${key}`;
         const opened = must(this.data.adventure).opened;
         if (generated && !changed && !opened[treasureKey])
-          [
-            stack("bread", 6),
-            stack("iron", 4),
-            stack("string", 6),
-            stack("book"),
-            stack("obsidian", 4),
-          ].forEach((v, i) => (slots[i] = v));
+          (this.world.revision === 2
+            ? [
+                stack("bread", 6),
+                stack("iron", 4),
+                stack("string", 6),
+                stack("book"),
+                stack("obsidian", 4),
+              ]
+            : structureLoot(this.data.seed, x, y, z, generated.kind)
+          ).forEach((v, i) => (slots[i] = v));
         opened[treasureKey] = true;
       }
       this.data.chests[key] = slots;

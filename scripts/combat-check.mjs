@@ -178,6 +178,47 @@ try {
     "walk continuously instead of pulsing forward and stopping",
   );
   console.log(`PASS continuous walking: ${pauses}/${interior.length - 1} stationary samples`);
+
+  // A return from combat must yield before walking/mining while new threats are ignored.
+  await page.evaluate(() => document.exitPointerLock());
+  await page.waitForFunction(() => window.__mc.mode() === "idle");
+  put(0, 34, 2, 3);
+  put(0, 35, 2, 3);
+  await load("interruptible-combat-return", []);
+  let interruptAt = Date.now() + 300;
+  assert.equal(await d.mine({ x: 0, y: 35, z: 2 }, () => Date.now() >= interruptAt), false);
+  assert.equal(
+    await d.block({ x: 0, y: 35, z: 2 }),
+    3,
+    "yield before completing the blocked return's dig",
+  );
+  const beforeReturn = (await d.info()).position;
+  interruptAt = Date.now() + 300;
+  assert.equal(
+    await d.walk(
+      beforeReturn.x + 8,
+      beforeReturn.z,
+      false,
+      0.3,
+      0,
+      () => Date.now() >= interruptAt,
+    ),
+    false,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const stopped = (await d.info()).position;
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const released = (await d.info()).position;
+  assert.ok(
+    Math.hypot(released.x - stopped.x, released.z - stopped.z) < 0.05,
+    "interrupted return releases movement keys",
+  );
+  assert.ok(Math.abs(released.x - beforeReturn.x) < 7, "return yields before the destination");
+  put(0, 34, 2, 0);
+  put(0, 35, 2, 0);
+  console.log(
+    "PASS return walking and mining yield promptly to a new threat signal and release controls",
+  );
   await page.evaluate(() => document.exitPointerLock());
   await page.waitForFunction(() => window.__mc.mode() === "idle");
   for (let x = -12; x < 0; x++) for (let z = -12; z <= 12; z++) put(x, 33, z, 0);

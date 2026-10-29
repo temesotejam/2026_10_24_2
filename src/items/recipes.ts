@@ -65,10 +65,10 @@ RECIPES.push(
   },
   {
     id: "arrow",
-    pattern: ["F", "S"],
-    keys: { F: "flint", S: "stick" },
+    pattern: ["F", "S", "P"],
+    keys: { F: "flint", S: "stick", P: "feather" },
     output: stack("arrow", 4),
-    station: 2,
+    station: 3,
   },
   {
     id: "enderEye",
@@ -84,8 +84,7 @@ RECIPES.push(
     output: stack("bucket"),
     station: 3,
   },
-  { id: "string", pattern: ["W"], keys: { W: "wool" }, output: stack("string", 4), station: 2 },
-  { id: "flint", pattern: ["CC"], keys: { C: "cobble" }, output: stack("flint"), station: 2 },
+  { id: "wool", pattern: ["SS", "SS"], keys: { S: "string" }, output: stack("wool"), station: 2 },
   {
     id: "flintSteel",
     pattern: ["I ", " F"],
@@ -99,13 +98,6 @@ RECIPES.push(
     keys: { S: "stick", T: "string" },
     output: stack("fishingRod"),
     station: 3,
-  },
-  {
-    id: "book",
-    pattern: ["WW", "WP"],
-    keys: { W: "wheat", P: "planks" },
-    output: stack("book"),
-    station: 2,
   },
   {
     id: "bottle",

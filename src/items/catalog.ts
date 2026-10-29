@@ -25,6 +25,8 @@ export const ITEMS: Record<string, ItemDef> = {
   fishingRod: { name: "釣り竿", color: "#b5956b", durability: 65 },
   fish: { name: "生魚", color: "#7aa5b0", food: 2 },
   cookedFish: { name: "焼き魚", color: "#b98c65", food: 6 },
+  feather: { name: "羽根", color: "#e9e4d6" },
+  gravel: { name: "砂利", color: "#837c78", block: BlockId.GRAVEL },
   flint: { name: "火打石", color: "#555363" },
   flintSteel: { name: "火打石と打ち金", color: "#9b9da9", durability: 65 },
   book: { name: "本", color: "#99795c" },

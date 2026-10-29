@@ -201,9 +201,14 @@ describe("creatures, combat and sleep", () => {
     d.creatures = [mob("pig")];
     d.nextId = 2;
     game.hitCreature(1);
+    expect(d.creatures[0]?.hp).toBe(2);
+    game.hitCreature(1);
+    expect(d.creatures[0]?.hp).toBe(2); // The attack cooldown prevents a second immediate hit.
+    tick(game, 0.5);
+    game.hitCreature(1);
     expect(d.creatures).toHaveLength(0);
     expect(d.loot.some((l) => l.stack.id === "rawMeat")).toBe(true);
-    expect(d.inventory[0].durability).toBe(250);
+    expect(d.inventory[0].durability).toBe(249);
   });
   it("feeding two adult animals breeds a child and consumes wheat", () => {
     const { d, game } = fixture();

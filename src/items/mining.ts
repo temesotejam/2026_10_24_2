@@ -38,6 +38,7 @@ export function miningSeconds(block: BlockId, held: Stack | null): number {
 }
 export function blockDrops(block: BlockId, held: Stack | null, roll: number): Stack[] {
   if (block === BlockId.FIRE) return [];
+  if (block === BlockId.GRAVEL) return [stack(roll < 0.1 ? "flint" : "gravel")];
   const tool = held ? ITEMS[held.id] : undefined;
   const tier = tool?.tool === "pick" ? (tool.tier ?? 0) : 0;
   if (PICK_BLOCKS.includes(block)) {
@@ -59,7 +60,10 @@ export function blockDrops(block: BlockId, held: Stack | null, roll: number): St
   if (block === BlockId.LEAVES)
     return roll < 0.15 ? [stack("apple")] : roll < 0.4 ? [stack("sapling")] : [];
   if (block === BlockId.CROP) return [stack("seeds")];
-  if (block === BlockId.RIPE_CROP) return [stack("wheat", 2), stack("seeds", 2)];
+  if (block === BlockId.RIPE_CROP) {
+    const seeds = Math.min(3, Math.floor(roll * 4));
+    return [stack("wheat"), ...(seeds ? [stack("seeds", seeds)] : [])];
+  }
   const id = blockItem(block);
   return id ? [stack(id)] : [];
 }

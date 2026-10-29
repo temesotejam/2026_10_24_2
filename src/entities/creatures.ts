@@ -53,18 +53,24 @@ export const COLORS: Record<Species, number> = {
 export function hostile(m: Creature): boolean {
   return m.species !== "villager" && !FRIENDLY.includes(m.species);
 }
-export function creatureDrops(m: Creature): Stack[] {
+export function creatureDrops(m: Creature, roll = 0.5): Stack[] {
   if (m.species === "villager") return [];
-  if (m.species === "wanderer") return [stack("enderPearl")];
-  if (m.species === "ember") return [stack("blazeRod")];
+  if (m.species === "wanderer") return roll < 0.5 ? [stack("enderPearl")] : [];
+  if (m.species === "ember") return roll < 0.5 ? [stack("blazeRod")] : [];
   if (m.species === "spider") return [stack("string", 2)];
   return FRIENDLY.includes(m.species)
     ? [
         stack("rawMeat", m.species === "cow" ? 3 : 1),
         ...(m.species === "sheep" ? [stack("wool", 2)] : []),
+        ...(m.species === "chicken" && roll >= 1 / 3
+          ? [stack("feather", Math.min(2, Math.floor(roll * 3)))]
+          : []),
       ]
     : m.species === "skeleton"
-      ? [stack("bone", 2)]
+      ? [
+          stack("bone", 2),
+          ...(roll >= 1 / 3 ? [stack("arrow", Math.min(2, Math.floor(roll * 3)))] : []),
+        ]
       : [];
 }
 export function moveCreature(m: Creature, target: Vec3, world: World, dt: number): void {

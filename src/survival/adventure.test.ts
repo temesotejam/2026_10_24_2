@@ -28,7 +28,9 @@ function fixture(dimension: Dimension = "overworld") {
   for (let x = -16; x < 32; x++)
     for (let z = -16; z < 32; z++) world.setBlock(x, 33, z, BlockId.STONE);
   const data = newSession(2026, "survival", { x: 0.5, y: 34, z: 0.5 });
+  data.generator = 2;
   const a = must(data.adventure);
+  a.dragon.health = 120;
   if (dimension !== "overworld") a.realms.overworld = realmSnapshot(data);
   a.dimension = dimension;
   const session = new SurvivalSession(world, data, (x, y, z, id) => {
@@ -271,7 +273,7 @@ describe("planned adventure progression", () => {
     "connects the stronghold stairs to dry daylight for seed %s",
     (seed) => {
       const sample = createColumnSampler(seed, 2),
-        entrance = strongholdEntrance(seed, sample);
+        entrance = strongholdEntrance(seed, sample, 2);
       const c = generateChunk(
         Math.floor(entrance.x / 16),
         Math.floor(entrance.z / 16),
@@ -280,7 +282,7 @@ describe("planned adventure progression", () => {
         2,
       );
       const world = new World(seed, "overworld", 2),
-        room = stronghold(seed);
+        room = stronghold(seed, 2);
       for (let t = 0; t <= entrance.y - room.y; t++) {
         for (const dx of [-2, 0, 2]) {
           const x = room.x + dx,
@@ -311,11 +313,11 @@ describe("planned adventure progression", () => {
     expect(world.getBlock(0, 34, -3)).toBe(BlockId.END_FRAME_FILLED);
     expect(data.inventory[0]).toBeNull();
   });
-  it("creates all twelve stronghold frames, four awaiting eyes, and six end crystals", () => {
-    const room = stronghold(2026);
+  it("preserves legacy twelve stronghold frames with four awaiting eyes and six end crystals", () => {
+    const room = stronghold(2026, 2);
     expect(room.y).toBeLessThan(32);
-    expect(endFrames(2026)).toHaveLength(12);
-    expect(endFrames(2026).filter((f) => f.empty)).toHaveLength(4);
+    expect(endFrames(2026, 2)).toHaveLength(12);
+    expect(endFrames(2026, 2).filter((f) => f.empty)).toHaveLength(4);
     const world = new World(2026, "end", 2);
     for (const p of END_CRYSTALS) {
       world.ensureChunk(Math.floor(p.x / 16), Math.floor(p.z / 16));
@@ -333,7 +335,7 @@ describe("planned adventure progression", () => {
     data.inventory[0] = stack("diamond_sword");
     a.dragon.phase = 13;
     expect(adventure.attackDragon({ x: 20, y: 35.5, z: 0 }, { x: -1, y: 0, z: 0 })).toBe(false);
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 80 && !a.dragon.defeated; i++) {
       adventure.attackDragon({ x: 0, y: 35.5, z: 4 }, { x: 0, y: 0, z: -1 });
       adventure.tick(0.51);
     }
@@ -344,6 +346,33 @@ describe("planned adventure progression", () => {
     adventure.tick(3);
     expect(a.xp).toBe(100);
     expect(parseSave(encodeSave(data)).adventure?.dragon.defeated).toBe(true);
+  });
+  it("blocks the dragon's proximity attack behind a solid shelter", () => {
+    const { world, data, adventure, a } = fixture("end");
+    a.dragon.phase = 13;
+    data.position = { x: 0.5, y: 34, z: 4.5 };
+    for (let x = -2; x <= 2; x++)
+      for (let y = 34; y <= 38; y++) world.setBlock(x, y, 2, BlockId.STONE);
+    adventure.tick(0.1);
+    expect(data.vitals.health).toBe(20);
+    for (let x = -2; x <= 2; x++)
+      for (let y = 34; y <= 38; y++) world.setBlock(x, y, 2, BlockId.AIR);
+    adventure.tick(0.1);
+    expect(data.vitals.health).toBe(17);
+  });
+  it("keeps dragon melee within three blocks of actual contact and respects the nearer wall", () => {
+    const { world, data, adventure, a } = fixture("end");
+    a.dragon.phase = 13;
+    data.inventory[0] = stack("iron_sword");
+    expect(adventure.attackDragon({ x: 0, y: 35.5, z: 5.6 }, { x: 0, y: 0, z: -1 })).toBe(false);
+    expect(a.dragon.health).toBe(120);
+    world.setBlock(0, 35, 3, BlockId.STONE);
+    expect(adventure.attackDragon({ x: 0, y: 35.5, z: 4 }, { x: 0, y: 0, z: -1 })).toBe(false);
+    expect(a.dragon.health).toBe(120);
+    world.setBlock(0, 35, 3, BlockId.AIR);
+    world.setBlock(0, 35, -1, BlockId.STONE);
+    expect(adventure.attackDragon({ x: 0, y: 35.5, z: 4 }, { x: 0, y: 0, z: -1 })).toBe(true);
+    expect(a.dragon.health).toBe(114);
   });
   it("fires a paid physical arrow that removes a crystal on its path", () => {
     const { world, data, adventure } = fixture("end");

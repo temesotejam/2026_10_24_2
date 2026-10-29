@@ -1,0 +1,205 @@
+{
+  "agent": "progression_audit",
+  "normalInputOnly": true,
+  "fixtureImports": false,
+  "gameplay": "Fresh empty inventory → gathered natural logs → wood/stone tools → smelted iron → mined natural diamond",
+  "issue": "Confirmed cobblestone-to-flint shortcut through real crafting UI",
+  "before": {
+    "position": {
+      "x": 13.503276941240285,
+      "y": 11.000000033908194,
+      "z": -9.62802940195083
+    },
+    "eye": 1.620000000000001,
+    "pitch": -1.127396326794897,
+    "yaw": 23.43439999999998,
+    "inventory": [
+      {
+        "id": "iron_pick",
+        "count": 1,
+        "durability": 225
+      },
+      {
+        "id": "seeds",
+        "count": 1
+      },
+      {
+        "id": "sapling",
+        "count": 1
+      },
+      {
+        "id": "wood_pick",
+        "count": 1,
+        "durability": 41
+      },
+      {
+        "id": "furnace",
+        "count": 1
+      },
+      {
+        "id": "stick",
+        "count": 5
+      },
+      {
+        "id": "stone_pick",
+        "count": 1,
+        "durability": 113
+      },
+      {
+        "id": "cobble",
+        "count": 37
+      },
+      {
+        "id": "torch",
+        "count": 2
+      },
+      {
+        "id": "dirt",
+        "count": 24
+      },
+      {
+        "id": "table",
+        "count": 1
+      },
+      {
+        "id": "planks",
+        "count": 1
+      },
+      {
+        "id": "ironOre",
+        "count": 1
+      },
+      {
+        "id": "coal",
+        "count": 1
+      },
+      {
+        "id": "diamond",
+        "count": 1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "health": 20
+  },
+  "after": {
+    "position": {
+      "x": 13.503276941240285,
+      "y": 11.000000033908194,
+      "z": -9.62802940195083
+    },
+    "eye": 1.620000000000001,
+    "pitch": -1.127396326794897,
+    "yaw": 23.43439999999998,
+    "inventory": [
+      {
+        "id": "iron_pick",
+        "count": 1,
+        "durability": 225
+      },
+      {
+        "id": "seeds",
+        "count": 1
+      },
+      {
+        "id": "sapling",
+        "count": 1
+      },
+      {
+        "id": "wood_pick",
+        "count": 1,
+        "durability": 41
+      },
+      {
+        "id": "furnace",
+        "count": 1
+      },
+      {
+        "id": "stick",
+        "count": 5
+      },
+      {
+        "id": "stone_pick",
+        "count": 1,
+        "durability": 113
+      },
+      {
+        "id": "cobble",
+        "count": 35
+      },
+      {
+        "id": "torch",
+        "count": 2
+      },
+      {
+        "id": "dirt",
+        "count": 24
+      },
+      {
+        "id": "table",
+        "count": 1
+      },
+      {
+        "id": "planks",
+        "count": 1
+      },
+      {
+        "id": "ironOre",
+        "count": 1
+      },
+      {
+        "id": "coal",
+        "count": 1
+      },
+      {
+        "id": "diamond",
+        "count": 1
+      },
+      {
+        "id": "flint",
+        "count": 1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "health": 20
+  },
+  "errors": []
+}

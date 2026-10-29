@@ -101,6 +101,11 @@ export function itemIcon(id: string): string {
       if (id !== "bottle") pixel(def.color, 5, 8, 6, 4);
       pixel("#916948", 6, 1, 4, 2);
       pixel("#edf8fc", 4, 7, 1, 4);
+    } else if (id === "feather") {
+      for (let i = 0; i < 9; i++) {
+        pixel("#e9e4d6", 4 + i, 11 - i, 3, 3);
+        pixel("#c5bdab", 4 + i, 13 - i, 1, 1);
+      }
     } else if (id === "arrow") {
       for (let i = 0; i < 10; i++) pixel("#b19a73", 3 + i, 12 - i, 1, 1);
       pixel("#c9d2dc", 11, 1, 3, 3);

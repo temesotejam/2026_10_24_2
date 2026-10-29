@@ -1,3 +1,4 @@
+import { FOOD_TRADES } from "../items/trades";
 import { Adventure, BREWS, exchange } from "../survival/adventure";
 import { itemIcon } from "../render/item-icon";
 import { must } from "../core/assert";
@@ -311,14 +312,8 @@ export class InventoryView {
             );
       } else {
         info.textContent = "村の畑で収穫した小麦や、釣った魚を交換できます。";
-        for (const [id, text, costs, output] of [
-          ["sell-wheat", "小麦12 → エメラルド1", { wheat: 12 }, stack("emerald")],
-          ["sell-fish", "生魚4 → エメラルド1", { fish: 4 }, stack("emerald")],
-          ["buy-bread", "エメラルド1 → パン3", { emerald: 1 }, stack("bread", 3)],
-          ["buy-pearl", "エメラルド3 → エンダーパール1", { emerald: 3 }, stack("enderPearl")],
-          ["buy-iron", "エメラルド2 → 鉄1", { emerald: 2 }, stack("iron")],
-        ] as const)
-          action(id, text, () => {
+        for (const { id, label, costs, output } of FOOD_TRADES)
+          action(id, label, () => {
             if (!exchange(this.session.data.inventory, costs, output))
               this.session.notice?.("材料と所持品の空きを確認してください");
           });
@@ -351,7 +346,11 @@ export class InventoryView {
     guideTitle.textContent = "冒険ガイド：村・ネザー・エンド";
     const guideText = document.createElement("p");
     guideText.textContent =
-      "村の畑や釣りで食料を集め、村人を右クリックして取引。ダイヤのツルハシで黒曜石を採取し、外幅4・高さ5の枠を火打石と打ち金で点火。ゲート面を右クリックでネザーへ。炎の敵からロッド、ソウルサンドからウォートを集めよう。エンチャント台はXP 5で道具を強化。醸造台は水入り瓶・ウォート・炎の粉と追加材料でポーションを作成。エンダーパールと炎の粉でアイを作り、手に持って右クリックすると遺跡の座標が分かる。地下の4つの空き枠にアイを使い、ゲート面を右クリック。エンドでは弓で6個のクリスタルを壊し、中央へ降りたドラゴンを攻撃しよう。";
+      "村の畑や釣りで食料を集め、村人を右クリックして取引。ダイヤのツルハシで黒曜石を採取し、外幅4・高さ5の枠を火打石と打ち金で点火。ゲートの中に入り、少し待つとネザーへ。炎の敵からロッド、ソウルサンドからウォートを集めよう。エンチャント台はXP 5で道具を強化。醸造台は水入り瓶・ウォート・炎の粉と追加材料でポーションを作成。エンダーパールと炎の粉でアイを作り、手に持って右クリックすると遺跡の方角が分かる。地下の12枠のうち空いている枠すべてにアイを使い、ゲートへ入ろう。エンドでは弓で6個のクリスタルを壊し、中央へ降りたドラゴンを攻撃しよう。";
+    if (this.session.world.revision < 3)
+      guideText.textContent = guideText.textContent
+        .replace("ゲートの中に入り、少し待つとネザーへ。", "ゲート面を右クリックしてネザーへ。")
+        .replace("ゲートへ入ろう。", "ゲート面を右クリックしよう。");
     guide.append(guideTitle, guideText);
     body.append(guide);
     const help = document.createElement("p");

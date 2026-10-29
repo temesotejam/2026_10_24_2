@@ -100,7 +100,7 @@ export function createAdventureDriver(page, d) {
           const passable = (id) => [0, 5, 16, 22, 23, 25, 31, 33, 40, 43].includes(id);
           for (let y = nether ? 60 : 94; y > 0; y--)
             if (
-              [1, 2, 3, 4, 5, 9, 10, 11, 17, 18, 19, 20, 21, 28, 29, 30, 32, 36].includes(
+              [1, 2, 3, 4, 5, 9, 10, 11, 17, 18, 19, 20, 21, 28, 29, 30, 32, 36, 44].includes(
                 mc.blockAt(x, y, z),
               ) &&
               passable(mc.blockAt(x, y + 1, z)) &&
@@ -352,114 +352,122 @@ export function createAdventureDriver(page, d) {
     await page.keyboard.up("Space");
     if (ui.open) await d.close();
     try {
-      const until = Date.now() + 45000;
+      const until = Date.now() + 90000;
       let defended = false;
-      while (target && Date.now() < until) {
-        let s = await d.info();
-        assert.ok(s.health > 0, "survive reactive combat");
-        const nearby = (await adventure()).creatures.filter(
-          (m) =>
-            hostile(m) &&
-            Math.hypot(
-              m.position.x - s.position.x,
-              m.position.y - s.position.y,
-              m.position.z - s.position.z,
-            ) < 4.5,
-        ).length;
-        if (s.health <= 14 || nearby >= 2) {
-          const cells = await page.evaluate(() => {
-            const p = window.__mc.position(),
-              r = [];
-            for (let x = Math.floor(p.x) - 3; x <= Math.floor(p.x) + 3; x++)
-              for (let z = Math.floor(p.z) - 3; z <= Math.floor(p.z) + 3; z++)
-                for (let y = Math.floor(p.y) - 3; y <= Math.floor(p.y) + 3; y++)
-                  r.push([`${x},${y},${z}`, window.__mc.blockAt(x, y, z)]);
-            return r;
-          });
-          const map = new Map(cells),
-            retreat = safeRetreat(
-              s.position,
-              target.position,
-              (x, y, z) => map.get(`${x},${y},${z}`) ?? 0,
+      let returned = false;
+      while (!returned && Date.now() < until) {
+        target = await threat(defended ? 14 : 5);
+        while (target && Date.now() < until) {
+          let s = await d.info();
+          assert.ok(s.health > 0, "survive reactive combat");
+          const nearby = (await adventure()).creatures.filter(
+            (m) =>
+              hostile(m) &&
+              Math.hypot(
+                m.position.x - s.position.x,
+                m.position.y - s.position.y,
+                m.position.z - s.position.z,
+              ) < 4.5,
+          ).length;
+          if (s.health <= 14 || nearby >= 2) {
+            const cells = await page.evaluate(() => {
+              const p = window.__mc.position(),
+                r = [];
+              for (let x = Math.floor(p.x) - 3; x <= Math.floor(p.x) + 3; x++)
+                for (let z = Math.floor(p.z) - 3; z <= Math.floor(p.z) + 3; z++)
+                  for (let y = Math.floor(p.y) - 3; y <= Math.floor(p.y) + 3; y++)
+                    r.push([`${x},${y},${z}`, window.__mc.blockAt(x, y, z)]);
+              return r;
+            });
+            const map = new Map(cells),
+              retreat = safeRetreat(
+                s.position,
+                target.position,
+                (x, y, z) => map.get(`${x},${y},${z}`) ?? 0,
+              );
+            if (retreat) {
+              await d.aim({ x: retreat.x, y: s.position.y + s.eye, z: retreat.z }, 0);
+              await page.keyboard.down("ControlLeft");
+              await page.keyboard.down("KeyW");
+              if (retreat.jump) await page.keyboard.down("Space");
+              await wait(350);
+              await page.keyboard.up("KeyW");
+              await page.keyboard.up("ControlLeft");
+              await page.keyboard.up("Space");
+              defended = true;
+              combatStats.retreats++;
+              d.narrate("囲まれる前に、距離を取って応戦します。", 2);
+              await eat();
+              s = await d.info();
+              target = await threat(14);
+              if (!target) break;
+            }
+          }
+          if (canMelee(s.position, s.eye, target.position)) {
+            const sword = s.inventory.some((item) => item?.id === "iron_sword");
+            if (sword) await d.equip("iron_sword");
+            else {
+              const pick = s.inventory.findIndex((item) => item?.id === "stone_pick");
+              if (pick >= 0) await d.equip("stone_pick");
+            }
+            await d.aim({ ...target.position, y: target.position.y + 1 }, 0);
+            await page.mouse.down();
+            await wait(420);
+            await page.mouse.up();
+            combatStats.melee++;
+            d.narrate("近づいた敵を、近接攻撃で倒します。", 1);
+          } else if (
+            (await d.count("bow")) &&
+            (await d.count("arrow")) > 0 &&
+            ((await d.count("arrow")) > 10 || target.distance < 5 || defended)
+          ) {
+            await d.equip("bow");
+            const t = target.distance / 22;
+            await d.aim(
+              {
+                x: target.position.x + target.velocity.x * t,
+                y: target.position.y + 1 + 1.2 * t * t,
+                z: target.position.z + target.velocity.z * t,
+              },
+              0,
             );
-          if (retreat) {
-            await d.aim({ x: retreat.x, y: s.position.y + s.eye, z: retreat.z }, 0);
+            await right();
+            await wait(550);
+            combatStats.ranged++;
+            d.narrate("近接攻撃の届かない敵には、弓を使います。", 1);
+          } else {
+            await d.aim({ ...target.position, y: target.position.y + 1 });
+            const front = await page.evaluate(() => {
+              const p = window.__mc.position(),
+                yaw = window.__mc.yaw(),
+                x = Math.floor(p.x - Math.sin(yaw) * 0.8),
+                z = Math.floor(p.z - Math.cos(yaw) * 0.8),
+                y = Math.floor(p.y);
+              return {
+                floor: window.__mc.blockAt(x, y - 1, z),
+                feet: window.__mc.blockAt(x, y, z),
+                head: window.__mc.blockAt(x, y + 1, z),
+              };
+            });
+            if ([0, 26].includes(front.floor) || front.feet === 26) break;
             await page.keyboard.down("ControlLeft");
             await page.keyboard.down("KeyW");
-            if (retreat.jump) await page.keyboard.down("Space");
-            await wait(350);
+            if (solid(front.feet) && !solid(front.head)) await page.keyboard.down("Space");
+            await wait(160);
             await page.keyboard.up("KeyW");
-            await page.keyboard.up("ControlLeft");
             await page.keyboard.up("Space");
-            defended = true;
-            combatStats.retreats++;
-            d.narrate("囲まれる前に、距離を取って応戦します。", 2);
-            await eat();
-            s = await d.info();
-            target = await threat(14);
-            if (!target) break;
+            await page.keyboard.up("ControlLeft");
           }
+          target = await threat(defended ? 14 : 5);
         }
-        if (canMelee(s.position, s.eye, target.position)) {
-          const sword = s.inventory.some((item) => item?.id === "iron_sword");
-          if (sword) await d.equip("iron_sword");
-          else {
-            const pick = s.inventory.findIndex((item) => item?.id === "stone_pick");
-            if (pick >= 0) await d.equip("stone_pick");
-          }
-          await d.aim({ ...target.position, y: target.position.y + 1 }, 0);
-          await page.mouse.down();
-          await wait(420);
-          await page.mouse.up();
-          combatStats.melee++;
-          d.narrate("近づいた敵を、近接攻撃で倒します。", 1);
-        } else if (
-          (await d.count("bow")) &&
-          (await d.count("arrow")) > 0 &&
-          ((await d.count("arrow")) > 10 || target.distance < 5 || defended)
-        ) {
-          await d.equip("bow");
-          const t = target.distance / 22;
-          await d.aim(
-            {
-              x: target.position.x + target.velocity.x * t,
-              y: target.position.y + 1 + 1.2 * t * t,
-              z: target.position.z + target.velocity.z * t,
-            },
-            0,
-          );
-          await right();
-          await wait(550);
-          combatStats.ranged++;
-          d.narrate("近接攻撃の届かない敵には、弓を使います。", 1);
-        } else {
-          await d.aim({ ...target.position, y: target.position.y + 1 });
-          const front = await page.evaluate(() => {
-            const p = window.__mc.position(),
-              yaw = window.__mc.yaw(),
-              x = Math.floor(p.x - Math.sin(yaw) * 0.8),
-              z = Math.floor(p.z - Math.cos(yaw) * 0.8),
-              y = Math.floor(p.y);
-            return {
-              floor: window.__mc.blockAt(x, y - 1, z),
-              feet: window.__mc.blockAt(x, y, z),
-              head: window.__mc.blockAt(x, y + 1, z),
-            };
-          });
-          if ([0, 26].includes(front.floor) || front.feet === 26) break;
-          await page.keyboard.down("ControlLeft");
-          await page.keyboard.down("KeyW");
-          if (solid(front.feet) && !solid(front.head)) await page.keyboard.down("Space");
-          await wait(160);
-          await page.keyboard.up("KeyW");
-          await page.keyboard.up("Space");
-          await page.keyboard.up("ControlLeft");
-        }
-        target = await threat(defended ? 14 : 5);
+        assert.ok(!(await threat()), "finish or safely escape the current combat encounter");
+        d.narrate("敵への対応を終えたので、元の作業に戻ります。", 2);
+        returned = await d.walk(saved.position.x, saved.position.z, false, 0.35, 150, async () =>
+          Boolean(await threat(14)),
+        );
+        if (!returned) defended = true;
       }
-      assert.ok(!(await threat()), "finish or safely escape the current combat encounter");
-      d.narrate("敵への対応を終えたので、元の作業に戻ります。", 2);
-      await d.walk(saved.position.x, saved.position.z, false, 0.35, 150);
+      assert.ok(returned, "finish combat and return without ignoring newly approaching enemies");
       if (ui.open) {
         if (ui.title !== "所持品" && ui.target) {
           if (await d.count("iron_sword")) await d.equip("iron_sword");
@@ -620,11 +628,21 @@ export function createAdventureDriver(page, d) {
     d.setGoal("クリスタルを6個破壊。降りてきたドラゴンを剣で攻撃します。");
     await move(0.5, 4);
     await d.equip("iron_sword");
-    for (let i = 0; i < 120; i++) {
+    const until = Date.now() + 240000;
+    while (Date.now() < until) {
       const a = await adventure();
       if (a.dragon.defeated) break;
-      assert.ok((await d.info()).health > 0, "survive dragon combat");
-      await d.aim(a.dragonPosition);
+      const health = (await d.info()).health;
+      assert.ok(health > 0, "survive dragon combat");
+      if (health <= 11) {
+        d.narrate("体力が減ったので、距離を取って食料で回復します。", 2);
+        await move(0.5, 11);
+        await eat();
+        await recover(18);
+        await move(0.5, 4);
+      }
+      await d.equip("iron_sword");
+      await d.aim((await adventure()).dragonPosition);
       await page.mouse.down();
       await wait(450);
       await page.mouse.up();

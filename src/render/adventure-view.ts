@@ -3,7 +3,7 @@ import { isSolid } from "../world/blocks";
 import type { World } from "../world/world";
 import type { Weather } from "../world/weather";
 import type { Adventure } from "../survival/adventure";
-import { dragonPosition } from "../survival/dragon";
+import { dragonPosition, dragonYaw } from "../survival/dragon";
 
 /** Bounded procedural precipitation, plus a visible fishing float and line. */
 export class AdventureView {
@@ -96,7 +96,7 @@ export class AdventureView {
     if (this.dragon.visible) {
       const p = dragonPosition(state.phase);
       this.dragon.position.set(p.x, p.y, p.z);
-      this.dragon.rotation.y = state.phase % 24 < 12 ? (-state.phase * Math.PI) / 6 : 0;
+      this.dragon.rotation.y = dragonYaw(state.phase);
       this.wings.forEach((wing, i) => {
         wing.rotation.z = Math.sin(time * 5) * 0.35 * (i ? -1 : 1);
       });

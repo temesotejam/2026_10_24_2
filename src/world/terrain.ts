@@ -57,14 +57,14 @@ export function createColumnSampler(
     let terrainHeight = Math.max(2, Math.min(CHUNK_HEIGHT - 2, Math.round(raw)));
     const moisture = moistureNoise(worldX, worldZ);
     const isSwamp =
-      revision === 2 &&
+      revision >= 2 &&
       moisture > 0.12 &&
       terrainHeight > SEA_LEVEL &&
       terrainHeight <= SEA_LEVEL + 5;
     if (isSwamp) terrainHeight = SEA_LEVEL - 1;
     const isDesert = moisture < DESERT_MOISTURE_THRESHOLD && terrainHeight <= DESERT_MAX_HEIGHT;
     const isSnowy = terrainHeight >= SNOW_HEIGHT;
-    return { terrainHeight, isDesert, isSnowy, ...(revision === 2 ? { isSwamp } : {}) };
+    return { terrainHeight, isDesert, isSnowy, ...(revision >= 2 ? { isSwamp } : {}) };
   };
 }
 
@@ -103,6 +103,7 @@ function fillColumn(
   profile: ColumnProfile,
   isCave: CaveQuery,
   seed: number,
+  revision: GeneratorVersion,
 ): void {
   const { terrainHeight } = profile;
   const underwater = terrainHeight <= SEA_LEVEL;
@@ -145,6 +146,16 @@ function fillColumn(
       else if (y < 24 && hash % 83 === 0) id = BlockId.GOLD_ORE;
       else if (y < 42 && hash % 41 === 0) id = BlockId.IRON_ORE;
       else if (hash % 29 === 0) id = BlockId.COAL_ORE;
+    }
+    if (revision >= 3 && (id === BlockId.STONE || id === BlockId.SAND)) {
+      const patch =
+        deriveSeed(
+          seed,
+          Math.imul(Math.floor(worldX / 5), 73856093) ^
+            Math.imul(Math.floor(worldZ / 5), 19349663) ^
+            Math.imul(Math.floor(y / 3), 83492791),
+        ) >>> 0;
+      if (patch % 19 === 0) id = BlockId.GRAVEL;
     }
     if (id === BlockId.AIR && y < 5 && y > 0 && isCave(worldX, y, worldZ)) id = BlockId.LAVA;
     chunk.setBlock(lx, y, lz, id);
@@ -200,7 +211,7 @@ export function generateChunk(
   revision: GeneratorVersion = 1,
 ): Chunk {
   if (dimension === "end") return generateEnd(cx, cz);
-  if (dimension === "nether") return generateNether(cx, cz, seed);
+  if (dimension === "nether") return generateNether(cx, cz, seed, revision);
   const chunk = new Chunk(cx, cz);
   const sampleColumn = createColumnSampler(seed, revision);
   const isCave = createCaveSampler(seed);
@@ -212,12 +223,12 @@ export function generateChunk(
       const worldX = originX + lx;
       const worldZ = originZ + lz;
       const profile = sampleColumn(worldX, worldZ);
-      fillColumn(chunk, lx, lz, worldX, worldZ, profile, isCave, seed);
+      fillColumn(chunk, lx, lz, worldX, worldZ, profile, isCave, seed, revision);
     }
   }
 
   stampTrees(chunk, seed, sampleColumn, isCave);
-  if (revision === 2) stampAdventure(chunk, seed, sampleColumn);
+  if (revision >= 2) stampAdventure(chunk, seed, sampleColumn, revision);
 
   return chunk;
 }

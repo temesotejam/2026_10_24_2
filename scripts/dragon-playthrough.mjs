@@ -76,6 +76,11 @@ d.setNarrator((text, priority = 0) => {
   flush();
 });
 const startRecording = async () => {
+  const generation = await page.evaluate(() => window.__mc.adventure().generator);
+  assert.ok(
+    generation < 3,
+    "This historical replay driver uses generation2 resource routes. It cannot certify generation3 survival; use the independent revision3 playtests instead.",
+  );
   await page.select("#render-scale", "0.5");
   part.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
   part.initial = await d.info();
