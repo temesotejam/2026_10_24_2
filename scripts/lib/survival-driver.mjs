@@ -137,6 +137,17 @@ export function createDriver(page, out) {
           );
           await wait(100);
           await aim({ x: hit.x + 0.5, y: hit.y + 0.5, z: hit.z + 0.5 }, 0);
+          const currentHit = await page.evaluate(() => window.__mc.target());
+          // Crops can grow into the ray or the player can finish landing.
+          // Release and replan against the new obstruction instead of holding
+          // attack on a stale cell until the recording times out.
+          if (
+            !currentHit ||
+            currentHit.x !== hit.x ||
+            currentHit.y !== hit.y ||
+            currentHit.z !== hit.z
+          )
+            break;
           const start = Date.now();
           if (await checkThreat()) {
             deadline += Date.now() - start;
@@ -202,7 +213,11 @@ export function createDriver(page, out) {
             distance < 1.5
               ? Math.floor(z)
               : Math.floor(s.position.z + ((z - s.position.z) / distance) * 0.8);
-          for (let yy = Math.floor(s.position.y); yy <= Math.floor(s.position.y) + 3; yy++) {
+          for (
+            let yy = Math.floor(s.position.y + 0.01);
+            yy <= Math.floor(s.position.y + 0.01) + 2;
+            yy++
+          ) {
             const cell = { x: frontX, y: yy, z: frontZ },
               id = await block(cell);
             if (id !== 0 && id !== 5 && id !== 8) await mine(cell);
