@@ -37,20 +37,21 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     },
     maintain: async (state) => {
       if (state.inventory.filter((slot) => slot === null).length < 4)
-        await stashVillage(page, d, a, v, [
-          "sapling",
-          "snow",
-          "sand",
-          "wood_pick",
-          "stone_pick",
-          "seeds",
-          "apple",
-          "rawMeat",
-          "wool",
-          "bone",
-          "powder",
-          "dirt",
-        ]);
+        if ((await d.info()).inventory.filter((s) => s === null).length < 6)
+          await stashVillage(page, d, a, v, [
+            "sapling",
+            "snow",
+            "sand",
+            "wood_pick",
+            "stone_pick",
+            "seeds",
+            "apple",
+            "rawMeat",
+            "wool",
+            "bone",
+            "powder",
+            "dirt",
+          ]);
       if ((await d.count("bread")) < 3)
         await stockVillageFood(d, page, a, v, { breadTarget: 8, waitForGrowth: false });
       // Spend an early daytime interval on real portal construction while
@@ -68,6 +69,17 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       }
       d.setGoal("夜の敵と戦い、エンダーパールと矢の材料を集めます。");
       const dayTime = await page.evaluate(() => window.__mc.time() % 1200);
+      if (
+        dayTime >= 24 &&
+        dayTime < 600 &&
+        (await d.count("arrow")) < 24 &&
+        !state.creatures.some((m) => m.species === "wanderer" && m.hp > 0) &&
+        (await d.count("arrow")) + 4 * (await d.count("feather")) >= 36
+      ) {
+        d.setGoal("昼の間に砂利から火打ち石を集め、次の戦闘に使う矢を作ります。");
+        await prepareArchery(page, d, a, 36);
+        h.activate();
+      }
       if (
         meta.portal &&
         (await d.count("blazeRod")) < 7 &&

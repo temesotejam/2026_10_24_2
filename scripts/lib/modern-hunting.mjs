@@ -684,9 +684,14 @@ export function createModernHunting(page, d, a, options = {}) {
               (ignored.get(m.id) ?? 0) < Date.now() ||
               (m.visibleToPlayer !== false && distance(m.position, latest.position) < 3),
           )
-          .sort(
-            (x, y) => distance(x.position, latest.position) - distance(y.position, latest.position),
-          );
+          .sort((x, y) => {
+            const priority = (mob) =>
+              missing.findIndex((item) => DROPS[item].includes(mob.species));
+            return (
+              priority(x) - priority(y) ||
+              distance(x.position, latest.position) - distance(y.position, latest.position)
+            );
+          });
         focus = candidates[0] ?? null;
         if (!focus && config.cullForSpawns !== false) {
           const population = alive(latest);
