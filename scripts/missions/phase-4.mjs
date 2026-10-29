@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { stashVillage } from "../lib/modern-storage.mjs";
 import { stockVillageFood } from "../lib/modern-resources.mjs";
+import { chooseHuntingCamp } from "../lib/modern-camp.mjs";
 import { craftArchery } from "../lib/modern-archery.mjs";
 import { wait } from "../lib/survival-driver.mjs";
 export async function run({ page, d, a, meta, flush, chapter, out }) {
@@ -111,11 +112,22 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   await a.eat();
   await a.recover(18);
   await stashVillage(page, d, a, v);
+  if (!meta.huntingCamp) {
+    meta.huntingCamp = (await chooseHuntingCamp(page, d, a, v, { radius: 40 })) ?? {
+      x: v.x,
+      y: v.y,
+      z: v.z - 6,
+    };
+    console.log("Hunting camp", meta.huntingCamp);
+    flush();
+  }
+  d.setGoal("見通しのよい場所へ移り、敵の素材を集めます。");
+  await a.surfaceTo(meta.huntingCamp);
   d.setGoal("夜の敵と戦い、エンダーパール・弓の糸・矢の材料を集めます。");
   meta.hunting = await h.gather(targets, {
     timeoutMs: 3000000,
     arrowReserve: 0,
-    home: { x: v.x, y: v.y, z: v.z },
+    home: meta.huntingCamp.position ?? meta.huntingCamp,
   });
   await a.surfaceTo({ x: v.x - 6, z: v.z + 1 });
   await craftArchery(d, 36);

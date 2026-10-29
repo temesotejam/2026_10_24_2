@@ -8,18 +8,44 @@ const solidBlock = (id) => ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].inclu
 export function createModernPortal(page, d, a) {
   async function placeOnTop(cell, id, block) {
     if ((await d.block(cell)) === block) return;
+    if (![0, 5].includes(await d.block(cell))) {
+      const existing = await d.block(cell);
+      assert.ok(
+        ![8, 14, 15, 28, 31, 38, 39, 40].includes(existing),
+        "preserve completed frame and protected cells",
+      );
+      await d.mine(cell);
+    }
     assert.ok(
       [0, 5].includes(await d.block(cell)),
       `clear or water-filled placement cell ${JSON.stringify(cell)}`,
     );
     await d.equip(id);
-    await d.aim({ x: cell.x + 0.5, y: cell.y - 0.01, z: cell.z + 0.5 });
-    const hit = await page.evaluate(() => window.__mc.target());
+    let hit;
+    const support = { x: cell.x, y: cell.y - 1, z: cell.z };
+    for (let attempt = 0; attempt < 10; attempt++) {
+      await d.aim({ x: cell.x + 0.5, y: cell.y - 0.01, z: cell.z + 0.5 });
+      hit = await page.evaluate(() => window.__mc.target());
+      if (hit && hit.x === support.x && hit.y === support.y && hit.z === support.z) break;
+      assert.ok(hit, "see a real supporting face for ordinary placement");
+      const id = await d.block(hit),
+        p = (await d.info()).position;
+      assert.ok(
+        ![8, 14, 15, 28, 31, 38, 39, 40].includes(id),
+        "keep the portal frame and protected blocks while clearing scaffolding",
+      );
+      assert.ok(
+        !(hit.x === Math.floor(p.x) && hit.z === Math.floor(p.z) && hit.y < Math.round(p.y)),
+        "keep the platform supporting the player",
+      );
+      await d.mine(hit);
+    }
     assert.deepEqual(
       hit,
-      { x: cell.x, y: cell.y - 1, z: cell.z },
+      support,
       `aim at the actual supporting top face for ${JSON.stringify(cell)}`,
     );
+    await d.equip(id);
     await a.right();
     await wait(150);
     assert.equal(await d.block(cell), block, `place owned ${id} through right click`);
