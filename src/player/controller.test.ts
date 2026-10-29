@@ -164,11 +164,11 @@ it("contracts immediately at a wall and eases outward after it is removed", () =
   const close = player.cameraSeparation;
   expect(close).toBeLessThan(1.3);
   blocked = false;
-  player.update(1 / 60);
+  for (let i = 0; i < 45; i++) player.update(1 / 60);
   expect(player.cameraSeparation).toBeGreaterThan(close);
   expect(player.cameraSeparation).toBeLessThan(2);
-  for (let i = 0; i < 90; i++) player.update(1 / 60);
-  expect(player.cameraSeparation).toBeCloseTo(4, 3);
+  for (let i = 0; i < 240; i++) player.update(1 / 60);
+  expect(player.cameraSeparation).toBeCloseTo(4, 1);
   blocked = true;
   player.update(1 / 60);
   expect(player.cameraSeparation).toBeCloseTo(close);

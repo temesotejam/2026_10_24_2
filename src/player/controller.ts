@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { raycastVoxels } from "./raycast";
+import { ThirdPersonCamera } from "./third-person-camera";
 import { FixedStepClock } from "../core/fixed-step";
 import { BlockId, isSolid } from "../world/blocks";
 import { CHUNK_HEIGHT } from "../world/coords";
@@ -55,7 +55,7 @@ export class PlayerController {
   perspective: 0 | 1 | 2 = 0;
   thirdPersonEnabled = true;
   onMenu: (() => void) | undefined;
-  private cameraDistance = 4;
+  private readonly thirdPersonCamera = new ThirdPersonCamera();
   private lastPerspective = 0;
   private yaw = 0;
   private pitch = 0;
@@ -270,41 +270,33 @@ export class PlayerController {
     this.camera.rotation.x = this.pitch;
     this.camera.rotation.y = this.yaw;
     if (this.perspective !== 0) {
-      const dir = this.lookDirection;
-      const sign = this.perspective === 1 ? -1 : 1;
-      const behind = { x: dir.x * sign, y: dir.y * sign, z: dir.z * sign };
-      // Test the camera's volume, not only its center ray. This also protects
-      // the near-plane corners when turning beside a wall or under a ceiling.
-      let allowed = 4;
-      for (const x of [-0.15, 0.15])
-        for (const y of [-0.15, 0.15])
-          for (const z of [-0.15, 0.15]) {
-            const hit = raycastVoxels(
-              { x: eye.x + x, y: eye.y + y, z: eye.z + z },
-              behind,
-              4,
-              (bx, by, bz) => isSolid(this.world.getBlock(bx, by, bz)),
-            );
-            if (hit) allowed = Math.min(allowed, Math.max(0, hit.distance - 0.18));
-          }
-      if (this.lastPerspective !== this.perspective || allowed < this.cameraDistance)
-        this.cameraDistance = allowed;
-      else this.cameraDistance += (allowed - this.cameraDistance) * (1 - Math.exp(-8 * dt));
-      const distance = this.cameraDistance;
+      const behind = this.thirdPersonCamera.update(
+        eye,
+        this.state.velocity,
+        this.yaw,
+        this.pitch,
+        this.perspective === 2,
+        dt,
+        this.lastPerspective !== this.perspective,
+        (x, y, z) => isSolid(this.world.getBlock(x, y, z)),
+      );
+      this.camera.rotation.x = this.thirdPersonCamera.pitch;
+      this.camera.rotation.y = this.thirdPersonCamera.yaw;
+      const distance = this.thirdPersonCamera.distance;
       this.camera.position.addScaledVector(
         new THREE.Vector3(behind.x, behind.y, behind.z),
         distance,
       );
       if (this.perspective === 2) {
         this.camera.rotation.y += Math.PI;
-        this.camera.rotation.x = -this.pitch;
+        this.camera.rotation.x = -this.thirdPersonCamera.pitch;
       }
     }
     this.lastPerspective = this.perspective;
   }
 
   get cameraSeparation(): number {
-    return this.perspective === 0 ? 0 : this.cameraDistance;
+    return this.perspective === 0 ? 0 : this.thirdPersonCamera.distance;
   }
 
   get isCrouching(): boolean {
