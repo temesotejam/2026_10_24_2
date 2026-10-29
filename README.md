@@ -139,3 +139,7 @@ CPU 代替描画ではモデル・照明を簡略化し、三人称視点を無�
 MIT License。取得時コミットは `6766703c14f7a443d94983600528614cc931df89`。
 元の著作権表示と [LICENSE](LICENSE) を保持しています。
 Mojang / Microsoft の公式製品ではありません。
+
+### 三人称で見る
+
+WebGL版は **F5** で一人称・背後・正面を切り替えられます。[背後視点で始める](https://temesotejam.github.io/2026_10_24_2/?seed=20261025&mode=survival&view=third-person)。壁際ではカメラが近づき、狭い坑道では一人称に近い映像になります。参考資料・検証内容は [三人称カメラ](docs/THIRD-PERSON.md) を参照してください。

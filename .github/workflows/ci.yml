@@ -47,6 +47,7 @@ jobs:
             exit 1
           fi
           node scripts/video-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/watch/
+          node scripts/third-person-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/visual-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/survival-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
           node scripts/polish-check.mjs --url http://127.0.0.1:4173/2026_10_24_2/
@@ -100,6 +101,7 @@ jobs:
         run: |
           site_url=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .html_url)
           node scripts/video-check.mjs --url "${site_url%/}/watch/"
+          node scripts/third-person-check.mjs --url "$site_url"
           node scripts/visual-check.mjs --url "$site_url"
           node scripts/survival-check.mjs --url "$site_url"
           node scripts/polish-check.mjs --url "$site_url"

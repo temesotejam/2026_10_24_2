@@ -2,7 +2,13 @@
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import puppeteer from "puppeteer";
-const out = "visual-check/third-person";
+const args = process.argv.slice(2);
+const option = (key, fallback) => (args.includes(key) ? args[args.indexOf(key) + 1] : fallback);
+const out = option("--out", "visual-check/third-person");
+const url = new URL(option("--url", "http://127.0.0.1:4173/2026_10_24_2/"));
+url.searchParams.set("seed", "2026");
+url.searchParams.set("mode", "survival");
+url.searchParams.set("view", "third-person");
 mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({
   headless: true,
@@ -13,7 +19,7 @@ try {
   await page.setViewport({ width: 1280, height: 720 });
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
-  await page.goto("http://127.0.0.1:4173/2026_10_24_2/?seed=2026&mode=survival&view=third-person");
+  await page.goto(url.href);
   await page.waitForFunction(() => window.__mc?.meshedChunks() >= 60, { timeout: 120000 });
   await page.select("#render-scale", "1");
   await page.locator("#play-button").click();
