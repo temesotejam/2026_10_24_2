@@ -138,12 +138,13 @@ try {
     await a.boot();
     await startRecording();
     if ((await d.info()).health <= 0) {
-      d.setGoal("夜の戦闘で倒されました。復活して、落とした道具を回収します。");
+      d.setGoal("倒されました。復活して、落とした道具を回収します。");
       await page.locator("#respawn").click();
-      await page.waitForFunction(
-        () => window.__mc.health() > 0 && window.__mc.mode() === "pointer",
-      );
+      await page.waitForFunction(() => window.__mc?.health() > 0, { timeout: 120000 });
       await a.boot();
+      if ((await page.evaluate(() => window.__mc.mode())) !== "pointer")
+        await page.locator("#play-button").click();
+      await page.waitForFunction(() => window.__mc.mode() === "pointer");
     } else {
       await page.locator("#play-button").click();
       await page.waitForFunction(() => window.__mc.mode() === "pointer");

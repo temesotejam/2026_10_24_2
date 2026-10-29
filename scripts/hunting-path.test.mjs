@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { bodyClear, drySweep, huntingPath, huntingCoverPath } from "./lib/hunting-path.mjs";
+import {
+  bodyClear,
+  drySweep,
+  huntingPath,
+  huntingCoverPath,
+  perpendicularStrafe,
+} from "./lib/hunting-path.mjs";
 const floor = (_x, y, _z) => (y <= 34 ? 3 : 0);
 test("routes around a house wall instead of repeatedly pressing into its corner", () => {
   const blocks = (x, y, z) => (y <= 34 ? 3 : x === 2 && z >= -2 && z <= 1 && y <= 37 ? 10 : 0);
@@ -53,4 +59,17 @@ test("withdraws behind real cover or beyond ranged reach without crossing water"
   const escaped = huntingCoverPath(from, [enemy], floor);
   assert.equal(escaped.reached, true);
   assert.ok(Math.hypot(escaped.path.at(-1).x - 6.5, escaped.path.at(-1).z - 0.5) > 15);
+});
+
+test("bow strafing alternates safely and refuses water, walls and unsupported edges", () => {
+  const player = { x: 0.5, y: 35, z: 0.5 },
+    target = { x: 7, y: 35, z: 0.5 };
+  assert.equal(perpendicularStrafe(player, target, floor, 1).key, "KeyD");
+  assert.equal(perpendicularStrafe(player, target, floor, -1).key, "KeyA");
+  const wall = (x, y, z) => (y <= 34 ? 3 : z === 1 && y <= 37 ? 10 : 0);
+  assert.equal(perpendicularStrafe(player, target, wall, 1).key, "KeyA");
+  const island = (x, y, z) => (y <= 34 ? (z === 0 ? 3 : 0) : 0);
+  assert.equal(perpendicularStrafe(player, target, island, 1), null);
+  const water = (x, y, z) => (y <= 33 ? 3 : y === 34 ? (z === 0 ? 3 : 5) : 0);
+  assert.equal(perpendicularStrafe(player, target, water, 1), null);
 });

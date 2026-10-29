@@ -3,7 +3,7 @@
  * Desired quantities are total inventory counts, not an assumed number of kills. */
 import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
-import { huntingCoverPath, huntingPath } from "./hunting-path.mjs";
+import { huntingCoverPath, huntingPath, perpendicularStrafe } from "./hunting-path.mjs";
 import { canMelee, clearSight, hostile, safeRetreat } from "./combat-policy.mjs";
 
 const DROPS = {
@@ -49,6 +49,7 @@ export function createModernHunting(page, d, a, options = {}) {
     blockedTargets: 0,
     pathPlans: 0,
     terrainFallbacks: 0,
+    shootingStrafes: 0,
   };
   const ignored = new Map();
   const corpses = [];
@@ -58,6 +59,7 @@ export function createModernHunting(page, d, a, options = {}) {
   let guarding = false;
   let currentConfig = {};
   let permanentGuard = false;
+  let strafeSide = 1;
   const countResource = async (id) =>
     id === "ammo" ? (await d.count("arrow")) + 4 * (await d.count("feather")) : d.count(id);
   const record = async (name, detail = {}) => {
@@ -317,21 +319,38 @@ export function createModernHunting(page, d, a, options = {}) {
     }
     return !shootingEnemies(await observe()).length;
   }
-  async function shoot(state, mob) {
+  async function shoot(_state, mob) {
+    await release();
     const before = await d.count("arrow");
     await d.equip("bow");
+    // Reobserve after equipping and after every previous sidestep. Never aim
+    // from the position the player occupied at the start of the encounter.
+    const state = await observe();
+    mob = alive(state).find((candidate) => candidate.id === mob.id);
+    if (!mob) return;
     const range = distance(mob.position, state.position),
       t = range / 22;
-    await d.aim(
-      {
-        x: mob.position.x + mob.velocity.x * t,
-        y: mob.position.y + 1 + 1.2 * t * t,
-        z: mob.position.z + mob.velocity.z * t,
-      },
-      0,
-    );
+    const aim = {
+      x: mob.position.x + mob.velocity.x * t,
+      y: mob.position.y + 1 + 1.2 * t * t,
+      z: mob.position.z + mob.velocity.z * t,
+    };
+    await d.aim(aim, 0);
     await a.right();
-    await wait(550);
+    const firedAt = Date.now();
+    const terrain = await combatTerrain(state);
+    const strafe = perpendicularStrafe(state.position, aim, terrain.blockAt, strafeSide);
+    if (strafe) {
+      strafeSide = -strafe.side;
+      try {
+        await page.keyboard.down(strafe.key);
+        await wait(300);
+        stats.shootingStrafes++;
+      } finally {
+        await page.keyboard.up(strafe.key);
+      }
+    }
+    await wait(Math.max(0, 550 - (Date.now() - firedAt)));
     stats.arrowsSpent += Math.max(0, before - (await d.count("arrow")));
     await enqueueKill(mob, await observe());
   }
@@ -435,20 +454,7 @@ export function createModernHunting(page, d, a, options = {}) {
             state.inventory.some((s) => s?.id === "bow") &&
             (await rangedVisible(state, mob))
           ) {
-            await d.equip("bow");
-            const t = range / 22;
-            await d.aim(
-              {
-                x: mob.position.x + mob.velocity.x * t,
-                y: mob.position.y + 1 + 1.2 * t * t,
-                z: mob.position.z + mob.velocity.z * t,
-              },
-              0,
-            );
-            await a.right();
-            await wait(450);
-            stats.arrowsSpent++;
-            await enqueueKill(mob, await observe());
+            await shoot(state, mob);
             lastProgress = Date.now();
           } else {
             const moved = await stepToward(state, mob, false, failedSwings >= 2);

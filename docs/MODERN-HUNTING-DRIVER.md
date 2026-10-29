@@ -55,3 +55,17 @@ await h.collectRods(7, { timeoutMs: 600000, arrowReserve: 32 });
 炎の敵は現実装では近接攻撃のみなので、弓が使えない場合でも、安全に近づくための通常の地形工事は許可します。ゲーム側の敵の強さや挙動を変更する処理ではありません。
 
 `scripts/hunting-path.test.mjs` の5項目と、明示した独立セーブを使う `scripts/hunting-navigation-check.mjs` で確認します。後者の最終実行では、家角での体力12・弓なしの戦闘を体力10で、5ブロック高いスケルトン2体への戦闘を矢4本・体力17で終えました。高所への戦闘では地形工事は行っていません。初回は追跡停滞を検出して処理が停止したため、録画コントローラーのチェックポイントと併用します。これらのセーブは通常の録画とは別です。
+
+## 通常射撃中の横移動
+
+弓を発射した後の待ち時間には、照準に対して左右の通常A/D入力を交互に300ms入れます。動く前に幅0.6・高さ1.8の身体全体が通る1.8mの経路を検証し、水・溶岩・壁・足場の切れ目があれば反対側を試します。両側が危険なら横移動しません。各射撃では装備後の実際のプレイヤー位置と生きている対象を再観測して照準を合わせます。
+
+独立した検証用セーブで、体力6から5ブロック高いスケルトン2体へ通常射撃し、矢4本・安全確認後の横移動4回で討伐し、体力3で生存しました。地形工事は行っていません。`scripts/hunting-navigation-check.mjs --low-health` で再現し、この検証用セーブを通常の録画には使いません。
+
+Recorded recovery follow-up: protect obsidian frames during automatic route mining,
+allow stored apples as ordinary food, and prepare recovery equipment through the
+village chest/crafting UI. `phase-6.23` records emergency feeding and a shelter
+pillar; `phase-6.22` prepares real building materials and `phase-6.3` retrieves
+actual Nether death drops from a three-block pillar. These are recovery stages,
+not a claim that the zero-inventory dragon run has completed. Every failed
+recording part remains in the final chronological source list.

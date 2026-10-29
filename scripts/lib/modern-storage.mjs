@@ -8,6 +8,7 @@ export async function stashVillage(
   v,
   ids = ["sapling", "snow", "sand", "wood_pick", "stone_pick", "seeds", "apple"],
 ) {
+  d.setGoal("戦利品をチェストでまとめ、持ち物の空きを作ります。");
   let chest = v.cacheChest ?? { x: v.x - 7, y: v.y, z: v.z + 5 };
   if ((await d.block(chest)) !== 14) {
     // The original house can be damaged in real combat. Craft a new empty
@@ -51,12 +52,54 @@ export async function stashVillage(
   }
   await a.useAt(chest);
   await page.waitForSelector('[data-area="chest"]', { timeout: 5000 });
+  // Merge matching partial stacks using the same slot clicks as a player.
+  for (let pass = 0; pass < 30; pass++) {
+    const pair = await page.$$eval('[data-area="chest"]', (els) => {
+      const slots = els.map((el, i) => ({
+        i,
+        name: el.querySelector("img")?.alt,
+        count: Number(el.querySelector(".item-count")?.textContent) || 1,
+        tool: !!el.querySelector(".durability"),
+      }));
+      for (const a of slots)
+        for (const b of slots)
+          if (
+            a.i < b.i &&
+            a.name &&
+            a.name === b.name &&
+            !a.tool &&
+            !b.tool &&
+            a.count + b.count <= 64
+          )
+            return [a.i, b.i];
+      return null;
+    });
+    if (!pair) break;
+    await page.locator(`[data-area="chest"][data-slot="${pair[1]}"]`).click();
+    await page.locator(`[data-area="chest"][data-slot="${pair[0]}"]`).click();
+  }
   for (let n = 0; n < 36; n++) {
     const inv = (await d.info()).inventory,
       index = inv.findIndex((s) => s && ids.includes(s.id));
     if (index < 0) break;
-    const slot = await page.$$eval('[data-area="chest"]', (els) =>
-      els.findIndex((el) => !el.querySelector("img")),
+    const item = inv[index];
+    const label = await page.$eval(
+      `[data-area="inventory"][data-slot="${index}"]`,
+      (el) => el.querySelector("img").alt,
+    );
+    const slot = await page.$$eval(
+      '[data-area="chest"]',
+      (els, { item, label }) => {
+        const merged = els.findIndex(
+          (el) =>
+            !el.querySelector(".durability") &&
+            item.durability === undefined &&
+            el.querySelector("img")?.alt === label &&
+            (Number(el.querySelector(".item-count")?.textContent) || 1) + item.count <= 64,
+        );
+        return merged >= 0 ? merged : els.findIndex((el) => !el.querySelector("img"));
+      },
+      { item, label },
     );
     assert.ok(slot >= 0, "room in discovered chest for surplus");
     await page.locator(`[data-area="inventory"][data-slot="${index}"]`).click();

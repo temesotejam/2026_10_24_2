@@ -211,7 +211,18 @@ export function createModernPortal(page, d, a) {
         ? "点火したゲートの中に入り、ネザーへ渡ります。"
         : "ゲートの中に入り、通常世界へ帰ります。",
     );
-    await d.equip((await d.count("iron_sword")) ? "iron_sword" : "diamond_pick");
+    for (const id of [
+      "iron_sword",
+      "stone_sword",
+      "wood_sword",
+      "diamond_pick",
+      "iron_pick",
+      "stone_pick",
+    ])
+      if (await d.count(id)) {
+        await d.equip(id);
+        break;
+      }
     await finishTravel(destination, async () => {
       const p = (await d.info()).position;
       await d.walk(entry.x + 0.5, entry.z + 0.5, p.y < entry.y - 0.1, 0.12, 0);
@@ -224,7 +235,18 @@ export function createModernPortal(page, d, a) {
         ? "開いたエンドゲートへ歩いて入ります。"
         : "討伐後の帰還ゲートへ歩いて戻ります。",
     );
-    await d.equip((await d.count("iron_sword")) ? "iron_sword" : "diamond_pick");
+    for (const id of [
+      "iron_sword",
+      "stone_sword",
+      "wood_sword",
+      "diamond_pick",
+      "iron_pick",
+      "stone_pick",
+    ])
+      if (await d.count(id)) {
+        await d.equip(id);
+        break;
+      }
     await finishTravel(destination, async () => {
       const p = (await d.info()).position;
       await d.walk(gate.x + 0.5, gate.z + 0.5, p.y < gate.y - 0.1, 0.12, 0);

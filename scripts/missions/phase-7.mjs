@@ -53,6 +53,30 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
   // recording ended before writing its mission progress metadata.
   if ((state.eyeThrows ?? 0) > 0) mission.directionChecked = true;
   if (state.dimension === "overworld" && !state.dragon.defeated) {
+    const inventory = (await d.info()).inventory;
+    const sword = inventory.find((slot) => slot?.id === "iron_sword");
+    const bow = inventory.find((slot) => slot?.id === "bow");
+    const arrows = await d.count("arrow"),
+      bread = await d.count("bread");
+    mission.endSupplies = {
+      arrows,
+      bread,
+      swordDurability: sword?.durability ?? 0,
+      bowDurability: bow?.durability ?? 0,
+    };
+    flush();
+    // Once the player enters the End there is no ordinary supply trip back.
+    // Check reserves before consuming eyes or walking into the activated gate.
+    assert.ok(
+      sword && (sword.durability ?? 0) >= 40,
+      "carry an iron sword with enough durability for the full 200HP battle",
+    );
+    assert.ok(
+      bow && (bow.durability ?? 0) >= 24,
+      "carry a bow with enough durability for crystal-shot retries",
+    );
+    assert.ok(arrows >= 24, "carry arrows for all six crystals with up to four attempts each");
+    assert.ok(bread >= 8, "carry food for withdrawal and ordinary health regeneration");
     d.setGoal("素材がそろいました。エンダーアイを作り、地下遺跡へ向かいます。");
     await d.open();
     // Seed2026 has eleven empty frames and its first directional throw breaks.
@@ -84,6 +108,7 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
     // Stop outside first: an already activated gate must not interrupt recovery
     // or the remaining preparation after an ordinary-save resume.
     await a.enterStronghold({ stopOutside: true });
+    await d.light();
     const frames = framePositions(c),
       empty = [];
     for (const frame of frames) if ((await d.block(frame)) === 38) empty.push(frame);
@@ -151,8 +176,8 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
         "one real arrow for each remaining crystal",
       );
       d.setGoal("クリスタルを壊してから、ドラゴンを討伐します。");
-      // The driver allows 240 seconds for a 200HP fight, including withdrawal,
-      // ordinary food regeneration and multiple 24-second flight/perch cycles.
+      // The recording allows ten minutes for the 200HP fight, including
+      // ordinary food recovery, other enemies and 24-second flight/perch cycles.
       await a.defeatDragon({ timeoutMs: 600000 });
     }
     assert.ok((await d.info()).health > 0, "survive the dragon battle");

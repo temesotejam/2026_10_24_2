@@ -124,3 +124,21 @@ export function huntingCoverPath(player, enemies, blockAt, options = {}) {
       ),
   });
 }
+
+/** A/D are perpendicular to the current aim; keep the complete movement
+ * corridor dry and supported before issuing either ordinary key input. */
+export function perpendicularStrafe(player, target, blockAt, preferred = 1, length = 1.8) {
+  const dx = target.x - player.x,
+    dz = target.z - player.z,
+    range = Math.hypot(dx, dz);
+  if (range < 0.01) return null;
+  for (const side of [preferred, -preferred]) {
+    const to = {
+      x: player.x - (dz / range) * length * side,
+      y: player.y,
+      z: player.z + (dx / range) * length * side,
+    };
+    if (drySweep(player, to, blockAt)) return { key: side === 1 ? "KeyD" : "KeyA", side, to };
+  }
+  return null;
+}

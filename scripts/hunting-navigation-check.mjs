@@ -8,6 +8,7 @@ import { createAdventureDriver } from "./lib/adventure-driver.mjs";
 import { createModernHunting } from "./lib/modern-hunting.mjs";
 const args = process.argv.slice(2),
   at = args.indexOf("--url");
+const lowHealth = args.includes("--low-health");
 const url = new URL(at < 0 ? "http://127.0.0.1:4173/2026_10_24_2/" : args[at + 1]);
 url.searchParams.set("seed", "2026");
 url.searchParams.set("mode", "survival");
@@ -100,36 +101,39 @@ try {
     await page.locator("#play-button").click();
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
-  const corner = fixture();
-  corner.data.position.x = 0.15;
-  corner.data.spawn = { ...corner.data.position };
-  corner.data.vitals.health = 12;
-  corner.data.inventory[1] = null;
-  corner.data.inventory[2] = null;
-  for (let z = 1; z <= 4; z++) for (let y = 35; y <= 38; y++) corner.put(-1, y, z, 10);
-  corner.data.creatures = [mob(1, 0.5, 35, 7)];
-  corner.data.nextId = 2;
-  await load(corner.data, "off-center-house-corner");
-  hunter = createModernHunting(page, d, a, {
-    arrowReserve: Infinity,
-    debugNavigation: true,
-    onEvent: (event) => trace.push(event),
-  });
-  hunter.activate();
-  await hunter.guard();
-  assert.ok((await d.info()).health > 0);
-  assert.ok(!(await a.adventure()).creatures.some((m) => m.id === 1));
-  await page.screenshot({ path: path.join(out, "corner-melee-victory.png") });
-  results.push({
-    name: "off-center house corner with12HP and no bow",
-    health: (await d.info()).health,
-    stats: { ...hunter.stats },
-  });
-  console.log(
-    "PASS full-body BFS centers off the corner and defeats the shooting skeleton with melee",
-  );
-  hunter.deactivate();
+  if (!lowHealth) {
+    const corner = fixture();
+    corner.data.position.x = 0.15;
+    corner.data.spawn = { ...corner.data.position };
+    corner.data.vitals.health = 12;
+    corner.data.inventory[1] = null;
+    corner.data.inventory[2] = null;
+    for (let z = 1; z <= 4; z++) for (let y = 35; y <= 38; y++) corner.put(-1, y, z, 10);
+    corner.data.creatures = [mob(1, 0.5, 35, 7)];
+    corner.data.nextId = 2;
+    await load(corner.data, "off-center-house-corner");
+    hunter = createModernHunting(page, d, a, {
+      arrowReserve: Infinity,
+      debugNavigation: true,
+      onEvent: (event) => trace.push(event),
+    });
+    hunter.activate();
+    await hunter.guard();
+    assert.ok((await d.info()).health > 0);
+    assert.ok(!(await a.adventure()).creatures.some((m) => m.id === 1));
+    await page.screenshot({ path: path.join(out, "corner-melee-victory.png") });
+    results.push({
+      name: "off-center house corner with12HP and no bow",
+      health: (await d.info()).health,
+      stats: { ...hunter.stats },
+    });
+    console.log(
+      "PASS full-body BFS centers off the corner and defeats the shooting skeleton with melee",
+    );
+    hunter.deactivate();
+  }
   const cliffs = fixture();
+  if (lowHealth) cliffs.data.vitals.health = 6;
   for (let x = 4; x <= 8; x++)
     for (let z = -1; z <= 6; z++) for (let y = 35; y <= 39; y++) cliffs.put(x, y, z, 3);
   for (let z = -1; z <= 6; z++) for (let y = 40; y <= 42; y++) cliffs.put(5, y, z, 3);
@@ -143,6 +147,7 @@ try {
   assert.ok((await d.info()).health > 0);
   assert.ok(!(await a.adventure()).creatures.some((m) => m.id === 1 || m.id === 2));
   assert.ok(hunter.stats.arrowsSpent >= 4);
+  assert.ok(hunter.stats.shootingStrafes > 0, "bow shots include verified dry lateral movement");
   assert.equal(
     hunter.stats.terrainFallbacks,
     0,
@@ -150,7 +155,9 @@ try {
   );
   await page.screenshot({ path: path.join(out, "ledge-bow-victory.png") });
   results.push({
-    name: "two skeletons five blocks higher",
+    name: lowHealth
+      ? "two skeletons five blocks higher, initial health6"
+      : "two skeletons five blocks higher",
     health: (await d.info()).health,
     stats: { ...hunter.stats },
   });

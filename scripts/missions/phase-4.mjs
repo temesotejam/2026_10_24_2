@@ -4,12 +4,12 @@ import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { stashVillage } from "../lib/modern-storage.mjs";
 import { stockVillageFood } from "../lib/modern-resources.mjs";
 import { chooseHuntingCamp } from "../lib/modern-camp.mjs";
-import { craftArchery } from "../lib/modern-archery.mjs";
+import { prepareArchery } from "../lib/modern-archery.mjs";
 import { wait } from "../lib/survival-driver.mjs";
 export async function run({ page, d, a, meta, flush, chapter, out }) {
   const v = meta.village,
     events = (meta.huntingEvents ??= []);
-  const targets = { enderPearl: 13, string: (await d.count("bow")) ? 0 : 3, ammo: 36 };
+  const targets = { enderPearl: 12, string: (await d.count("bow")) ? 0 : 3, ammo: 36 };
 
   const h = createModernHunting(page, d, a, {
     onEvent: async (e) => {
@@ -66,17 +66,18 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
         h.activate();
         d.setGoal("夜の敵との戦いに戻り、残りのエンダーパールを集めます。");
       }
+      d.setGoal("夜の敵と戦い、エンダーパールと矢の材料を集めます。");
       const dayTime = await page.evaluate(() => window.__mc.time() % 1200);
       if (
         meta.portal &&
         (await d.count("blazeRod")) < 7 &&
         dayTime >= 24 &&
-        dayTime < 420 &&
+        dayTime < 600 &&
         !state.creatures.some((m) => m.species === "wanderer" && m.hp > 0) &&
         (await d.count("arrow")) + 4 * (await d.count("feather")) >= 36 &&
         (await d.count("string")) >= 3
       ) {
-        await craftArchery(d, 36);
+        await prepareArchery(page, d, a, 36);
         targets.string = 0;
         const expedition = await import("./phase-6.mjs");
         await expedition.run({ page, d, a, meta, flush, chapter, out });
@@ -130,8 +131,8 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     home: meta.huntingCamp.position ?? meta.huntingCamp,
   });
   await a.surfaceTo({ x: v.x - 6, z: v.z + 1 });
-  await craftArchery(d, 36);
-  await stockVillageFood(d, page, a, v, { breadTarget: 24, waitForGrowth: true });
+  await prepareArchery(page, d, a, 36);
+  await stockVillageFood(d, page, a, v, { breadTarget: 18, waitForGrowth: true });
   flush();
   await chapter("戦闘でエンダーパールと糸を集め、弓と矢を製作", 5);
 }

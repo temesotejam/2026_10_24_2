@@ -175,6 +175,7 @@ export function createAdventureDriver(page, d) {
           const cell = { x: p.x, y, z: p.z },
             block = await d.block(cell);
           if (![0, 5, 22, 23, 25, 31, 33, 40].includes(block)) {
+            assert.notEqual(block, 28, "route around an obsidian frame");
             if (await d.count("iron_pick")) await d.equip("iron_pick");
             if ((await d.mine(cell)) === false) {
               replan = true;
@@ -270,8 +271,9 @@ export function createAdventureDriver(page, d) {
     const hunger = await page.$eval("#hunger", (el) =>
       Number(el.textContent.match(/食料 (\d+)/)?.[1]),
     );
-    if (hunger < 18 && (await d.count("bread"))) {
-      await d.equip("bread");
+    const food = (await d.count("bread")) ? "bread" : (await d.count("apple")) ? "apple" : null;
+    if (hunger < 18 && food) {
+      await d.equip(food);
       const s = await d.info();
       await d.aim({ x: s.position.x, y: s.position.y + 20, z: s.position.z - 1 });
       await right();

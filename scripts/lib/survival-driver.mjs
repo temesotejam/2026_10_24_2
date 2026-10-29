@@ -234,6 +234,11 @@ export function createDriver(page, out) {
           ) {
             const cell = { x: frontX, y: yy, z: frontZ },
               id = await block(cell);
+            assert.notEqual(
+              id,
+              28,
+              "route around obsidian structures instead of clearing their frame",
+            );
             if (id !== 0 && id !== 5 && id !== 8 && (await mine(cell, interrupt)) === false)
               return false;
           }
@@ -394,7 +399,18 @@ export function createDriver(page, out) {
     throw new Error("No gathered building material remains");
   }
   async function bridge(nx, cy, nz) {
-    const before = await info();
+    await page.keyboard.up("KeyW");
+    await page.keyboard.up("Space");
+    let before = await info();
+    for (
+      let settle = 0;
+      settle < 10 && Math.abs(before.position.y - Math.round(before.position.y)) > 0.02;
+      settle++
+    ) {
+      await wait(100);
+      before = await info();
+    }
+    cy = Math.round(before.position.y);
     // A player's body can overlap a ledge while its center is above air.
     const support = await page.evaluate(
       ({ p, cy }) => {
@@ -475,8 +491,15 @@ export function createDriver(page, out) {
         const step = Math.sign(target - current);
         const nx = cx + (axis === "x" ? step : 0),
           nz = cz + (axis === "z" ? step : 0);
-        for (const y of [cy + 1, cy])
-          if ((await block({ x: nx, y, z: nz })) !== 0) await mine({ x: nx, y, z: nz });
+        for (const y of [cy + 1, cy]) {
+          const id = await block({ x: nx, y, z: nz });
+          assert.notEqual(
+            id,
+            28,
+            "route around obsidian frames rather than tunneling through them",
+          );
+          if (id !== 0 && id !== 31) await mine({ x: nx, y, z: nz });
+        }
         if ([0, 5, 26, 31, 40, 43].includes(await block({ x: nx, y: cy - 1, z: nz }))) {
           const built = await bridge(nx, cy, nz);
           await walk(built.x + 0.5, built.z + 0.5);
