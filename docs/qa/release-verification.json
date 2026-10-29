@@ -32,5 +32,12 @@
     "errors": []
   },
   "finalIntegrationAsset": "index-BO-kpD8f.js",
-  "fullNewRulesZeroInventoryToDragonCompleted": false
+  "fullNewRulesZeroInventoryToDragonCompleted": false,
+  "visualBrowserChecksPassed": 27,
+  "survivalInventoryAndSaveBrowserChecksPassed": 18,
+  "loadBrowserRegression": {
+    "edits": 101734,
+    "droppedItems": 10000,
+    "reloads": 3
+  }
 }

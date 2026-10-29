@@ -4,7 +4,7 @@
 Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サーバーは不要です。
 公式 Minecraft の素材は同梱せず、テクスチャ・アイコン・モデルを手続き生成します。
 
-**[ブラウザで遊ぶ](https://temesotejam.github.io/2026_10_24_2/)** · [三人称・字幕付きプレイ動画をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
+**[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [旧仕様の三人称プレイ記録をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
 
 ![作業台で木のツルハシを作成したサバイバル画面](docs/screenshots/survival-crafting.png)
 
@@ -152,4 +152,4 @@ Mojang / Microsoft の公式製品ではありません。
 
 WebGL版は **F5** で一人称・背後・正面を切り替えられます。[背後視点で始める](https://temesotejam.github.io/2026_10_24_2/?seed=20261025&mode=survival&view=third-person)。壁際ではカメラが近づき、狭い坑道では一人称に近い映像になります。参考資料・検証内容は [三人称カメラ](docs/THIRD-PERSON.md) を参照してください。
 
-[三人称・字幕付きの討伐動画をダウンロード（MP4・約19MB）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4)。所持品ゼロから討伐・帰還まで、約1.5倍速・10分13秒です。
+[進行見直し前の三人称・字幕付き動画（MP4・約19MB）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4)。所持品ゼロから討伐・帰還まで、約1.5倍速・10分13秒です。

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import puppeteer from "puppeteer";
+import { createDriver } from "./lib/survival-driver.mjs";
 const args = process.argv.slice(2);
 const url = new URL(args[args.indexOf("--url") + 1] || "http://localhost:4173/");
 url.searchParams.set("seed", "2026");
@@ -22,6 +23,7 @@ const browser = await puppeteer.launch({
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 try {
   const page = await browser.newPage();
+  const driver = createDriver(page, out);
   await page.setViewport({ width: 1280, height: 720 });
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -142,6 +144,20 @@ try {
   fixture.inventory[0] = { id: "log", count: 3 };
   fixture.selected = 0;
   fixture.vitals.hunger = 10;
+  // Crafting UI tests use a declared flat arena, independent of the open
+  // spawn's natural hills. All placing/crafting remains actual browser input.
+  fixture.position = { x: 0.5, y: 35, z: 0.5 };
+  fixture.spawn = { ...fixture.position };
+  fixture.yaw = 0;
+  fixture.pitch = 0;
+  fixture.edits = {};
+  for (let x = -3; x <= 3; x++)
+    for (let z = -3; z <= 3; z++)
+      for (let y = 34; y < 96; y++) {
+        const key = `${Math.floor(x / 16)},${Math.floor(z / 16)}`;
+        const index = (y * 16 + (((z % 16) + 16) % 16)) * 16 + (((x % 16) + 16) % 16);
+        (fixture.edits[key] ??= {})[index] = y === 34 ? 3 : 0;
+      }
   const fixturePath = path.join(out, "craft-fixture.json");
   writeFileSync(fixturePath, JSON.stringify(fixture));
   page.once("dialog", (dialog) => {
@@ -197,21 +213,7 @@ try {
     while (y > 0 && window.__mc.blockAt(x, y, z) === 0) y--;
     return { x, y, z, eye: p.y + window.__mc.eyeHeight(), yaw: 0 };
   });
-  async function aim(pitch) {
-    await page.evaluate((p) => {
-      document.dispatchEvent(new MouseEvent("mousemove", { movementX: 0, movementY: -2000 }));
-      document.dispatchEvent(
-        new MouseEvent("mousemove", { movementX: 0, movementY: (Math.PI / 2 - 0.01 + p) / 0.0022 }),
-      );
-    }, pitch);
-    await wait(350);
-  }
-  await page.evaluate(() =>
-    document.dispatchEvent(
-      new MouseEvent("mousemove", { movementX: Math.PI / 2 / 0.0022, movementY: 0 }),
-    ),
-  );
-  await aim(Math.atan2(neighbor.eye - neighbor.y - 1, 1));
+  await driver.aim({ x: neighbor.x + 0.5, y: neighbor.y + 0.99, z: neighbor.z + 0.5 });
   await page.mouse.down({ button: "right" });
   await page.mouse.up({ button: "right" });
   await page.waitForFunction(
@@ -220,7 +222,7 @@ try {
     neighbor,
   );
   check("placing a table consumes the finite inventory block", (await has("table")) === 0);
-  await aim(Math.atan2(neighbor.eye - neighbor.y - 1.5, 1));
+  await driver.aim({ x: neighbor.x + 0.5, y: neighbor.y + 1.5, z: neighbor.z + 0.5 });
   await page.mouse.down({ button: "right" });
   await page.mouse.up({ button: "right" });
   await page.waitForFunction(
