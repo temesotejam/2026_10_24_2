@@ -138,6 +138,16 @@ try {
     await a.boot();
     await startRecording();
     if ((await d.info()).health <= 0) {
+      const previous = meta.parts.at(-2);
+      if (previous && !(meta.deaths ?? []).some((death) => death.part === previous.path)) {
+        meta.lastDeath = (await d.info()).position;
+        (meta.deaths ??= []).push({
+          part: previous.path,
+          position: meta.lastDeath,
+          cause: "Observed actual death before normal respawn",
+        });
+        flush();
+      }
       d.setGoal("倒されました。復活して、落とした道具を回収します。");
       await page.locator("#respawn").click();
       await page.waitForFunction(() => window.__mc?.health() > 0, { timeout: 120000 });

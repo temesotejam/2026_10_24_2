@@ -2,7 +2,7 @@ import { writeFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { stashVillage } from "../lib/modern-storage.mjs";
-import { stockVillageFood } from "../lib/modern-resources.mjs";
+import { stockVillageFood, carriedFoodUnits } from "../lib/modern-resources.mjs";
 import { chooseHuntingCamp } from "../lib/modern-camp.mjs";
 import { prepareArchery } from "../lib/modern-archery.mjs";
 import { wait } from "../lib/survival-driver.mjs";
@@ -12,6 +12,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   const targets = { enderPearl: 12, string: (await d.count("bow")) ? 0 : 3, ammo: 36 };
 
   const h = createModernHunting(page, d, a, {
+    arrowReserve: 0,
     onEvent: async (e) => {
       events.push(e);
       if (e.name === "mob-defeated")
@@ -36,6 +37,21 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       await d.collect("table", 1);
     },
     maintain: async (state) => {
+      if (
+        !state.inventory.some(
+          (slot) => slot?.id === "iron_sword" && (slot.durability ?? 0) >= 80,
+        ) &&
+        (await d.count("iron")) >= 2
+      ) {
+        d.setGoal("消耗した剣の代わりに、採掘済みの鉄で新しい剣を作ります。");
+        const table = await d.station("table");
+        if (!(await d.count("stick"))) await d.make("sticks");
+        await d.make("iron_sword");
+        await d.close();
+        await d.mine(table);
+        await wait(500);
+        await d.collect("table", 1);
+      }
       if (state.inventory.filter((slot) => slot === null).length < 4)
         if ((await d.info()).inventory.filter((s) => s === null).length < 6)
           await stashVillage(page, d, a, v, [
@@ -52,7 +68,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
             "powder",
             "dirt",
           ]);
-      if ((await d.count("bread")) < 3)
+      if ((await carriedFoodUnits(d)) < 20)
         await stockVillageFood(d, page, a, v, { breadTarget: 8, waitForGrowth: false });
       // Spend an early daytime interval on real portal construction while
       // waiting for naturally spawning night creatures, using this same input loop.
@@ -98,7 +114,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       }
     },
     recover: async (target) => {
-      if ((await d.count("bread")) < 3)
+      if ((await carriedFoodUnits(d)) < 20)
         await stockVillageFood(d, page, a, v, { breadTarget: 8, waitForGrowth: false });
       await a.eat();
       await a.recover(target);
@@ -139,6 +155,21 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     "goldOre",
     "ironOre",
   ]);
+  flush();
+  if (
+    v.cacheChest &&
+    Math.hypot(
+      (meta.huntingCamp?.x ?? 0) - v.cacheChest.x,
+      (meta.huntingCamp?.z ?? 0) - v.cacheChest.z,
+    ) > 48
+  ) {
+    meta.huntingCamp = (await chooseHuntingCamp(page, d, a, v.cacheChest, { radius: 32 })) ?? {
+      x: v.cacheChest.x,
+      y: v.cacheChest.y,
+      z: v.cacheChest.z - 4,
+    };
+    flush();
+  }
   if (!meta.huntingCamp) {
     meta.huntingCamp = (await chooseHuntingCamp(page, d, a, v, { radius: 40 })) ?? {
       x: v.x,
@@ -159,7 +190,8 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   });
   await a.surfaceTo({ x: v.x - 6, z: v.z + 1 });
   await prepareArchery(page, d, a, 36);
-  await stockVillageFood(d, page, a, v, { breadTarget: 18, waitForGrowth: true });
+  if ((await carriedFoodUnits(d)) < 50)
+    await stockVillageFood(d, page, a, v, { breadTarget: 18, waitForGrowth: true });
   flush();
   await chapter("戦闘でエンダーパールと糸を集め、弓と矢を製作", 5);
 }

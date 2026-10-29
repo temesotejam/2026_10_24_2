@@ -3,6 +3,14 @@
 import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
 
+export async function carriedFoodUnits(d) {
+  const values = { meat: 8, bread: 5, cookedFish: 6, apple: 4, rawMeat: 2 };
+  return (await d.info()).inventory.reduce(
+    (total, slot) => total + (slot ? (values[slot.id] ?? 0) * slot.count : 0),
+    0,
+  );
+}
+
 export async function gatherOre(d, blockId, itemId, targetCount, { maxAttempts = 40 } = {}) {
   for (let attempt = 0; (await d.count(itemId)) < targetCount && attempt < maxAttempts; attempt++) {
     await d.checkThreat();
@@ -57,6 +65,110 @@ export async function smeltIron(d, page) {
   await wait(700);
   await d.collect("iron", before + ore);
   await d.collect("furnace", 1);
+}
+
+/** Cook only carried, genuine meat using normal furnace-slot clicks.
+ * Returns the number cooked, even if the guard eats some during the wait.
+ * Call from a sheltered, supported site with a pick and a carried furnace. */
+export async function cookCarriedMeat(d, page, a, { count = 8 } = {}) {
+  assert.ok(Number.isInteger(count) && count > 0 && count <= 64, "valid cooking batch");
+  const amount = Math.min(count, await d.count("rawMeat"));
+  if (!amount) return { cooked: 0, remainingRaw: 0 };
+  const fuelId = (await d.count("coal")) ? "coal" : "planks";
+  const fuelCount = Math.ceil((amount * 8) / (fuelId === "coal" ? 80 : 15));
+  assert.ok((await d.count(fuelId)) >= fuelCount, "own enough real cooking fuel");
+  assert.ok(await d.count("furnace"), "carry the recovered furnace before cooking");
+  const inventory = (await d.info()).inventory;
+  assert.ok(
+    inventory.some((s) => s === null || (s?.id === "meat" && s.count + amount <= 64)) ||
+      (await d.count("rawMeat")) === amount ||
+      (await d.count(fuelId)) === fuelCount,
+    "leave space for both cooked meat and the recovered furnace",
+  );
+  let pick = null;
+  for (const id of ["stone_pick", "iron_pick", "diamond_pick", "wood_pick"])
+    if (await d.count(id)) {
+      pick = id;
+      break;
+    }
+  assert.ok(pick, "own a pick to recover the furnace");
+  d.setGoal("回収した生肉をかまどで焼き、遠征用の食料を補充します。");
+  await d.checkThreat();
+  const home = (await d.info()).position;
+  const furnace = await d.station("furnace");
+  const slot = (index) => page.locator(`[data-area="furnace"][data-slot="${index}"]`);
+  const readSlot = (index) =>
+    page.$eval(`[data-area="furnace"][data-slot="${index}"]`, (el) =>
+      el.querySelector("img") ? Number(el.querySelector(".item-count")?.textContent) || 1 : 0,
+    );
+  const putExact = async (id, index, n) => {
+    while (n > 0) {
+      const inventory = (await d.info()).inventory;
+      const source = inventory.findIndex((s) => s?.id === id);
+      assert.ok(source >= 0, `own ${id} for actual furnace input`);
+      const moved = Math.min(n, inventory[source].count);
+      const button = page.locator(`[data-area="inventory"][data-slot="${source}"]`);
+      await button.click();
+      for (let i = 0; i < moved; i++) await slot(index).click({ button: "right" });
+      // A split transfer keeps the source selected until its stack is empty.
+      if (moved < inventory[source].count) await button.click();
+      n -= moved;
+    }
+  };
+  const take = async (index, id) => {
+    const n = await readSlot(index);
+    if (!n) return 0;
+    const inventory = (await d.info()).inventory;
+    let destination = inventory.findIndex((s) => s?.id === id && s.count + n <= 64);
+    if (destination < 0) destination = inventory.findIndex((s) => s === null);
+    assert.ok(destination >= 0, `inventory room for cooked food / unused ${id}`);
+    await slot(index).click();
+    await page.locator(`[data-area="inventory"][data-slot="${destination}"]`).click();
+    return n;
+  };
+  assert.equal(await readSlot(0), 0, "placed furnace has no old input");
+  assert.equal(await readSlot(1), 0, "placed furnace has no old fuel");
+  assert.equal(await readSlot(2), 0, "placed furnace has no old output");
+  await putExact("rawMeat", 0, amount);
+  await putExact(fuelId, 1, fuelCount);
+  await d.close();
+  let cooked = 0;
+  const until = Date.now() + amount * 8000 + 120000;
+  while (cooked < amount) {
+    await d.checkThreat();
+    if (a?.eat) await a.eat();
+    assert.ok((await d.info()).health > 0, "survive actual meat cooking");
+    assert.ok(Date.now() < until, "finish cooking with actual consumed fuel");
+    await wait(4000);
+    const p = (await d.info()).position;
+    if (Math.hypot(p.x - home.x, p.z - home.z) > 1.5 && a?.surfaceTo)
+      await a.surfaceTo({ x: Math.floor(home.x), z: Math.floor(home.z) });
+    const current = await d.info();
+    assert.ok(
+      Math.hypot(
+        furnace.x + 0.5 - current.position.x,
+        furnace.y + 0.5 - current.position.y - current.eye,
+        furnace.z + 0.5 - current.position.z,
+      ) < 4.4,
+      "return within normal furnace interaction reach",
+    );
+    await d.aim({ x: furnace.x + 0.5, y: furnace.y + 0.5, z: furnace.z + 0.5 });
+    await page.mouse.down({ button: "right" });
+    await page.mouse.up({ button: "right" });
+    await page.waitForSelector('[data-area="furnace"][data-slot="2"]');
+    cooked += await take(2, "meat");
+    if (cooked === amount) {
+      await take(0, "rawMeat");
+      await take(1, fuelId);
+    }
+    await d.close();
+  }
+  await d.equip(pick);
+  await d.mine(furnace);
+  await wait(700);
+  await d.collect("furnace", 1);
+  await d.report(`回収した生肉${cooked}個を実際の燃料で焼き、かまどを回収`);
+  return { cooked, carriedMeat: await d.count("meat"), remainingRaw: await d.count("rawMeat") };
 }
 
 /** Starting after the first natural diamond at y11, gather the remaining
@@ -122,6 +234,48 @@ export async function gatherFlint(
     await d.collect("table", 1);
   }
 
+  // Reuse gravel already mined in this survival run, as in ordinary flint
+  // farming: every placed block is consumed and each drop uses native RNG.
+  if (await d.count("gravel")) d.setGoal("採掘した砂利を置き直して掘り、火打ち石を集めます。");
+  for (
+    let attempt = 0;
+    attempt < maxAttempts && (await d.count("gravel")) && (await d.count("flint")) < targetCount;
+    attempt++
+  ) {
+    await d.checkThreat();
+    const site = await page.evaluate(() => {
+      const p = window.__mc.position(),
+        y = Math.round(p.y);
+      const solid = (id) => ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id);
+      for (const [dx, dz] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ]) {
+        const x = Math.floor(p.x) + dx,
+          z = Math.floor(p.z) + dz;
+        const support = window.__mc.blockAt(x, y - 1, z);
+        if (
+          solid(support) &&
+          ![12, 13, 14, 15, 28, 34, 35, 38, 39].includes(support) &&
+          window.__mc.blockAt(x, y, z) === 0 &&
+          window.__mc.blockAt(x, y + 1, z) === 0
+        )
+          return { x, y, z };
+      }
+      return null;
+    });
+    if (!site) break;
+    await d.equip("gravel");
+    await d.aim({ x: site.x + 0.5, y: site.y - 0.01, z: site.z + 0.5 });
+    await a.right();
+    if ((await d.block(site)) !== 44) break;
+    if (await d.count("stone_shovel")) await d.equip("stone_shovel");
+    else if (await d.count("stick")) await d.equip("stick");
+    await d.mine(site);
+    await wait(450);
+  }
   const skipped = [];
   for (
     let attempt = 0;

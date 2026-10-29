@@ -262,6 +262,9 @@ export function createDriver(page, out) {
     return true;
   }
   async function center() {
+    await page.keyboard.up("KeyW");
+    await page.keyboard.up("Space");
+    await wait(700);
     const p = (await info()).position;
     // The center may hang above air while the body still overlaps a ledge.
     // Crouching then refuses to move farther off that support. Center on the

@@ -278,7 +278,12 @@ export function createAdventureDriver(page, d) {
     const hunger = await page.$eval("#hunger", (el) =>
       Number(el.textContent.match(/食料 (\d+)/)?.[1]),
     );
-    const food = (await d.count("bread")) ? "bread" : (await d.count("apple")) ? "apple" : null;
+    let food = null;
+    for (const id of ["meat", "bread", "cookedFish", "apple", "rawMeat"])
+      if (await d.count(id)) {
+        food = id;
+        break;
+      }
     if (hunger < 18 && food) {
       await d.equip(food);
       const s = await d.info();

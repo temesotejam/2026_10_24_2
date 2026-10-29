@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { wait } from "../lib/survival-driver.mjs";
+import { carriedFoodUnits } from "../lib/modern-resources.mjs";
 
 function framePositions(center) {
   const frames = [];
@@ -76,10 +77,12 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
     const sword = await bestSword();
     const bow = inventory.find((slot) => slot?.id === "bow");
     const arrows = await d.count("arrow"),
-      bread = await d.count("bread");
+      bread = await d.count("bread"),
+      foodUnits = await carriedFoodUnits(d);
     mission.endSupplies = {
       arrows,
       bread,
+      foodUnits,
       swordDurability: sword?.durability ?? 0,
       bowDurability: bow?.durability ?? 0,
     };
@@ -95,7 +98,7 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
       "carry a bow with enough durability for crystal-shot retries",
     );
     assert.ok(arrows >= 24, "carry arrows for all six crystals with up to four attempts each");
-    assert.ok(bread >= 8, "carry food for withdrawal and ordinary health regeneration");
+    assert.ok(foodUnits >= 40, "carry food for withdrawal and ordinary health regeneration");
     d.setGoal("素材がそろいました。エンダーアイを作り、地下遺跡へ向かいます。");
     await d.open();
     // Seed2026 has eleven empty frames and its first directional throw breaks.

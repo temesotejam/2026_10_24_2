@@ -173,6 +173,12 @@ export function renderWatchPage(proof, style) {
   const chapterNavigation = chapters.length
     ? `<details><summary>場面を選んで再生</summary><nav aria-label="動画の章">${chapters.join("\n")}</nav></details>`
     : "";
+  const additionalDownloads = proof.export.additionalDownloads ?? [];
+  const higherQuality = additionalDownloads.length
+    ? `<section><h2>高画質・分割版（全3本）</h2>
+      <p>同じ全工程を時系列に3分割し、各動画の画質を上げています。順番に見ると全編を視聴できます。三人称・日本語字幕・1.5倍速です。</p>
+      <nav aria-label="高画質の分割動画">${additionalDownloads.map((item, index) => `<a class="download" href="${escapeHtml(item.url)}" download="${escapeHtml(item.file)}">${index + 1}/3をダウンロード（${lengthLabel(item.duration)}・約${Math.ceil(item.bytes / 1e6)}MB）</a>`).join("\n")}</nav></section>`
+    : "";
   return `<!doctype html>
 <html lang="ja">
   <head>
@@ -200,6 +206,7 @@ export function renderWatchPage(proof, style) {
         <a class="download" href="./${proofName}">進行と録画の検証記録</a>
       </nav>
       ${chapterNavigation}
+      ${higherQuality}
       <p>字幕は映像に入っているので設定は不要です。長時間の全工程を収めるため画質を軽量化しています。音声はありません。壁際や狭い坑道ではカメラが近づき、体が視界を塞ぐ場合は非表示になります。</p>
       <details>
         <summary>旧仕様の動画（生成方式2・改善前）</summary>
@@ -307,7 +314,66 @@ export async function main(args = process.argv.slice(2)) {
     });
   }
   const download = { file: mediaName, url: rawDownload, bytes, sha256: await sha256(movie) };
+  const additionalDownloads = [];
+  const extraSources = [];
+  if (metadata.export.additionalDownloads !== undefined) {
+    assert.equal(metadata.export.additionalDownloads.length, 3);
+    let rawEnd = 0;
+    for (const [index, item] of metadata.export.additionalDownloads.entries()) {
+      assert.equal(item.file, `survival-generation3-part-${index + 1}.mp4`);
+      assert.equal(item.subtitleFile, `survival-generation3-part-${index + 1}.srt`);
+      assert.equal(item.fullDecodeVerified, true);
+      assert.equal(item.speed, 1.5);
+      assert.equal(item.audio, false);
+      assert.match(item.captions, /Japanese.*burned/i);
+      assert.ok(Math.abs(item.rawStart - rawEnd) < 0.001, "contiguous chronological chunks");
+      assert.ok(item.rawEnd > item.rawStart);
+      assert.ok(Math.abs(item.start - item.rawStart / 1.5) < 0.001);
+      assert.ok(Math.abs(item.end - item.rawEnd / 1.5) < 0.001);
+      assert.ok(Math.abs(item.duration - (item.rawEnd - item.rawStart) / 1.5) < 0.25);
+      rawEnd = item.rawEnd;
+      const file = sourceFile(directory, item.file);
+      const subtitle = sourceFile(directory, item.subtitleFile);
+      const size = statSync(file).size;
+      assert.ok(size > 0 && size < 95 * 1024 * 1024);
+      const extraProbe = JSON.parse(
+        run("ffprobe", [
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-show_entries",
+          "stream=codec_name,width,height,pix_fmt:format=duration",
+          "-of",
+          "json",
+          file,
+        ]),
+      );
+      assert.deepEqual(extraProbe.streams[0], {
+        codec_name: "h264",
+        width: 960,
+        height: 540,
+        pix_fmt: "yuv420p",
+      });
+      assert.ok(Math.abs(Number(extraProbe.format.duration) - item.duration) < 0.1);
+      additionalDownloads.push({
+        ...item,
+        bytes: size,
+        sha256: await sha256(file),
+        url: rawDownload.replace(mediaName, item.file),
+      });
+      extraSources.push({ file, name: item.file }, { file: subtitle, name: item.subtitleFile });
+    }
+    assert.ok(Math.abs(rawEnd - metadata.export.rawDuration) < 0.001);
+    assert.ok(
+      Math.abs(
+        additionalDownloads.reduce((sum, item) => sum + item.duration, 0) -
+          metadata.export.duration,
+      ) < 1,
+    );
+  }
   const proof = createCompactProof(metadata, download, parts);
+  if (additionalDownloads.length) proof.export.additionalDownloads = additionalDownloads;
   const layoutFile = existsSync(path.join(output, "index.html"))
     ? path.join(output, "index.html")
     : path.join(repository, "public/watch/index.html");
@@ -322,6 +388,7 @@ export async function main(args = process.argv.slice(2)) {
   try {
     copyFileSync(movie, path.join(staging, mediaName));
     copyFileSync(subtitles, path.join(staging, subtitleName));
+    for (const extra of extraSources) copyFileSync(extra.file, path.join(staging, extra.name));
     const poster = option("--poster", null);
     if (poster) {
       assert.match(poster, /\.jpe?g$/i, "provide a verified JPEG poster");
@@ -346,7 +413,14 @@ export async function main(args = process.argv.slice(2)) {
     }
     writeFileSync(path.join(staging, proofName), JSON.stringify(proof, null, 2) + "\n");
     writeFileSync(path.join(staging, "index.html"), html);
-    for (const name of [mediaName, subtitleName, posterName, proofName, "index.html"])
+    for (const name of [
+      mediaName,
+      subtitleName,
+      posterName,
+      proofName,
+      ...extraSources.map((extra) => extra.name),
+      "index.html",
+    ])
       renameSync(path.join(staging, name), path.join(output, name));
   } finally {
     rmSync(staging, { recursive: true, force: true });

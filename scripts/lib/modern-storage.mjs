@@ -10,6 +10,22 @@ export async function stashVillage(
 ) {
   d.setGoal("戦利品をチェストでまとめ、持ち物の空きを作ります。");
   let chest = v.cacheChest ?? { x: v.x - 7, y: v.y, z: v.z + 5 };
+  const current = (await d.info()).position;
+  if (!v.cacheChest && (await d.count("chest"))) {
+    // Use the genuinely crafted camp chest, rather than carrying it full-time.
+    chest = { x: Math.floor(current.x) - 1, y: Math.round(current.y), z: Math.floor(current.z) };
+    for (const y of [chest.y + 1, chest.y])
+      if ((await d.block({ ...chest, y })) !== 0) await d.mine({ ...chest, y });
+    await d.equip("chest");
+    await d.aim({ x: chest.x + 0.5, y: chest.y - 0.01, z: chest.z + 0.5 });
+    await a.right();
+    assert.equal(await d.block(chest), 14, "place the crafted empty camp chest");
+    v.cacheChest = chest;
+    await wait(700);
+  } else if (Math.hypot(current.x - chest.x, current.z - chest.z) > 48) {
+    // Unloaded chunks read as air. Load the area before deciding a chest was lost.
+    await a.surfaceTo({ x: chest.x + 2, z: chest.z - 3 });
+  }
   if ((await d.block(chest)) !== 14) {
     // The original house can be damaged in real combat. Craft a new empty
     // cache at a different coordinate so it cannot regenerate structure loot.

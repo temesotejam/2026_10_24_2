@@ -69,3 +69,14 @@ pillar; `phase-6.22` prepares real building materials and `phase-6.3` retrieves
 actual Nether death drops from a three-block pillar. These are recovery stages,
 not a claim that the zero-inventory dragon run has completed. Every failed
 recording part remains in the final chronological source list.
+
+Subsequent recorded failures exposed inventory-capacity, food-selection and
+vertical-approach errors in the controller. Carried meat and apples are now
+ordinary food choices, food reserves count their actual hunger values, and
+existing flint is crafted before looking for a larger batch. Collected gravel
+can be placed and mined again using native drops. Cooking uses actual furnace
+slots and fuel. Close obstructions are mined only in front of the target.
+Independent imported fixtures cover cooking, safe height changes and protected
+obstruction mining; these fixtures never use the recorded survival profile.
+The recorded run still includes its deaths and recoveries and is not considered
+complete until the actual dragon reward is returned to the Overworld.

@@ -38,6 +38,28 @@ const SWORDS = [
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 const nightAt = (time) => ((time % 1200) + 1200) % 1200 >= 720;
 
+/** True only when the aimed voxel begins before the creature hit sphere.
+ * A raycast can otherwise report terrain behind an unobstructed creature. */
+export function blockBeforeTargetSphere(eye, center, block, radius = 0.55) {
+  const delta = { x: center.x - eye.x, y: center.y - eye.y, z: center.z - eye.z };
+  const length = Math.hypot(delta.x, delta.y, delta.z);
+  if (length <= radius) return false;
+  let entry = 0,
+    exit = Infinity;
+  for (const axis of ["x", "y", "z"]) {
+    const direction = delta[axis] / length;
+    if (Math.abs(direction) < 1e-9) {
+      if (eye[axis] < block[axis] || eye[axis] > block[axis] + 1) return false;
+      continue;
+    }
+    const a = (block[axis] - eye[axis]) / direction,
+      b = (block[axis] + 1 - eye[axis]) / direction;
+    entry = Math.max(entry, Math.min(a, b));
+    exit = Math.min(exit, Math.max(a, b));
+  }
+  return exit >= entry && entry < length - radius - 0.03;
+}
+
 export function createModernHunting(page, d, a, options = {}) {
   const stats = {
     kills: {},
@@ -50,6 +72,7 @@ export function createModernHunting(page, d, a, options = {}) {
     pathPlans: 0,
     terrainFallbacks: 0,
     shootingStrafes: 0,
+    closeObstructionsBroken: 0,
   };
   const ignored = new Map();
   const corpses = [];
@@ -466,6 +489,44 @@ export function createModernHunting(page, d, a, options = {}) {
             if (!moved || Date.now() - lastProgress > 2500) {
               const latest = await observe();
               if (shootingEnemies(latest).length) {
+                // A nearby enemy may see the player over a block while our
+                // approach or body-level attack is obstructed. Break that one
+                // real cover block quickly, using the owned pickaxe, before
+                // abandoning an otherwise reachable close encounter.
+                if (distance(mob.position, latest.position) < 6 && latest.health >= 6) {
+                  const currentMob = alive(latest).find((candidate) => candidate.id === mob.id);
+                  if (!currentMob) continue;
+                  const body = { ...currentMob.position, y: currentMob.position.y + 0.7 };
+                  await d.aim(body, 0);
+                  const hit = await page.evaluate(() => window.__mc.target());
+                  if (
+                    hit &&
+                    blockBeforeTargetSphere(
+                      { ...latest.position, y: latest.position.y + latest.eye },
+                      body,
+                      hit,
+                    ) &&
+                    Math.hypot(
+                      hit.x + 0.5 - latest.position.x,
+                      hit.y + 0.5 - latest.position.y - latest.eye,
+                      hit.z + 0.5 - latest.position.z,
+                    ) < 4.4 &&
+                    ![0, 5, 8, 12, 13, 14, 15, 26, 28, 31, 34, 35, 38, 39, 40, 43].includes(
+                      await d.block(hit),
+                    )
+                  ) {
+                    await d.mine(hit);
+                    stats.closeObstructionsBroken++;
+                    await record("removed-close-obstruction", {
+                      block: hit,
+                      species: currentMob.species,
+                    });
+                    lastProgress = Date.now();
+                    failedSwings = 0;
+                    terrainCache = null;
+                    continue;
+                  }
+                }
                 const covered = await takeCover(latest);
                 if (!covered)
                   throw new Error(
@@ -518,7 +579,13 @@ export function createModernHunting(page, d, a, options = {}) {
       }));
       // Leave crafting grids alone. The runner restores food before starting a job.
       if (idle.open || idle.mode !== "pointer") return false;
-      if (idle.hunger < 18 && saved.inventory.some((stack) => stack?.id === "bread")) {
+      if (
+        idle.hunger < 18 &&
+        saved.inventory.some(
+          (stack) =>
+            stack && ["meat", "bread", "cookedFish", "apple", "rawMeat"].includes(stack.id),
+        )
+      ) {
         guarding = true;
         const held = saved.inventory[idle.selected]?.id;
         try {
@@ -563,8 +630,14 @@ export function createModernHunting(page, d, a, options = {}) {
         while (!returned && Date.now() < until) {
           target = pickTarget(await observe());
           if (target) await fight(target.id);
-          returned = await d.walk(saved.position.x, saved.position.z, false, 0.35, 80, async () =>
-            Boolean(pickTarget(await observe())),
+          const returnState = await observe();
+          returned = await d.walk(
+            saved.position.x,
+            saved.position.z,
+            saved.position.y > returnState.position.y + 0.2,
+            0.35,
+            80,
+            async () => Boolean(pickTarget(await observe())),
           );
         }
         assert.ok(returned, "return safely to interrupted work after hunting guard combat");
@@ -700,14 +773,17 @@ export function createModernHunting(page, d, a, options = {}) {
             population.filter((m) =>
               night
                 ? !FRIENDLY.includes(m.species) && m.species !== "villager"
-                : FRIENDLY.includes(m.species),
-            ).length >= (night ? 10 : 10);
+                : missing.some((item) =>
+                    DROPS[item].some((species) => FRIENDLY.includes(species)),
+                  ) && FRIENDLY.includes(m.species),
+            ).length >= 10;
           if (crowded)
             focus =
               population
                 .filter(
                   (m) =>
                     m.species !== "villager" &&
+                    (ignored.get(m.id) ?? 0) < Date.now() &&
                     (night ? !FRIENDLY.includes(m.species) : FRIENDLY.includes(m.species)),
                 )
                 .sort(
@@ -719,13 +795,61 @@ export function createModernHunting(page, d, a, options = {}) {
           idle = 0;
           const desired = missing.find((item) => DROPS[item].includes(focus.species));
           if (desired) d.narrate(`${LABELS[desired]}を集めるため、見つけた生物に近づきます。`, 1);
-          await a.surfaceTo({ x: Math.floor(focus.position.x), z: Math.floor(focus.position.z) });
+          // Terrain movement still reacts to hostile danger, but must not
+          // re-enter combat with this unreachable gathering target mid-approach.
+          const chosen = focus;
+          focus = null;
+          try {
+            await a.surfaceTo({
+              x: Math.floor(chosen.position.x),
+              z: Math.floor(chosen.position.z),
+            });
+            // Reaching the same map column can still leave the animal on a
+            // different cave/terrain level. Resolve that real height difference
+            // with ordinary building or one-block descent, rather than spinning.
+            const at = await observe();
+            const target = alive(at).find((mob) => mob.id === chosen.id);
+            if (
+              target &&
+              Math.hypot(target.position.x - at.position.x, target.position.z - at.position.z) < 1.6
+            ) {
+              const dy = target.position.y - at.position.y;
+              if (dy > 1.2) {
+                await a.pillarTo(Math.round(target.position.y));
+              } else if (dy < -1.2) {
+                await d.center();
+                const p = (await d.info()).position;
+                const floor = { x: Math.floor(p.x), y: Math.round(p.y) - 1, z: Math.floor(p.z) };
+                const id = await d.block(floor);
+                const landing = await page.evaluate((floor) => {
+                  const pass = [0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43];
+                  for (let y = floor.y - 1; y >= Math.max(0, floor.y - 8); y--)
+                    if (!pass.includes(window.__mc.blockAt(floor.x, y, floor.z))) return y + 1;
+                  return -Infinity;
+                }, floor);
+                if (![0, 5, 8, 26, 28, 31, 38, 39, 40, 43].includes(id) && p.y - landing <= 3.1) {
+                  await d.mine(floor);
+                  await wait(600);
+                } else ignored.set(target.id, Date.now() + 30000);
+              }
+            }
+          } finally {
+            focus = chosen;
+          }
           await huntingGuard();
           await collectDrops();
         } else {
           idle++;
           stats.waits++;
-          if (idle % 6 === 0) await patrol(home, patrolIndex++);
+          const waitingForNight =
+            expectedDimension === "overworld" &&
+            !nightAt(latest.time) &&
+            missing.every((item) => DROPS[item].every((species) => !FRIENDLY.includes(species)));
+          if (waitingForNight) {
+            d.narrate("夜に出現する敵を待ち、食料と装備を温存しています。", 1);
+            await a.eat();
+            await a.waitSafe(5000);
+          } else if (idle % 6 === 0) await patrol(home, patrolIndex++);
           else {
             await a.eat();
             await wait(1000);
