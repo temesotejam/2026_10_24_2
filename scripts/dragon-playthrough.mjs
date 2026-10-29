@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { setInterval, clearInterval } from "node:timers";
 import { execFileSync } from "node:child_process";
 import puppeteer from "puppeteer";
 import { createDriver, initialJourney, finishIronDiamond, wait } from "./lib/survival-driver.mjs";
