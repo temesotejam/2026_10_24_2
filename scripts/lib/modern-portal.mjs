@@ -208,9 +208,15 @@ export function createModernPortal(page, d, a) {
 
   /** Cool actual naturally generated lava cells; no lava creation or repeated
    * cooling of a single duplicated source. Call near a dry ledge by the pool. */
-  async function gatherObsidian(target = 10, { lava, stand } = {}) {
+  async function gatherObsidian(
+    target = 10,
+    { lava, stand, resume, onProgress = () => undefined } = {},
+  ) {
     assert.ok((await d.count("diamond_pick")) > 0, "own a normally crafted diamond pickaxe");
-    assert.ok((await d.count("waterBucket")) > 0, "own a real water source in a bucket");
+    assert.ok(
+      (await d.count("waterBucket")) > 0 || resume?.waterSupport,
+      "own a real water source in a bucket or resume beside the same placed source",
+    );
     if (stand) {
       await d.tunnelTo(stand);
       await d.walk(stand.x + 0.5, stand.z + 0.5, false, 0.12);
@@ -231,42 +237,79 @@ export function createModernPortal(page, d, a) {
         return found ? { x: found.x, y: found.y, z: found.z } : null;
       });
     assert.ok(lava, "approach an exposed natural lava pool from a dry ledge within bucket reach");
-    assert.equal(await d.block(lava), 26, "selected lava genuinely exists before cooling");
+    if (!resume?.waterSupport)
+      assert.equal(await d.block(lava), 26, "selected lava genuinely exists before cooling");
     d.setGoal("自然の溶岩へ水を流し、ダイヤのツルハシで黒曜石を採掘します。");
-    const waterSupport = await page.evaluate((lava) => {
-      const mc = window.__mc,
-        player = mc.position(),
-        options = [];
-      const solid = (id) => ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id);
-      for (let dx = -3; dx <= 3; dx++)
-        for (let dz = -3; dz <= 3; dz++) {
-          if (Math.abs(dx) + Math.abs(dz) > 3) continue;
-          const x = lava.x + dx,
-            z = lava.z + dz,
-            y = lava.y;
-          if (solid(mc.blockAt(x, y, z)) && mc.blockAt(x, y + 1, z) === 0) {
-            const d = Math.hypot(
-              x + 0.5 - player.x,
-              y + 0.99 - player.y - 1.62,
-              z + 0.5 - player.z,
-            );
-            if (d < 4.4) options.push({ x, y, z, d });
+    const waterSupport =
+      resume?.waterSupport ??
+      (await page.evaluate((lava) => {
+        const mc = window.__mc,
+          player = mc.position(),
+          options = [];
+        const solid = (id) => ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id);
+        for (let dx = -3; dx <= 3; dx++)
+          for (let dz = -3; dz <= 3; dz++) {
+            if (Math.abs(dx) + Math.abs(dz) > 3) continue;
+            const x = lava.x + dx,
+              z = lava.z + dz,
+              y = lava.y;
+            if (solid(mc.blockAt(x, y, z)) && mc.blockAt(x, y + 1, z) === 0) {
+              const d = Math.hypot(
+                x + 0.5 - player.x,
+                y + 0.99 - player.y - 1.62,
+                z + 0.5 - player.z,
+              );
+              if (d < 4.4) options.push({ x, y, z, d });
+            }
           }
-        }
-      const best = options.sort((a, b) => a.d - b.d)[0];
-      return best ? { x: best.x, y: best.y, z: best.z } : null;
-    }, lava);
+        const best = options.sort((a, b) => a.d - b.d)[0];
+        return best ? { x: best.x, y: best.y, z: best.z } : null;
+      }, lava));
     assert.ok(waterSupport, "find an exposed solid bank beside the real lava pool");
-    await d.equip("waterBucket");
-    await d.aim({ x: waterSupport.x + 0.5, y: waterSupport.y + 0.99, z: waterSupport.z + 0.5 });
-    await a.right();
-    await page.waitForFunction(
-      (p) => window.__mc.blockAt(p.x, p.y, p.z) === 28,
-      { timeout: 15000 },
-      lava,
-    );
+    if (!resume?.waterSupport) {
+      await d.equip("waterBucket");
+      await d.aim({ x: waterSupport.x + 0.5, y: waterSupport.y + 0.99, z: waterSupport.z + 0.5 });
+      assert.deepEqual(
+        await page.evaluate(() => window.__mc.target()),
+        waterSupport,
+        "aim at the real solid bank before pouring the owned bucket",
+      );
+      await a.right();
+      assert.equal(
+        await d.block({ ...waterSupport, y: waterSupport.y + 1 }),
+        5,
+        "place the actual bucket source above the bank",
+      );
+      await onProgress({
+        lava,
+        waterSupport,
+        mined: [],
+        pending: null,
+        inventoryCount: await d.count("obsidian"),
+      });
+      await page.waitForFunction(
+        (p) => window.__mc.blockAt(p.x, p.y, p.z) === 28,
+        { timeout: 15000 },
+        lava,
+      );
+    } else
+      assert.equal(
+        await d.block({ ...waterSupport, y: waterSupport.y + 1 }),
+        5,
+        "the same normally placed source is still present on resume",
+      );
     const deadline = Date.now() + 360000;
-    const mined = [];
+    const mined = [...(resume?.mined ?? [])];
+    let pending = resume?.pending ?? null;
+    const progress = async () =>
+      onProgress({
+        lava,
+        waterSupport,
+        mined: [...mined],
+        pending,
+        inventoryCount: await d.count("obsidian"),
+      });
+    await progress();
     while ((await d.count("obsidian")) < target) {
       assert.ok(
         Date.now() < deadline,
@@ -274,29 +317,36 @@ export function createModernPortal(page, d, a) {
       );
       await d.checkThreat();
       const p = (await d.info()).position;
-      const next = await page.evaluate(
-        ({ p, lava }) => {
-          const mc = window.__mc,
-            list = [];
-          for (let x = lava.x - 5; x <= lava.x + 5; x++)
-            for (let z = lava.z - 5; z <= lava.z + 5; z++)
-              for (let y = lava.y; y <= lava.y; y++)
-                if (mc.blockAt(x, y, z) === 28) {
-                  const d = Math.hypot(x + 0.5 - p.x, y + 0.5 - p.y - 1.62, z + 0.5 - p.z);
-                  if (d <= 4.4) list.push({ x, y, z, d });
-                }
-          const found = list.sort((a, b) => a.d - b.d)[0];
-          return found ? { x: found.x, y: found.y, z: found.z } : null;
-        },
-        { p, lava },
-      );
+      const next =
+        pending ??
+        (await page.evaluate(
+          ({ p, lava }) => {
+            const mc = window.__mc,
+              list = [];
+            for (let x = lava.x - 5; x <= lava.x + 5; x++)
+              for (let z = lava.z - 5; z <= lava.z + 5; z++)
+                for (let y = lava.y; y <= lava.y; y++)
+                  if (mc.blockAt(x, y, z) === 28) {
+                    const d = Math.hypot(x + 0.5 - p.x, y + 0.5 - p.y - 1.62, z + 0.5 - p.z);
+                    if (d <= 4.4) list.push({ x, y, z, d });
+                  }
+            const found = list.sort((a, b) => a.d - b.d)[0];
+            return found ? { x: found.x, y: found.y, z: found.z } : null;
+          },
+          { p, lava },
+        ));
       assert.ok(
         next,
         "remaining cooled natural obsidian is reachable; move along the safe dry bank before continuing",
       );
-      await d.equip("diamond_pick");
-      await d.mine(next);
-      mined.push({ ...next });
+      const countBefore = await d.count("obsidian");
+      if (!pending) {
+        await d.equip("diamond_pick");
+        await d.mine(next);
+        mined.push({ ...next });
+        pending = { ...next };
+        await progress();
+      }
       await wait(600);
       // Keep the mining route at the original bank height. The water cools the
       // exposed lava underneath, then an owned block closes the hole. Walking
@@ -317,7 +367,28 @@ export function createModernPortal(page, d, a) {
       await d.equip("diamond_pick");
       await d.tunnelTo({ x: next.x, z: next.z });
       await wait(600);
+      if ((await d.count("obsidian")) === countBefore) {
+        const p = (await d.info()).position;
+        const under = { x: Math.floor(p.x), y: Math.round(p.y) - 1, z: Math.floor(p.z) };
+        // A drop may have fallen one level before the lower lava cooled.
+        // Recover it through ordinary motion, then rebuild that one step.
+        if (under.y === lava.y && solidBlock(await d.block({ ...under, y: under.y - 1 }))) {
+          d.narrate("落ちた黒曜石を拾うため、一段だけ下りて回収します。", 1);
+          await d.equip("diamond_pick");
+          await d.mine(under);
+          await wait(700);
+          assert.ok(
+            (await d.info()).position.y >= lava.y - 0.2,
+            "the cooled lower block supports pickup",
+          );
+          await wait(500);
+          await a.pillarTo(lava.y + 1);
+          await wait(300);
+        }
+      }
       assert.ok((await d.info()).health > 0, "survive the real obsidian mining expedition");
+      pending = null;
+      await progress();
     }
     // Preserve the one real source for later use; flowing water is never
     // counted as another bucket or a newly created lava source.

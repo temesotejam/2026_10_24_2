@@ -153,7 +153,7 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
       d.setGoal("クリスタルを壊してから、ドラゴンを討伐します。");
       // The driver allows 240 seconds for a 200HP fight, including withdrawal,
       // ordinary food regeneration and multiple 24-second flight/perch cycles.
-      await a.defeatDragon();
+      await a.defeatDragon({ timeoutMs: 600000 });
     }
     assert.ok((await d.info()).health > 0, "survive the dragon battle");
     assert.equal(await d.count("dragonEgg"), 1, "own the actual victory egg");

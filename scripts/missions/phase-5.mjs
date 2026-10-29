@@ -27,7 +27,10 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     }
   const needed = 10 - existingFrame;
   if ((await d.count("obsidian")) < needed) {
-    assert.ok((await d.count("waterBucket")) > 0, "carry a source of water from the village well");
+    assert.ok(
+      (await d.count("waterBucket")) > 0 || mission.mining?.waterSupport,
+      "carry a source of water or resume beside the source already placed in this expedition",
+    );
     if ((await d.info()).position.y > 7) {
       // Start outside the houses, well and crop field. The rest of the descent
       // stays under the surface and never imports a route or a modified save.
@@ -43,6 +46,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
         [0, -1],
       ];
       let bridges = 0;
+      let bridgeHeading = null;
       for (let step = mission.staircase.length; step < 100; step++) {
         await d.checkThreat();
         await a.eat();
@@ -77,7 +81,8 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
             ++bridges < 40,
             "find natural rock beyond the cave instead of descending into fluid",
           );
-          const [dx, dz] = directions[preferred];
+          bridgeHeading ??= directions[preferred];
+          const [dx, dz] = bridgeHeading;
           await d.tunnelTo({ x: x + dx, z: z + dz });
           mission.notes.push({
             kind: "bridged-cave",
@@ -87,6 +92,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
           record();
           continue;
         }
+        bridgeHeading = null;
         for (const y of [cy + 1, cy, cy - 1]) {
           const cell = { ...chosen, y },
             id = await d.block(cell);
@@ -102,6 +108,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
           cy - 1,
         );
         mission.staircase.push({ ...chosen, y: cy - 1 });
+        if (mission.staircase.length % 8 === 0 && (await d.count("torch")) > 0) await d.light();
         record();
       }
     }
@@ -110,49 +117,52 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       "reach the deep natural-lava level via mined stairs",
     );
     await d.equip("diamond_pick");
-    const pool = await page.evaluate(() => {
-      const mc = window.__mc,
-        p = mc.position(),
-        options = [];
-      const solid = (id) => ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id);
-      const clearable = (id) =>
-        ![5, 8, 12, 13, 14, 15, 26, 28, 31, 34, 35, 36, 38, 39, 40, 42, 43].includes(id);
-      const cx = Math.floor(p.x),
-        cz = Math.floor(p.z);
-      for (let x = cx - 36; x <= cx + 36; x++)
-        for (let z = cz - 36; z <= cz + 36; z++) {
-          if (
-            mc.blockAt(x, 4, z) !== 26 ||
-            !clearable(mc.blockAt(x, 5, z)) ||
-            !clearable(mc.blockAt(x, 6, z))
-          )
-            continue;
-          let amount = 0;
-          for (let dx = -4; dx <= 4; dx++)
-            for (let dz = -4; dz <= 4; dz++)
-              if (Math.abs(dx) + Math.abs(dz) <= 5 && mc.blockAt(x + dx, 4, z + dz) === 26)
-                amount++;
-          if (amount < 12) continue;
-          for (const [dx, dz] of [
-            [1, 0],
-            [-1, 0],
-            [0, 1],
-            [0, -1],
-          ]) {
-            const bx = x + dx,
-              bz = z + dz;
-            if (!solid(mc.blockAt(bx, 4, bz))) continue;
-            if (![5, 6, 7].every((y) => clearable(mc.blockAt(bx, y, bz)))) continue;
-            options.push({
-              lava: { x, y: 4, z },
-              bank: { x: bx, y: 5, z: bz },
-              amount,
-              score: Math.hypot(bx + 0.5 - p.x, bz + 0.5 - p.z) - Math.min(amount, 25) * 0.2,
-            });
-          }
-        }
-      return options.sort((a, b) => a.score - b.score)[0] ?? null;
-    });
+    const pool =
+      mission.mining?.waterSupport && mission.pool
+        ? mission.pool
+        : await page.evaluate(() => {
+            const mc = window.__mc,
+              p = mc.position(),
+              options = [];
+            const solid = (id) => ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id);
+            const clearable = (id) =>
+              ![5, 8, 12, 13, 14, 15, 26, 28, 31, 34, 35, 36, 38, 39, 40, 42, 43].includes(id);
+            const cx = Math.floor(p.x),
+              cz = Math.floor(p.z);
+            for (let x = cx - 36; x <= cx + 36; x++)
+              for (let z = cz - 36; z <= cz + 36; z++) {
+                if (
+                  mc.blockAt(x, 4, z) !== 26 ||
+                  !clearable(mc.blockAt(x, 5, z)) ||
+                  !clearable(mc.blockAt(x, 6, z))
+                )
+                  continue;
+                let amount = 0;
+                for (let dx = -4; dx <= 4; dx++)
+                  for (let dz = -4; dz <= 4; dz++)
+                    if (Math.abs(dx) + Math.abs(dz) <= 5 && mc.blockAt(x + dx, 4, z + dz) === 26)
+                      amount++;
+                if (amount < 12) continue;
+                for (const [dx, dz] of [
+                  [1, 0],
+                  [-1, 0],
+                  [0, 1],
+                  [0, -1],
+                ]) {
+                  const bx = x + dx,
+                    bz = z + dz;
+                  if (!solid(mc.blockAt(bx, 4, bz))) continue;
+                  if (![5, 6, 7].every((y) => clearable(mc.blockAt(bx, y, bz)))) continue;
+                  options.push({
+                    lava: { x, y: 4, z },
+                    bank: { x: bx, y: 5, z: bz },
+                    amount,
+                    score: Math.hypot(bx + 0.5 - p.x, bz + 0.5 - p.z) - Math.min(amount, 25) * 0.2,
+                  });
+                }
+              }
+            return options.sort((a, b) => a.score - b.score)[0] ?? null;
+          });
     assert.ok(
       pool,
       "discover a natural lava pool with at least twelve source cells and a solid bank",
@@ -168,7 +178,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     );
     // Clear the top of the actual lava source from the dry bank. Never step
     // into the pool, and never place lava to manufacture extra source cells.
-    for (const y of [7, 6, 5]) {
+    for (const y of mission.mining?.waterSupport ? [] : [7, 6, 5]) {
       const cell = { x: pool.lava.x, y, z: pool.lava.z };
       const id = await d.block(cell);
       if (id !== 0) {
@@ -177,13 +187,20 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       }
     }
     await page.screenshot({ path: `${out}/natural-lava-before-cooling.png` });
-    mission.sourceObservation = {
+    mission.sourceObservation ??= {
       lavaId: await d.block(pool.lava),
       bankFloorId: await d.block({ ...pool.bank, y: 4 }),
       beforeInventory: await d.count("obsidian"),
     };
     record();
-    mission.mining = await modern.gatherObsidian(needed, { lava: pool.lava });
+    mission.mining = await modern.gatherObsidian(needed, {
+      lava: pool.lava,
+      resume: mission.mining,
+      onProgress: (progress) => {
+        mission.mining = progress;
+        record();
+      },
+    });
     assert.ok(
       (await d.count("obsidian")) >= needed,
       "actual obsidian was picked up into the normal inventory",

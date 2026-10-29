@@ -11,6 +11,15 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   const h = createModernHunting(page, d, a, {
     onEvent: async (e) => {
       events.push(e);
+      if (e.name === "mob-defeated")
+        console.log(
+          "Hunt",
+          e.species,
+          "pearls",
+          await d.count("enderPearl"),
+          "arrows",
+          await d.count("arrow"),
+        );
       writeFileSync(`${out}/hunting-events.json`, JSON.stringify(events, null, 2));
     },
     ensureWeapon: async () => {
@@ -41,6 +50,18 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
         ]);
       if ((await d.count("bread")) < 3)
         await stockVillageFood(d, page, a, v, { breadTarget: 18, waitForGrowth: true });
+      // Spend an early daytime interval on real portal construction while
+      // waiting for naturally spawning night creatures, using this same input loop.
+      if (
+        !meta.portal &&
+        state.time % 1200 < 240 &&
+        !state.creatures.some((m) => m.species === "wanderer" && m.hp > 0) &&
+        (await d.count("arrow")) + 4 * (await d.count("feather")) >= 36
+      ) {
+        const construction = await import("./phase-5.mjs");
+        await construction.run({ page, d, a, meta, flush, chapter, out });
+        d.setGoal("夜の敵との戦いに戻り、残りのエンダーパールを集めます。");
+      }
     },
     recover: async (target) => {
       if ((await d.count("bread")) < 3)

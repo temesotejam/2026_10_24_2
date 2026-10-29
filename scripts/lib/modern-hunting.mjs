@@ -341,7 +341,7 @@ export function createModernHunting(page, d, a, options = {}) {
           guarding = false;
         }
       }
-      if (saved.health < 16 && idle.hunger >= 18) {
+      if (saved.dimension !== "end" && saved.health < 16 && idle.hunger >= 18) {
         await release();
         await wait(1000);
         return true;

@@ -610,7 +610,7 @@ export function createAdventureDriver(page, d) {
     }
     assert.equal(await d.block(p), 0, "destroy crystal with an actual arrow");
   }
-  async function defeatDragon() {
+  async function defeatDragon({ timeoutMs = 240000 } = {}) {
     await move(0.5, 10);
     const crystals = Array.from({ length: 6 }, (_, i) => ({
       x: Math.round(Math.cos((i * Math.PI) / 3) * 16),
@@ -635,7 +635,7 @@ export function createAdventureDriver(page, d) {
     d.setGoal("クリスタルを6個破壊。降りてきたドラゴンを剣で攻撃します。");
     await move(0.5, 4);
     await d.equip("iron_sword");
-    const until = Date.now() + 240000;
+    const until = Date.now() + timeoutMs;
     while (Date.now() < until) {
       const a = await adventure();
       if (a.dragon.defeated) break;
