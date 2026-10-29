@@ -162,20 +162,22 @@ try {
   await page.waitForFunction(() => Math.abs(window.__mc.eyeHeight() - 1.62) < 0.001);
   report("releasing Shift restores the standing eye height", true);
 
-  // Sets an absolute view direction regardless of prior state: pitch first
-  // clamps fully up, then a fixed downward delta lands at a known angle;
-  // yaw is a pure delta (the harness starts at yaw 0 and tracks its own
-  // rotations). Synthetic MouseEvents because headless pointer-lock delta
-  // reporting through CDP-dispatched moves is unreliable.
-  const look = async (p, yawPixels, pitchPixels) => {
+  const spawnYaw = await page.evaluate(() => window.__mc.yaw());
+  // The spawn may face any open direction. Compute input relative to the
+  // actual aim rather than assuming every new world starts at yaw zero.
+  const look = async (p, targetYaw, pitchPixels) => {
     await p.evaluate(
-      ([yawPx, pitchPx]) => {
+      ([yaw, pitchPx]) => {
+        const delta = Math.atan2(
+          Math.sin(yaw - window.__mc.yaw()),
+          Math.cos(yaw - window.__mc.yaw()),
+        );
         document.dispatchEvent(new MouseEvent("mousemove", { movementX: 0, movementY: -2000 }));
         document.dispatchEvent(
-          new MouseEvent("mousemove", { movementX: yawPx, movementY: pitchPx }),
+          new MouseEvent("mousemove", { movementX: -delta / 0.0022, movementY: pitchPx }),
         );
       },
-      [yawPixels, pitchPixels],
+      [targetYaw, pitchPixels],
     );
     await new Promise((r) => setTimeout(r, 600));
   };
@@ -215,7 +217,7 @@ try {
     if (neighbor) {
       // Face the neighbor, look ~55 degrees down: the ray crosses into its
       // column below the player's eye and hits the surface block's top face.
-      await look(page, -neighbor.yaw / 0.0022, 1146);
+      await look(page, neighbor.yaw, 1146);
       const placeTarget = await page.evaluate(() => window.__mc.target());
       const aimedRight =
         placeTarget !== null && placeTarget.x === neighbor.x && placeTarget.z === neighbor.z;
@@ -228,12 +230,12 @@ try {
         placed === 1, // grass, the default hotbar selection
         `aimed ${JSON.stringify(placeTarget)} (expected column ${String(neighbor.x)},${String(neighbor.z)}: ${String(aimedRight)}), cell above is now id ${placed}`,
       );
-      // Undo the yaw so later steps face -Z again.
-      await look(page, neighbor.yaw / 0.0022, 709);
+      // Restore the chosen starting direction.
+      await look(page, spawnYaw, 709);
     }
 
     // ---- breaking, straight down at the block under the player's feet ----
-    await look(page, 0, 2000); // clamps to max pitch: straight down
+    await look(page, spawnYaw, 2000); // clamps to max pitch: straight down
     const target = await page.evaluate(() => window.__mc.target());
     report("crosshair targets a block when looking down", target !== null, JSON.stringify(target));
 
@@ -248,26 +250,30 @@ try {
         `block ${JSON.stringify(target)} is now id ${afterBreak}`,
       );
     }
-
-    // Level the view before the movement test.
-    await look(page, 0, 709);
-
-    const before = await page.evaluate(() => window.__mc.position());
-    await page.keyboard.down("KeyW");
-    await new Promise((r) => setTimeout(r, 2500));
-    await page.keyboard.up("KeyW");
-    const after = await page.evaluate(() => window.__mc.position());
-    const dist = Math.hypot(after.x - before.x, after.z - before.z);
-    report(
-      "walking forward moves the player through the world",
-      dist > 1,
-      `moved ${dist.toFixed(1)} blocks`,
-    );
-
-    await page.screenshot({ path: path.join(OUT_DIR, "03-playing.png") });
   }
-
   await page.browserContext().close();
+
+  // Test movement in a fresh world: the placement/breaking checks above
+  // intentionally leave an obstruction and a hole under the old player.
+  const moving = await freshPage();
+  await moving.setViewport({ width: 1280, height: 720 });
+  await moving.goto(URL_UNDER_TEST, { waitUntil: "domcontentloaded" });
+  await moving.waitForFunction(() => window.__mc?.meshedChunks() >= 60, { timeout: 120000 });
+  await moving.click("#play-button");
+  await moving.waitForFunction(() => window.__mc.mode() === "pointer");
+  const before = await moving.evaluate(() => window.__mc.position());
+  await moving.keyboard.down("KeyW");
+  await new Promise((r) => setTimeout(r, 2500));
+  await moving.keyboard.up("KeyW");
+  const after = await moving.evaluate(() => window.__mc.position());
+  const dist = Math.hypot(after.x - before.x, after.z - before.z);
+  report(
+    "walking forward moves the player through the fresh world",
+    dist > 1,
+    `moved ${dist.toFixed(1)} blocks`,
+  );
+  await moving.screenshot({ path: path.join(OUT_DIR, "03-playing.png") });
+  await moving.browserContext().close();
 
   // ---- pointer-lock-blocked fallback (a fresh page, lock sabotaged) ----
   // Simulates browsers/extensions that silently refuse pointer lock — the
