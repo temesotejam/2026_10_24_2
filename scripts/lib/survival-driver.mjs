@@ -137,17 +137,6 @@ export function createDriver(page, out) {
           );
           await wait(100);
           await aim({ x: hit.x + 0.5, y: hit.y + 0.5, z: hit.z + 0.5 }, 0);
-          const currentHit = await page.evaluate(() => window.__mc.target());
-          // Crops can grow into the ray or the player can finish landing.
-          // Release and replan against the new obstruction instead of holding
-          // attack on a stale cell until the recording times out.
-          if (
-            !currentHit ||
-            currentHit.x !== hit.x ||
-            currentHit.y !== hit.y ||
-            currentHit.z !== hit.z
-          )
-            break;
           const start = Date.now();
           if (await checkThreat()) {
             deadline += Date.now() - start;
