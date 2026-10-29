@@ -123,6 +123,10 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
     position: { x: village.x + 0.5, y: village.y, z: village.z - 4.5 },
   };
   meta.recovery4_78.returned = await d.info();
+  if (village.cacheChest) {
+    meta.remoteCacheChest = { ...village.cacheChest };
+    delete village.cacheChest;
+  }
   flush();
   await chapter("村でパンを補給し、パール8個とロッド14本を回収して元の村へ帰還", 4);
 }
