@@ -81,6 +81,11 @@ writeFileSync(
   path.join(directory, "recorded-parts.ffconcat"),
   "ffconcat version 1.0\n" + metadata.parts.map((part) => `file '${part.path}'\n`).join(""),
 );
+// Keep the complete long-form MP4 below GitHub's individual-file limit.
+const maximumRateKbps = Math.min(
+  300,
+  Math.max(40, Math.floor((76 * 1024 * 1024 * 8) / (rawDuration / 1.5) / 1000)),
+);
 const output = "survival-narrated-1.5x.mp4";
 run("ffmpeg", [
   "-y",
@@ -104,9 +109,9 @@ run("ffmpeg", [
   "-crf",
   "29",
   "-maxrate",
-  "300k",
+  `${maximumRateKbps}k`,
   "-bufsize",
-  "600k",
+  `${maximumRateKbps * 2}k`,
   "-pix_fmt",
   "yuv420p",
   "-movflags",
@@ -133,6 +138,7 @@ metadata.export = {
   duration,
   audio: false,
   outputFps: 30,
+  maximumRateKbps,
   captions: "Japanese, burned into the picture",
   captionCount: cues.length,
   subtitleFile: "commentary.srt",

@@ -209,7 +209,7 @@ export function createAdventureDriver(page, d) {
     }
     throw new Error("surface route limit");
   }
-  async function enterStronghold() {
+  async function enterStronghold({ stopOutside = false } = {}) {
     const { stronghold: c, entrance } = await adventure();
     const p = (await d.info()).position;
     const nearRoom = Math.abs(p.x - c.x) < 4.5 && Math.abs(p.z - c.z) < 4.5;
@@ -235,7 +235,7 @@ export function createAdventureDriver(page, d) {
       for (let t = entrance.y - c.y - 1; t >= 0; t--) await move(c.x + 0.5, c.z + 4 + t + 0.5);
       await move(c.x + 0.5, c.z + 3.5);
     }
-    await move(c.x + 0.5, c.z + 0.5, true);
+    await move(c.x + 0.5, c.z + (stopOutside ? 3.5 : 0.5), true);
     assert.ok(
       Math.abs((await d.info()).position.y - c.y) < 1,
       "enter the stronghold through normal movement",
@@ -273,6 +273,11 @@ export function createAdventureDriver(page, d) {
     }
     return false;
   }
+  let alternateGuard = null;
+  const setGuard = (fn) => {
+    alternateGuard = fn;
+    d.setThreatHandler(fn ?? guard);
+  };
   let guarding = false;
   const combatStats = { interruptions: 0, melee: 0, ranged: 0, retreats: 0 };
   async function threat(meleeRange = 5) {
@@ -305,6 +310,7 @@ export function createAdventureDriver(page, d) {
     );
   }
   async function guard() {
+    if (alternateGuard) return await alternateGuard();
     if (guarding) return false;
     let target = await threat();
     if (!target) {
@@ -612,6 +618,7 @@ export function createAdventureDriver(page, d) {
       y: 39 + (i % 3) * 2,
     }));
     for (const p of crystals) {
+      if ((await d.block(p)) === 0) continue;
       const s = await d.info(),
         start = Math.atan2(s.position.z, s.position.x),
         goal = Math.atan2(p.z, p.x) + Math.PI + 0.6;
@@ -664,6 +671,7 @@ export function createAdventureDriver(page, d) {
     takeChest,
     eat,
     combatStats,
+    setGuard,
     waitSafe,
     guard,
     recover,

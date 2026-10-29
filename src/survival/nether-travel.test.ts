@@ -112,3 +112,21 @@ describe("survival portal linking", () => {
     expect(travelCandidate(n, "overworld", { x: 0, y: 34, z: 0 }).position).toEqual(data.position);
   });
 });
+
+it("preserves an existing Overworld bed spawn while linking a return portal", () => {
+  const data = newSession(2026, "survival", { x: 81.5, y: 35, z: -159.5 });
+  data.spawn = { x: 72.5, y: 34, z: -152.5 };
+  frame(data, 80, 34, -160);
+  const nether = travelCandidate(data, "nether", { x: 0.5, y: 34, z: 0.5 });
+  const returned = travelCandidate(nether, "overworld", { x: 0.5, y: 34, z: 0.5 });
+  expect(returned.spawn).toEqual(data.spawn);
+});
+
+it("keeps End arrival separate from Nether portal generation", () => {
+  const data = newSession(2026, "survival", { x: 81.5, y: 35, z: -159.5 });
+  const spawn = { x: 0.5, y: 34, z: 0.5 };
+  const end = travelCandidate(data, "end", spawn);
+  expect(end.position).toEqual(spawn);
+  expect(end.edits).toEqual({});
+  expect(end.adventure?.dimension).toBe("end");
+});

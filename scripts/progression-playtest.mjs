@@ -34,6 +34,7 @@ try {
     JSON.stringify(
       {
         agent: "progression_audit",
+        assets: await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src"))),
         normalInputOnly: true,
         fixtureImports: false,
         gameplay:

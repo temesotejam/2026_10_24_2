@@ -86,6 +86,7 @@ try {
   await page.screenshot({ path: `${out}/flint-and-crafting.png` });
   const report = {
     agent: "progression_audit",
+    assets: await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src"))),
     round: "corrected",
     url: url.href,
     normalInputOnly: true,

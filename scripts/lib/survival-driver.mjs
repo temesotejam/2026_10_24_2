@@ -233,9 +233,24 @@ export function createDriver(page, out) {
   }
   async function center() {
     const p = (await info()).position;
+    // The center may hang above air while the body still overlaps a ledge.
+    // Crouching then refuses to move farther off that support. Center on the
+    // block that actually supports the player, rather than blindly flooring x/z.
+    const support = await page.evaluate((p) => {
+      const cells = [],
+        y = Math.round(p.y) - 1;
+      for (let x = Math.floor(p.x - 0.3); x <= Math.floor(p.x + 0.3); x++)
+        for (let z = Math.floor(p.z - 0.3); z <= Math.floor(p.z + 0.3); z++) {
+          const b = window.__mc.blockAt(x, y, z);
+          if (![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(b))
+            cells.push({ x, z, d: Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z) });
+        }
+      return cells.sort((a, b) => a.d - b.d)[0];
+    }, p);
+    assert.ok(support, "center on a block actually supporting the player");
     await page.keyboard.down("ShiftLeft");
     try {
-      await walk(Math.floor(p.x) + 0.5, Math.floor(p.z) + 0.5, false, 0.12);
+      await walk(support.x + 0.5, support.z + 0.5, false, 0.12);
     } finally {
       await page.keyboard.up("ShiftLeft");
     }
