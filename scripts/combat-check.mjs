@@ -225,12 +225,14 @@ try {
     for (let z = 3; z <= 6; z++) {
       put(x, 31, z, 3);
       for (let y = 32; y <= 34; y++) put(x, y, z, 5);
-      for (let y = 35; y <= 40; y++) put(x, y, z, 0);
+      // Clear the full column so generated hilltops cannot become an upper route.
+      for (let y = 35; y < 96; y++) put(x, y, z, 0);
     }
   fixture.position = { x: 0.5, y: 40, z: 4.5 };
   await load("water-descent", []);
   await a.surfaceTo({ x: 3, z: 4 });
-  await new Promise((r) => setTimeout(r, 1500));
+  // Wait for the physical descent; shared CI rendering can lag wall time.
+  await page.waitForFunction(() => window.__mc.position().y < 37, { timeout: 10000 });
   assert.ok(
     (await d.info()).position.y < 37,
     "descend to the water instead of stopping on the high ledge",
