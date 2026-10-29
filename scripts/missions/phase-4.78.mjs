@@ -16,30 +16,65 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
     "recover the ninth actual death, not the old eastern body",
   );
   d.setGoal("朝の村で予備の道具とパンを用意し、海岸から装備を回収します。");
-  // Leave the original bed house through its door before crossing the village.
-  await a.move(village.x + 7.5, village.z + 2.5, true);
-  await a.move(village.x + 7.5, village.z + 1.5, true);
-  await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
-  await a.move(village.x - 5.5, village.z + 3.5, true);
-  await a.move(village.x - 5.5, village.z + 5.5, true);
-  await a.useAt({ x: 189, y: 35, z: -72 });
-  await page.waitForSelector('[data-area="chest"]');
-  let slot = -1;
-  for (const name of ["石のツルハシ", "木のツルハシ"]) {
-    slot = await page.$$eval(
-      '[data-area="chest"]',
-      (els, label) => els.findIndex((el) => el.querySelector("img")?.alt === label),
-      name,
+  const ownsPick = async () =>
+    (await d.info()).inventory.some(
+      (stack) => stack?.id.endsWith("_pick") && (stack.durability ?? 0) > 0,
     );
-    if (slot >= 0) break;
+  if (!(await ownsPick())) {
+    // Leave the original bed house through its door before crossing the village.
+    const position = (await d.info()).position;
+    if (position.x > village.x + 3) {
+      await a.move(village.x + 7.5, village.z + 2.5, true);
+      await a.move(village.x + 7.5, village.z + 1.5, true);
+    }
+    await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
+    await a.move(village.x - 5.5, village.z + 3.5, true);
+    await a.move(village.x - 5.5, village.z + 5.5, true);
+    await a.useAt({ x: 189, y: 35, z: -72 });
+    await page.waitForSelector('[data-area="chest"]');
+    const slots = await page.$$eval('[data-area="chest"]', (els) =>
+      els.map((el, index) => ({
+        index,
+        label: el.querySelector("img")?.alt ?? null,
+        text: el.textContent,
+      })),
+    );
+    console.log("Actual original recovery chest slots", JSON.stringify(slots));
+    let spare = null;
+    for (const label of ["石のツルハシ", "木のツルハシ"])
+      spare ??= slots.find((slot) => slot.label === label);
+    const retrieve = async (slot) => {
+      const free = (await d.info()).inventory.findIndex((stack) => stack === null);
+      assert.ok(free >= 0, "space for actual stored recovery supplies");
+      await page.locator(`[data-area="chest"][data-slot="${slot.index}"]`).click();
+      await page.locator(`[data-area="inventory"][data-slot="${free}"]`).click();
+    };
+    if (spare) await retrieve(spare);
+    else {
+      for (const slot of slots)
+        if (["丸石", "木材", "棒", "原木", "シラカバの原木"].includes(slot.label))
+          await retrieve(slot);
+    }
+    await d.close();
+    if (!(await ownsPick())) {
+      assert.ok((await d.count("cobble")) >= 3, "own three actual stored cobblestone");
+      await a.useAt({ x: 191, y: 35, z: -72 });
+      await page.waitForSelector('[data-recipe="stone_pick"]');
+      if ((await d.count("stick")) < 2) {
+        while ((await d.count("planks")) < 2) {
+          if (await d.count("log")) await d.make("planks");
+          else {
+            assert.ok(await d.count("birchLog"), "own actual wood for replacement pickaxe sticks");
+            await d.make("birch_planks");
+          }
+        }
+        await d.make("sticks");
+      }
+      await d.make("stone_pick");
+      await d.close();
+    }
+    assert.ok(await ownsPick(), "retrieve or normally craft a real recovery pickaxe");
   }
-  assert.ok(slot >= 0, "retrieve the actual original chest spare pickaxe");
-  const free = (await d.info()).inventory.findIndex((stack) => stack === null);
-  assert.ok(free >= 0, "space for the real spare pickaxe");
-  await page.locator(`[data-area="chest"][data-slot="${slot}"]`).click();
-  await page.locator(`[data-area="inventory"][data-slot="${free}"]`).click();
-  await d.close();
-  assert.ok((await d.count("stone_pick")) || (await d.count("wood_pick")));
 
   const food = await stockVillageFood(d, page, a, village, {
     breadTarget: 16,
