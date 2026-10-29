@@ -100,6 +100,7 @@ export async function run({ page, d, a, meta, chapter }) {
           if ((await d.count("dirt")) + (await d.count("planks")) + (await d.count("cobble")) >= 2)
             await a.pillarTo(Math.round(state.position.y) + 2);
         }
+        await d.releaseAttack();
         await d.equip("stone_sword");
         await d.aim({ ...target.position, y: target.position.y + 0.7 }, 0);
         await page.mouse.down();

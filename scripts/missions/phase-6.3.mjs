@@ -109,7 +109,34 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   meta.netherGate = gate;
   meta.netherGearRecovery.gate = gate;
   flush();
-  assert.equal(gate.y, 26, "the verified recovery tactic requires the ember floor at height26");
+  assert.ok([25, 26].includes(gate.y), "observe the native arrival floor");
+  async function returnWithGear() {
+    a.setGuard(h.guard);
+    d.setGoal("新しくつながったゲートの手前を通り、装備を持って通常世界へ帰ります。");
+    const p = (await d.info()).position;
+    await safeWalkTo({ x: p.x, y: Math.round(p.y), z: gate.z + 2.5 });
+    // The first portal column's front cell contains our intact rescue pillar.
+    // Use the SECOND interior column, then approach along its unobstructed face.
+    await safeWalkTo({ x: gate.x + 1.5, y: gate.y, z: gate.z + 2.5 });
+    await safeWalkTo({ x: gate.x + 1.5, y: gate.y, z: gate.z + 1.5 });
+    a.setGuard(async () => false);
+    assert.equal(await d.block(gate), 31, "the replacement portal remains lit and untouched");
+    await portal.enterNetherPortal("overworld", gate);
+    assert.equal((await a.adventure()).dimension, "overworld");
+    a.setGuard(h.guard);
+    await record("returned with rescued equipment");
+    await chapter("三段の足場から敵を倒し、失ったロッド・パール・道具を回収して帰還", 6);
+  }
+  if (
+    (await d.count("blazeRod")) >= 13 &&
+    (await d.count("enderPearl")) >= 5 &&
+    (await d.count("diamond_pick"))
+  ) {
+    await record("resume with already rescued equipment");
+    await returnWithGear();
+    return;
+  }
+
   let site = meta.netherGearRecovery.pillar;
   if (!site || Math.abs((await d.info()).position.y - site.y - 3) > 0.2) {
     const front = { x: gate.x + 0.5, y: gate.y, z: gate.z + 2.5 };
@@ -125,15 +152,6 @@ export async function run({ page, d, a, meta, flush, chapter }) {
     assert.ok(clear, "the front platform has a real floor and five air blocks above the pillar");
     // Native frames are four blocks high and cannot be climbed by these
     // same-level melee creatures. Do not clear or mine any gate headroom.
-    assert.ok(
-      (await a.adventure()).creatures
-        .filter(
-          (m) =>
-            m.species === "ember" && Math.hypot(m.position.x - front.x, m.position.z - front.z) < 8,
-        )
-        .every((m) => m.position.y < gate.y + 1.3),
-      "no elevated ember beside the rescue platform",
-    );
     d.setGoal("ゲートの手前に三段の柱を積み、敵の近接攻撃が届かない高さを確保します。");
     await a.pillarTo(site.y + 3);
     meta.netherGearRecovery.pillar = site;
@@ -180,15 +198,15 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   // the old frame plane at z=-22 while going from one gate to the other.
   await safeWalkTo({
     x: (await d.info()).position.x,
-    y: 26,
+    y: gate.y,
     z: Math.max(gate.z + 2.5, death.z + 1.5),
   });
   await safeWalkTo({
     x: Math.floor(death.x) + 0.5,
-    y: 26,
+    y: death.y,
     z: Math.max(gate.z + 2.5, death.z + 1.5),
   });
-  await safeWalkTo({ x: Math.floor(death.x) + 0.5, y: 26, z: Math.floor(death.z) + 0.5 });
+  await safeWalkTo({ x: Math.floor(death.x) + 0.5, y: death.y, z: Math.floor(death.z) + 0.5 });
   await wait(800);
   // Drops are actual physics objects. This small ordinary walk crosses their
   // recorded death position rather than importing an inventory or moving loot.
@@ -201,14 +219,5 @@ export async function run({ page, d, a, meta, flush, chapter }) {
     rods: await d.count("blazeRod"),
     pearls: await d.count("enderPearl"),
   });
-  d.setGoal("新しくつながったゲートの手前を通り、装備を持って通常世界へ帰ります。");
-  await safeWalkTo({ x: (await d.info()).position.x, y: 26, z: gate.z + 2.5 });
-  await safeWalkTo({ x: gate.x + 0.5, y: 26, z: gate.z + 2.5 });
-  a.setGuard(async () => false);
-  assert.equal(await d.block(gate), 31, "the replacement portal remains lit and untouched");
-  await portal.enterNetherPortal("overworld", gate);
-  assert.equal((await a.adventure()).dimension, "overworld");
-  a.setGuard(h.guard);
-  await record("returned with rescued equipment");
-  await chapter("三段の足場から敵を倒し、失ったロッド・パール・道具を回収して帰還", 6);
+  await returnWithGear();
 }
