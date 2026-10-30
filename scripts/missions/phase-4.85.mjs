@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { wait } from "../lib/survival-driver.mjs";
 import { createModernHunting } from "../lib/modern-hunting.mjs";
+import { hostile } from "../lib/combat-policy.mjs";
 export async function run({ page, d, a, meta, flush = () => undefined, chapter }) {
   const h = createModernHunting(page, d, a, { arrowReserve: 12 });
   const visited = new Set(),
@@ -57,12 +58,14 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
   // This guard only preserves breathing during the staged land approach.
   // Normal combat/automatic air routines are suspended for the controlled dive.
   async function approachGuard() {
+    const defended = await defendNearby();
     const s = await observe();
+    await abortRangedExposure();
     if (s.headWet) {
       await ascend();
       return true;
     }
-    return false;
+    return defended;
   }
   async function bestSword() {
     const inv = (await d.info()).inventory;
@@ -94,6 +97,126 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
       index = 0;
     }
     await page.keyboard.press(`Digit${index + 1}`);
+  }
+  async function abortRangedExposure() {
+    const id = await page.evaluate(() => {
+      const p = window.__mc.position();
+      for (const m of window.__mc.adventure().creatures) {
+        if (m.species !== "skeleton" || m.hp <= 0) continue;
+        const from = { ...m.position, y: m.position.y + 1 },
+          to = { ...p, y: p.y + 1 };
+        const length = Math.hypot(to.x - from.x, to.y - from.y, to.z - from.z);
+        if (length >= 14) continue;
+        let clear = true;
+        for (let t = 0.1; t < length; t += 0.1) {
+          const f = t / length;
+          if (
+            ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(
+              window.__mc.blockAt(
+                Math.floor(from.x + (to.x - from.x) * f),
+                Math.floor(from.y + (to.y - from.y) * f),
+                Math.floor(from.z + (to.z - from.z) * f),
+              ),
+            )
+          ) {
+            clear = false;
+            break;
+          }
+        }
+        if (clear) return m.id;
+      }
+      return null;
+    });
+    assert.equal(
+      id,
+      null,
+      "visible ranged enemy can hit the recovery bank; checkpoint before unguarded waiting",
+    );
+  }
+  async function defendNearby() {
+    let state = await observe();
+    const near = (s) =>
+      s.creatures
+        .filter(
+          (m) =>
+            m.hp > 0 &&
+            hostile(m) &&
+            Math.hypot(m.position.x - s.p.x, m.position.y - s.p.y, m.position.z - s.p.z) <= 4,
+        )
+        .sort(
+          (a, b) =>
+            Math.hypot(a.position.x - s.p.x, a.position.y - s.p.y, a.position.z - s.p.z) -
+            Math.hypot(b.position.x - s.p.x, b.position.y - s.p.y, b.position.z - s.p.z),
+        );
+    if (!near(state).length) return false;
+    await release();
+    await bestSword();
+    const deadline = Date.now() + 4500;
+    try {
+      while (Date.now() < deadline) {
+        state = await observe();
+        assert.ok(state.health > 0, "survive direct self-defense before shore recovery");
+        if (state.headWet && state.air <= 3) {
+          await ascend();
+          throw new Error("Surface before continuing self-defense; checkpoint for a safe bank");
+        }
+        const mob = near(state)[0];
+        if (!mob) return true;
+        const body = { x: mob.position.x, y: mob.position.y + 0.7, z: mob.position.z };
+        const distance = Math.hypot(
+          body.x - state.p.x,
+          body.y - state.p.y - state.eye,
+          body.z - state.p.z,
+        );
+        if (distance < 2.95) {
+          const clear = await page.evaluate(
+            ({ p, eye, body, distance }) => {
+              for (let t = 0.1; t < distance; t += 0.08) {
+                const f = t / distance;
+                if (
+                  ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(
+                    window.__mc.blockAt(
+                      Math.floor(p.x + (body.x - p.x) * f),
+                      Math.floor(p.y + eye + (body.y - p.y - eye) * f),
+                      Math.floor(p.z + (body.z - p.z) * f),
+                    ),
+                  )
+                )
+                  return false;
+              }
+              return true;
+            },
+            { p: state.p, eye: state.eye, body, distance },
+          );
+          if (!clear)
+            throw new Error(
+              "Nearby hostile is behind solid cover; checkpoint instead of waiting exposed",
+            );
+          await d.aim(body, 0);
+          await d.releaseAttack();
+          await page.mouse.down();
+          await wait(80);
+          await d.releaseAttack();
+          const after = await observe();
+          if (!after.creatures.some((m) => m.id === mob.id)) {
+            await wait(180);
+            await record("direct nearby self-defense", {
+              id: mob.id,
+              species: mob.species,
+              pearls: await d.count("enderPearl"),
+            });
+          }
+        } else {
+          await d.releaseAttack();
+          await wait(70);
+        }
+      }
+      throw new Error(
+        "Nearby hostile remains outside safe melee reach; checkpoint instead of unguarded healing",
+      );
+    } finally {
+      await d.releaseAttack();
+    }
   }
   async function targets() {
     return page.evaluate(() => {
@@ -202,7 +325,11 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
   }
   try {
     assert.equal((await a.adventure()).dimension, "overworld");
+    a.setGuard(approachGuard);
     while ((await d.count("enderPearl")) < 12) {
+      // Deal with an already angered survivor BEFORE choosing or walking to a
+      // new bank. Healing and passive-target selection cannot take priority.
+      await defendNearby();
       const observed = await targets();
       console.log("UNDERWATER_WANDERER_OBSERVATIONS", JSON.stringify(observed.observations));
       const target = observed.candidates.find((t) => !visited.has(t.id));
@@ -224,12 +351,15 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
         await record("shore approach blocked", { id: target.id, error: String(error) });
         continue;
       }
+      await defendNearby();
       await a.eat();
       // Regeneration takes place at the verified dry bank, before entering water.
       const until = Date.now() + 120000;
       while ((await d.info()).health < 20 && Date.now() < until) {
+        await defendNearby();
+        await abortRangedExposure();
         await a.eat();
-        await wait(1000);
+        await wait(100);
       }
       assert.equal((await d.info()).health, 20, "start each shallow dive at full natural health");
       await bestSword();
@@ -237,6 +367,9 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
       let lastMob = (await a.adventure()).creatures.find((m) => m.id === target.id);
       if (!lastMob) continue;
       let success = false;
+      await defendNearby();
+      lastMob = (await a.adventure()).creatures.find((m) => m.id === target.id);
+      if (!lastMob) continue;
       const reached = await surfaceSwim(lastMob.position);
       if (!reached) {
         await ascend();
