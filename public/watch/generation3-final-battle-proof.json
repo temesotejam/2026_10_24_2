@@ -1,0 +1,762 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-battle-excerpt",
+  "includesFullPlaythrough": false,
+  "completed": true,
+  "generator": 3,
+  "seed": 2026,
+  "mode": "survival",
+  "fixtureImports": false,
+  "stateMutationAPI": false,
+  "initialInventoryEmpty": true,
+  "deathCount": 10,
+  "perspective": "third-person-behind",
+  "allCameraSamplesThirdPerson": true,
+  "sourceMetadataSha256": "e6ec038a263bf4b950d9aaaa65da2eb24e0007ffed5ae9f5ccf0b8ca3a22d541",
+  "sourceParts": [
+    {
+      "path": "part-1.mp4",
+      "duration": 156.933333,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-2.mp4",
+      "duration": 147.6,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-3.mp4",
+      "duration": 167.6,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-4.mp4",
+      "duration": 150.333333,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-5.mp4",
+      "duration": 38.8,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-6.mp4",
+      "duration": 165.533333,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-7.mp4",
+      "duration": 373.666667,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-8.mp4",
+      "duration": 388.466667,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b"
+    },
+    {
+      "path": "part-9.mp4",
+      "duration": 328.133333,
+      "sourceCommit": "7c5d6ff531ab2050338a6a1ae52069195fe0024a"
+    },
+    {
+      "path": "part-10.mp4",
+      "duration": 293.6,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f"
+    },
+    {
+      "path": "part-11.mp4",
+      "duration": 58.4,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f"
+    },
+    {
+      "path": "part-12.mp4",
+      "duration": 67.666667,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f"
+    },
+    {
+      "path": "part-13.mp4",
+      "duration": 120.133333,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f"
+    },
+    {
+      "path": "part-14.mp4",
+      "duration": 157.866667,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f"
+    },
+    {
+      "path": "part-15.mp4",
+      "duration": 1.8,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f"
+    },
+    {
+      "path": "part-16.mp4",
+      "duration": 217.8,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f"
+    },
+    {
+      "path": "part-17.mp4",
+      "duration": 42.666667,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b"
+    },
+    {
+      "path": "part-18.mp4",
+      "duration": 33.2,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b"
+    },
+    {
+      "path": "part-19.mp4",
+      "duration": 36.4,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b"
+    },
+    {
+      "path": "part-20.mp4",
+      "duration": 8.666667,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b"
+    },
+    {
+      "path": "part-21.mp4",
+      "duration": 381.266667,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b"
+    },
+    {
+      "path": "part-22.mp4",
+      "duration": 190,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-23.mp4",
+      "duration": 376.8,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-24.mp4",
+      "duration": 241.733333,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-25.mp4",
+      "duration": 72.4,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-26.mp4",
+      "duration": 340.933333,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-27.mp4",
+      "duration": 20.133333,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-28.mp4",
+      "duration": 192.866667,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-29.mp4",
+      "duration": 35.533333,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-30.mp4",
+      "duration": 2.8,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-31.mp4",
+      "duration": 14.2,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-32.mp4",
+      "duration": 2.866667,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-33.mp4",
+      "duration": 43.866667,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-34.mp4",
+      "duration": 76.466667,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-35.mp4",
+      "duration": 36.466667,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95"
+    },
+    {
+      "path": "part-36.mp4",
+      "duration": 19.8,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849"
+    },
+    {
+      "path": "part-37.mp4",
+      "duration": 1.2,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849"
+    },
+    {
+      "path": "part-38.mp4",
+      "duration": 1.466667,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849"
+    },
+    {
+      "path": "part-39.mp4",
+      "duration": 24.466667,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849"
+    },
+    {
+      "path": "part-40.mp4",
+      "duration": 12.466667,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849"
+    },
+    {
+      "path": "part-41.mp4",
+      "duration": 97.4,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849"
+    },
+    {
+      "path": "part-42.mp4",
+      "duration": 18.333333,
+      "sourceCommit": "ff88ccf1ffac9b764e975ec1bcb025c3abb4136f"
+    },
+    {
+      "path": "part-43.mp4",
+      "duration": 652.733333,
+      "sourceCommit": "ff88ccf1ffac9b764e975ec1bcb025c3abb4136f"
+    },
+    {
+      "path": "part-44.mp4",
+      "duration": 180.8,
+      "sourceCommit": "92242433f5110cc31ef810c0d1e231ffa8a629ac"
+    },
+    {
+      "path": "part-45.mp4",
+      "duration": 394.266667,
+      "sourceCommit": "9d5524dc8e977d7f771ab3960e74ee9e3e8ae6a0"
+    },
+    {
+      "path": "part-46.mp4",
+      "duration": 136.533333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-47.mp4",
+      "duration": 84,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-48.mp4",
+      "duration": 45.2,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-49.mp4",
+      "duration": 158.6,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-50.mp4",
+      "duration": 4.466667,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-51.mp4",
+      "duration": 2.533333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-52.mp4",
+      "duration": 12.333333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-53.mp4",
+      "duration": 123.2,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-54.mp4",
+      "duration": 1.6,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-55.mp4",
+      "duration": 2.733333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-56.mp4",
+      "duration": 32.733333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-57.mp4",
+      "duration": 82.4,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-58.mp4",
+      "duration": 73.733333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-59.mp4",
+      "duration": 10.733333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-60.mp4",
+      "duration": 2.133333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-61.mp4",
+      "duration": 91.6,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-62.mp4",
+      "duration": 67.466667,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-63.mp4",
+      "duration": 102.933333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-64.mp4",
+      "duration": 25.8,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-65.mp4",
+      "duration": 11.6,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-66.mp4",
+      "duration": 261.533333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-67.mp4",
+      "duration": 16.533333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-68.mp4",
+      "duration": 22,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-69.mp4",
+      "duration": 50.733333,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194"
+    },
+    {
+      "path": "part-70.mp4",
+      "duration": 19.933333,
+      "sourceCommit": "98e7047106da9f221e4ed2deb19552377c10caa9"
+    },
+    {
+      "path": "part-71.mp4",
+      "duration": 131.8,
+      "sourceCommit": "98e7047106da9f221e4ed2deb19552377c10caa9"
+    },
+    {
+      "path": "part-72.mp4",
+      "duration": 33.866667,
+      "sourceCommit": "1b7c0c1425f9722ef5b91de6ea57b08cbfdb23d9"
+    },
+    {
+      "path": "part-73.mp4",
+      "duration": 1.133333,
+      "sourceCommit": "1b7c0c1425f9722ef5b91de6ea57b08cbfdb23d9"
+    },
+    {
+      "path": "part-74.mp4",
+      "duration": 113.866667,
+      "sourceCommit": "1b7c0c1425f9722ef5b91de6ea57b08cbfdb23d9"
+    },
+    {
+      "path": "part-75.mp4",
+      "duration": 1.466667,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-76.mp4",
+      "duration": 5.466667,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-77.mp4",
+      "duration": 4.6,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-78.mp4",
+      "duration": 1.933333,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-79.mp4",
+      "duration": 2.333333,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-80.mp4",
+      "duration": 3.133333,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-81.mp4",
+      "duration": 4.266667,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-82.mp4",
+      "duration": 66.866667,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-83.mp4",
+      "duration": 6.266667,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065"
+    },
+    {
+      "path": "part-84.mp4",
+      "duration": 6.933333,
+      "sourceCommit": "a86de33dea88dde0e75be6c1b18588b5f61c151c"
+    },
+    {
+      "path": "part-85.mp4",
+      "duration": 9.866667,
+      "sourceCommit": "a86de33dea88dde0e75be6c1b18588b5f61c151c"
+    },
+    {
+      "path": "part-86.mp4",
+      "duration": 10.133333,
+      "sourceCommit": "a86de33dea88dde0e75be6c1b18588b5f61c151c"
+    },
+    {
+      "path": "part-87.mp4",
+      "duration": 11.8,
+      "sourceCommit": "a888dbf34a5364f55fd53e3e2b0d21e432e333d8"
+    },
+    {
+      "path": "part-88.mp4",
+      "duration": 6.2,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08"
+    },
+    {
+      "path": "part-89.mp4",
+      "duration": 441.466667,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08"
+    },
+    {
+      "path": "part-90.mp4",
+      "duration": 277.333333,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08"
+    },
+    {
+      "path": "part-91.mp4",
+      "duration": 5.6,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08"
+    },
+    {
+      "path": "part-92.mp4",
+      "duration": 111.333333,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08"
+    },
+    {
+      "path": "part-93.mp4",
+      "duration": 462.666667,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08"
+    },
+    {
+      "path": "part-94.mp4",
+      "duration": 207.8,
+      "sourceCommit": "1c8cba10178364493cf4761a71effd760053aa94"
+    },
+    {
+      "path": "part-95.mp4",
+      "duration": 74.266667,
+      "sourceCommit": "54c5014bad401ffc2d28fc4a49808c6d6247e76e"
+    },
+    {
+      "path": "part-96.mp4",
+      "duration": 90.133333,
+      "sourceCommit": "5045cb8428d715d7b7a10ece26fb996b0e4146b2"
+    },
+    {
+      "path": "part-97.mp4",
+      "duration": 66.2,
+      "sourceCommit": "5045cb8428d715d7b7a10ece26fb996b0e4146b2"
+    },
+    {
+      "path": "part-98.mp4",
+      "duration": 15.266667,
+      "sourceCommit": "934f85b76217b02585792a8fddc5b5f48048f62f"
+    },
+    {
+      "path": "part-99.mp4",
+      "duration": 69.533333,
+      "sourceCommit": "934f85b76217b02585792a8fddc5b5f48048f62f"
+    },
+    {
+      "path": "part-100.mp4",
+      "duration": 85.333333,
+      "sourceCommit": "b72caf007f3b48e41e671d8ff3b3e648e64eb60b"
+    },
+    {
+      "path": "part-101.mp4",
+      "duration": 82.133333,
+      "sourceCommit": "b72caf007f3b48e41e671d8ff3b3e648e64eb60b"
+    },
+    {
+      "path": "part-102.mp4",
+      "duration": 8.133333,
+      "sourceCommit": "2b816c6bc929ff972a4d628267ed8c2f50c93e99"
+    },
+    {
+      "path": "part-103.mp4",
+      "duration": 15.4,
+      "sourceCommit": "2b816c6bc929ff972a4d628267ed8c2f50c93e99"
+    },
+    {
+      "path": "part-104.mp4",
+      "duration": 63.533333,
+      "sourceCommit": "4170350bd42d43b63d9d085f979fbff558bcf688"
+    },
+    {
+      "path": "part-105.mp4",
+      "duration": 27.666667,
+      "sourceCommit": "4170350bd42d43b63d9d085f979fbff558bcf688"
+    },
+    {
+      "path": "part-106.mp4",
+      "duration": 2.866667,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-107.mp4",
+      "duration": 3.066667,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-108.mp4",
+      "duration": 18.533333,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-109.mp4",
+      "duration": 155.333333,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-110.mp4",
+      "duration": 303.733333,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-111.mp4",
+      "duration": 1.266667,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-112.mp4",
+      "duration": 1.333333,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-113.mp4",
+      "duration": 4.733333,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d"
+    },
+    {
+      "path": "part-114.mp4",
+      "duration": 4.6,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81"
+    },
+    {
+      "path": "part-115.mp4",
+      "duration": 23.6,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81"
+    },
+    {
+      "path": "part-116.mp4",
+      "duration": 174,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81"
+    },
+    {
+      "path": "part-117.mp4",
+      "duration": 167.6,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81"
+    },
+    {
+      "path": "part-118.mp4",
+      "duration": 2.866667,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-119.mp4",
+      "duration": 117.933333,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-120.mp4",
+      "duration": 86.333333,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-121.mp4",
+      "duration": 5.133333,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-122.mp4",
+      "duration": 85.866667,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-123.mp4",
+      "duration": 1.6,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-124.mp4",
+      "duration": 70.466667,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-125.mp4",
+      "duration": 286.466667,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df"
+    },
+    {
+      "path": "part-126.mp4",
+      "duration": 1.266667,
+      "sourceCommit": "8fb498250eb842a61e4b3e504079ef9d5ef6396c"
+    },
+    {
+      "path": "part-127.mp4",
+      "duration": 7.133333,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-128.mp4",
+      "duration": 237.8,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-129.mp4",
+      "duration": 70.866667,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-130.mp4",
+      "duration": 189.733333,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-131.mp4",
+      "duration": 98.733333,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-132.mp4",
+      "duration": 5.933333,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-133.mp4",
+      "duration": 23.533333,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-134.mp4",
+      "duration": 14.066667,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-135.mp4",
+      "duration": 20.266667,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-136.mp4",
+      "duration": 24.4,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0"
+    },
+    {
+      "path": "part-137.mp4",
+      "duration": 377.066667,
+      "sourceCommit": "e31572b9a14f2efe1e87b7dfdc11fc68cae134a0"
+    }
+  ],
+  "chapters": [
+    {
+      "name": "全ての空枠にエンダーアイを入れ、エンドへ進入",
+      "phase": 8,
+      "part": "part-137.mp4",
+      "at": "2026-10-30T13:59:37.535Z",
+      "seconds": 114.407
+    },
+    {
+      "name": "ドラゴン討伐・卵入手・通常世界へ帰還",
+      "phase": 9,
+      "part": "part-137.mp4",
+      "at": "2026-10-30T14:03:58.901Z",
+      "seconds": 375.773
+    }
+  ],
+  "final": {
+    "health": 17,
+    "dragon": {
+      "health": 0,
+      "phase": 251.68333332967086,
+      "defeated": true
+    },
+    "eggCount": 1,
+    "dimension": "overworld"
+  },
+  "excerpt": {
+    "rawStart": 12668.806997,
+    "rawEnd": 12943.466664,
+    "start": 8445.871331333334,
+    "end": 8628.977776,
+    "duration": 183.066667,
+    "sourceWindow": {
+      "start": {
+        "part": "part-137.mp4",
+        "seconds": 102.40699999999924
+      },
+      "end": {
+        "part": "part-137.mp4",
+        "seconds": 377.06666699999914
+      },
+      "endEntryRawSeconds": 12680.806997,
+      "victoriousReturnRawSeconds": 12942.172997,
+      "contiguous": true
+    },
+    "file": "survival-generation3-final-battle.mp4",
+    "subtitleFile": "survival-generation3-final-battle.srt",
+    "kind": "final-battle-excerpt",
+    "speed": 1.5,
+    "audio": false,
+    "outputFps": 30,
+    "perspective": "third-person-behind",
+    "captions": "Japanese, burned into the picture",
+    "maximumRateKbps": 800,
+    "bytes": 4724359,
+    "captionCount": 15,
+    "fullDecodeVerified": true,
+    "sha256": "0c4566d009ab3d66a37edb095b62752bddb6042c99012b477799eaea0df6c84f"
+  }
+}
