@@ -660,7 +660,7 @@ export function createModernHunting(page, d, a, options = {}) {
         idle.hunger < 18 &&
         saved.inventory.some(
           (stack) =>
-            stack && ["meat", "bread", "cookedFish", "apple", "rawMeat"].includes(stack.id),
+            stack && ["meat", "bread", "cookedFish", "apple", "rawMeat", "fish"].includes(stack.id),
         )
       ) {
         guarding = true;

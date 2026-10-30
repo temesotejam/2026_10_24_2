@@ -14,6 +14,8 @@ const args = process.argv.slice(2),
 const out = path.resolve(option("--out", `visual-check/dragon-playthrough/run-${Date.now()}`));
 const resume = Number(option("--resume", "0"));
 const until = Number(option("--until", "1"));
+const inspectPaused = args.includes("--inspect");
+const manualStart = args.includes("--manual-start");
 const url = new URL(option("--url", "http://127.0.0.1:4173/2026_10_24_2/"));
 url.searchParams.set("seed", "2026");
 url.searchParams.set("mode", "survival");
@@ -137,7 +139,7 @@ try {
     await page.goto(url.href, { waitUntil: "domcontentloaded" });
     await a.boot();
     await startRecording();
-    if ((await d.info()).health <= 0) {
+    if ((await d.info()).health <= 0 && !inspectPaused) {
       const previous = meta.parts.at(-2);
       if (previous && !(meta.deaths ?? []).some((death) => death.part === previous.path)) {
         meta.lastDeath = (await d.info()).position;
@@ -152,15 +154,21 @@ try {
       await page.locator("#respawn").click();
       await page.waitForFunction(() => window.__mc?.health() > 0, { timeout: 120000 });
       await a.boot();
-      if ((await page.evaluate(() => window.__mc.mode())) !== "pointer")
-        await page.locator("#play-button").click();
-      await page.waitForFunction(() => window.__mc.mode() === "pointer");
-    } else {
+      if (!manualStart) {
+        if ((await page.evaluate(() => window.__mc.mode())) !== "pointer")
+          await page.locator("#play-button").click();
+        await page.waitForFunction(() => window.__mc.mode() === "pointer");
+      }
+    } else if (!inspectPaused && !manualStart) {
       await page.locator("#play-button").click();
       await page.waitForFunction(() => window.__mc.mode() === "pointer");
     }
   }
-  if (Math.max(1, resume) < until) {
+  if (inspectPaused) {
+    part.inspection = { info: await d.info(), adventure: await a.adventure() };
+    console.log("Paused inspection", JSON.stringify(part.inspection));
+  }
+  if (!inspectPaused && Math.max(1, resume) < until) {
     const child = fork(
       path.resolve("scripts/lib/recorded-mission-worker.mjs"),
       [browser.wsEndpoint(), out, String(resume), String(until)],
@@ -201,7 +209,7 @@ try {
     process.off("SIGUSR2", requestCheckpoint);
     if (code !== 0) throw new Error(childFailure ?? `Mission controller exited with ${code}`);
   }
-  await a.save();
+  await a.save(false);
   await wait(1000);
   part.completed = true;
 } catch (error) {
@@ -220,7 +228,7 @@ try {
       await page.waitForFunction(
         () => document.querySelector("#save-status").textContent === "保存済み",
       );
-    } else await a.save();
+    } else await a.save(false);
   } catch {
     /* Preserve failure evidence. */
   }

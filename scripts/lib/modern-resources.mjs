@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
 
 export async function carriedFoodUnits(d) {
-  const values = { meat: 8, bread: 5, cookedFish: 6, apple: 4, rawMeat: 2 };
+  const values = { fish: 2, meat: 8, bread: 5, cookedFish: 6, apple: 4, rawMeat: 2 };
   return (await d.info()).inventory.reduce(
     (total, slot) => total + (slot ? (values[slot.id] ?? 0) * slot.count : 0),
     0,

@@ -228,7 +228,10 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
         if (m.species !== "wanderer" || m.hp <= 0) continue;
         const x = Math.floor(m.position.x),
           z = Math.floor(m.position.z),
-          bottom = Math.floor(m.position.y + 0.4);
+          sampledBottom = Math.floor(m.position.y + 0.4);
+        let bottom = sampledBottom;
+        for (let dy = 1; dy <= 2 && mc.blockAt(x, bottom, z) !== 5; dy++)
+          if (mc.blockAt(x, sampledBottom - dy, z) === 5) bottom = sampledBottom - dy;
         const observed = {
           id: m.id,
           position: m.position,

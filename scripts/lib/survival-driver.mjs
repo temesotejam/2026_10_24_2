@@ -388,6 +388,8 @@ export function createDriver(page, out) {
     const x = Math.floor(s.position.x),
       y = Math.round(s.position.y),
       z = Math.floor(s.position.z);
+    const feetPlant = { x, y, z };
+    if ([16, 22, 23, 25].includes(await block(feetPlant))) await mine(feetPlant);
     const candidates = [];
     for (const [dx, dz] of [
       [1, 0],

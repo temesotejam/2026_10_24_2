@@ -15,7 +15,7 @@ export function createAdventureDriver(page, d) {
         window.__mc.meshedChunks() >= (window.__mc.adventure().dimension === "end" ? 24 : 60),
       { timeout: 120000 },
     );
-  async function save() {
+  async function save(resumeControls = true) {
     if (await page.$("#inventory-panel:not([hidden])")) await d.close();
     await page.evaluate(() => document.exitPointerLock());
     await page.waitForFunction(() => window.__mc.mode() === "idle");
@@ -23,8 +23,10 @@ export function createAdventureDriver(page, d) {
     await page.waitForFunction(
       () => document.querySelector("#save-status").textContent === "保存済み",
     );
-    await page.locator("#play-button").click();
-    await page.waitForFunction(() => window.__mc.mode() === "pointer");
+    if (resumeControls) {
+      await page.locator("#play-button").click();
+      await page.waitForFunction(() => window.__mc.mode() === "pointer");
+    }
   }
   async function move(x, z, jump = false, tolerance = 0.3) {
     await d.walk(x, z, jump, tolerance, jump ? 800 : 60);
@@ -289,13 +291,16 @@ export function createAdventureDriver(page, d) {
     const hunger = await page.$eval("#hunger", (el) =>
       Number(el.textContent.match(/食料 (\d+)/)?.[1]),
     );
-    let food = null;
-    for (const id of ["meat", "bread", "cookedFish", "apple", "rawMeat"])
-      if (await d.count(id)) {
-        food = id;
-        break;
-      }
-    if (hunger < 18 && food) {
+    const health = (await d.info()).health;
+    const values = { fish: 2, rawMeat: 2, apple: 4, bread: 5, cookedFish: 6, meat: 8 };
+    const available = [];
+    for (const id of Object.keys(values)) if (await d.count(id)) available.push(id);
+    const eligible = available.filter((id) =>
+      health < 20 ? hunger < 18 : values[id] <= 20 - hunger,
+    );
+    eligible.sort((a, b) => values[a] - values[b]);
+    const food = eligible[0];
+    if (food) {
       await d.equip(food);
       const s = await d.info();
       await d.aim({ x: s.position.x, y: s.position.y + 20, z: s.position.z - 1 });

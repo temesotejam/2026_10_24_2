@@ -58,7 +58,7 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
     try {
       // Lean safely over the supported edge so the low ray clears our own
       // floor. Crouching also brings foundation31 within ordinary reach.
-      await d.walk(p.x + (dx / length) * 0.35, p.z + (dz / length) * 0.35, false, 0.07, 50);
+      await d.walk(p.x + (dx / length) * 0.45, p.z + (dz / length) * 0.45, false, 0.015, 50);
       await wait(200);
       for (let y = foundation + 1; y <= 34; y++) {
         await d.aim({ x: x + 0.5, y: y - 0.01, z: z + 0.5 });
