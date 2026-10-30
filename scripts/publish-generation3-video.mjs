@@ -179,6 +179,10 @@ export function renderWatchPage(proof, style) {
       <p>同じ全工程を時系列に3分割し、各動画の画質を上げています。順番に見ると全編を視聴できます。三人称・日本語字幕・1.5倍速です。</p>
       <nav aria-label="高画質の分割動画">${additionalDownloads.map((item, index) => `<a class="download" href="${escapeHtml(item.url)}" download="${escapeHtml(item.file)}">${index + 1}/3をダウンロード（${lengthLabel(item.duration)}・約${Math.ceil(item.bytes / 1e6)}MB）</a>`).join("\n")}</nav></section>`
     : "";
+  const excerpt = proof.export.finalBattleExcerpt;
+  const finalBattle = excerpt
+    ? `<section><h2>最終戦の抜粋</h2><p>エンド進入直前から、ドラゴンとの戦い・卵の入手・通常世界への帰還までを抜き出した動画です。冒険の全工程は上の全編動画に収録しています。</p><a class="download" href="${escapeHtml(excerpt.url)}" download="${escapeHtml(excerpt.file)}">最終戦の抜粋をダウンロード（${lengthLabel(excerpt.duration)}・約${Math.ceil(excerpt.bytes / 1e6)}MB）</a></section>`
+    : "";
   return `<!doctype html>
 <html lang="ja">
   <head>
@@ -207,6 +211,7 @@ export function renderWatchPage(proof, style) {
       </nav>
       ${chapterNavigation}
       ${higherQuality}
+      ${finalBattle}
       <p>字幕は映像に入っているので設定は不要です。長時間の全工程を収めるため画質を軽量化しています。音声はありません。壁際や狭い坑道ではカメラが近づき、体が視界を塞ぐ場合は非表示になります。</p>
       <details>
         <summary>旧仕様の動画（生成方式2・改善前）</summary>
@@ -374,6 +379,76 @@ export async function main(args = process.argv.slice(2)) {
   }
   const proof = createCompactProof(metadata, download, parts);
   if (additionalDownloads.length) proof.export.additionalDownloads = additionalDownloads;
+  if (metadata.export.finalBattleExcerpt !== undefined) {
+    const item = metadata.export.finalBattleExcerpt;
+    assert.equal(item.file, "survival-generation3-final-battle.mp4");
+    assert.equal(item.subtitleFile, "survival-generation3-final-battle.srt");
+    assert.equal(item.kind, "final-battle-excerpt");
+    assert.equal(item.fullDecodeVerified, true);
+    assert.equal(item.speed, 1.5);
+    assert.equal(item.audio, false);
+    assert.equal(item.perspective, "third-person-behind");
+    assert.match(item.captions, /Japanese.*burned/i);
+    assert.ok(item.captionCount > 0);
+    assert.equal(item.sourceWindow.contiguous, true);
+    const sourceTime = (point) => {
+      let offset = 0;
+      for (const part of metadata.parts) {
+        if (part.path === point.part) {
+          assert.ok(
+            Number.isFinite(point.seconds) && point.seconds >= 0 && point.seconds <= part.duration,
+          );
+          return offset + point.seconds;
+        }
+        offset += part.duration;
+      }
+      assert.fail("excerpt timestamp must identify an actual recorded part");
+    };
+    assert.ok(Math.abs(sourceTime(item.sourceWindow.start) - item.rawStart) < 0.001);
+    assert.ok(Math.abs(sourceTime(item.sourceWindow.end) - item.rawEnd) < 0.001);
+    const entries = metadata.chapters.filter((chapter) => chapter.phase === 8).map(sourceTime);
+    const returns = metadata.chapters.filter((chapter) => chapter.phase === 9).map(sourceTime);
+    assert.ok(entries.length && returns.length);
+    const enteredAt = Math.min(...entries),
+      returnedAt = Math.max(...returns);
+    assert.ok(enteredAt >= item.rawStart && enteredAt - item.rawStart <= 2.001);
+    assert.ok(returnedAt > enteredAt && returnedAt <= item.rawEnd);
+    assert.ok(Math.abs(item.rawEnd - metadata.export.rawDuration) < 0.001);
+    assert.ok(Math.abs(item.start - item.rawStart / 1.5) < 0.001);
+    assert.ok(Math.abs(item.end - item.rawEnd / 1.5) < 0.001);
+    assert.ok(Math.abs(item.duration - (item.rawEnd - item.rawStart) / 1.5) < 0.25);
+    const file = sourceFile(directory, item.file);
+    const subtitle = sourceFile(directory, item.subtitleFile);
+    assert.match(readFileSync(subtitle, "utf8"), /\d{2}:\d{2}:\d{2},\d{3} --> /);
+    const size = statSync(file).size;
+    assert.ok(size > 0 && size <= 20 * 1024 * 1024);
+    const excerptProbe = JSON.parse(
+      run("ffprobe", [
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "stream=codec_name,width,height,pix_fmt:format=duration",
+        "-of",
+        "json",
+        file,
+      ]),
+    );
+    const stream = excerptProbe.streams[0];
+    assert.equal(stream.codec_name, "h264");
+    assert.equal(stream.width, 960);
+    assert.equal(stream.height, 540);
+    assert.equal(stream.pix_fmt, "yuv420p");
+    assert.ok(Math.abs(Number(excerptProbe.format.duration) - item.duration) < 0.1);
+    proof.export.finalBattleExcerpt = {
+      ...item,
+      bytes: size,
+      sha256: await sha256(file),
+      url: rawDownload.replace(mediaName, item.file),
+    };
+    extraSources.push({ file, name: item.file }, { file: subtitle, name: item.subtitleFile });
+  }
   const layoutFile = existsSync(path.join(output, "index.html"))
     ? path.join(output, "index.html")
     : path.join(repository, "public/watch/index.html");
