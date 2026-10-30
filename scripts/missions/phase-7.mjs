@@ -121,7 +121,8 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
       );
       await d.equip("enderEye");
       const p = (await d.info()).position;
-      await d.aim({ x: p.x, y: p.y + 15, z: p.z - 1 });
+      const entrance = (await a.adventure()).entrance;
+      await d.aim({ x: entrance.x + 0.5, y: p.y + 3, z: entrance.z + 0.5 });
       await a.right();
       mission.directionChecked = true;
       mission.eyesAfterDirection = await d.count("enderEye");
