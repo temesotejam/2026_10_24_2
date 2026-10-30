@@ -235,6 +235,15 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
     const c = (await a.adventure()).stronghold;
     await a.move(c.x + 0.5, c.z + 3.5, true, 0.15);
   }
+  if ((await d.count("dragonEgg")) === 1) {
+    d.narrate("通常世界へ生還。持ち帰ったドラゴンの卵を確認します。", 2);
+    const eggSlot = (await d.info()).inventory.findIndex((slot) => slot?.id === "dragonEgg");
+    await d.open();
+    await page.hover(`[data-area="inventory"][data-slot="${eggSlot}"]`);
+    await wait(3500);
+    await page.screenshot({ path: `${out}/completion-inventory.png` });
+    await d.close();
+  }
   const final = await a.adventure();
   assert.equal(final.dimension, "overworld", "return by physical contact with the victory gate");
   assert.ok(final.dragon.defeated);
