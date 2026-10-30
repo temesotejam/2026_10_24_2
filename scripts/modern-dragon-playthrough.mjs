@@ -17,6 +17,8 @@ const until = Number(option("--until", "1"));
 const renderScale = option("--render-scale", "0.5");
 process.env.RECORDING_RENDER_SCALE = renderScale;
 const captureQuality = Number(option("--capture-quality", "28"));
+const captureFps = Number(option("--capture-fps", "15"));
+assert.ok([15, 30].includes(captureFps));
 assert.ok(["0.5", "0.75", "1"].includes(renderScale));
 assert.ok(Number.isInteger(captureQuality) && captureQuality >= 0 && captureQuality <= 51);
 const inspectPaused = args.includes("--inspect");
@@ -97,7 +99,7 @@ const startRecording = async () => {
   part.capture = {
     width: 1280,
     height: 720,
-    fps: 15,
+    fps: captureFps,
     quality: captureQuality,
     renderScale: Number(renderScale),
   };
@@ -118,7 +120,7 @@ const startRecording = async () => {
   recorder = await page.screencast({
     path: path.join(out, part.path),
     format: "mp4",
-    fps: 15,
+    fps: captureFps,
     quality: captureQuality,
     speed: 1,
     ffmpegPath: path.resolve("scripts/ffmpeg-capture.py"),
