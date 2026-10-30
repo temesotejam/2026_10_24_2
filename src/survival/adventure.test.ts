@@ -191,6 +191,25 @@ describe("planned adventure progression", () => {
       validateSave(travelCandidate(again, "end", { x: 0.5, y: 34, z: 0.5 })).adventure?.dimension,
     ).toBe("end");
   });
+  it("returns End victors to their Overworld bed without restoring health or inventory", () => {
+    const { data } = fixture();
+    data.generator = 3;
+    data.spawn = { x: 199.5, y: 35, z: -71.5 };
+    data.position = { x: 13.5, y: 18.68, z: -257.97 };
+    const end = travelCandidate(data, "end", { x: 0.5, y: 34, z: 0.5 });
+    must(end.adventure).dragon = { health: 0, phase: 230, defeated: true };
+    end.inventory[0] = stack("dragonEgg");
+    end.vitals.health = 13;
+    end.vitals.hunger = 19;
+    const returned = travelCandidate(end, "overworld", { x: 0.5, y: 34, z: 0.5 });
+    expect(returned.position).toEqual(data.spawn);
+    expect(returned.spawn).toEqual(data.spawn);
+    expect(returned.inventory).toEqual(end.inventory);
+    expect(returned.vitals).toEqual(end.vitals);
+    expect(returned.adventure?.dimension).toBe("overworld");
+    expect(returned.adventure?.dragon.defeated).toBe(true);
+    expect(end.adventure?.dimension).toBe("end");
+  });
   it("accepts legacy saves and rejects corrupt or recursive realm state", () => {
     const { data } = fixture();
     const legacy = { ...data, generator: 1, adventure: undefined };

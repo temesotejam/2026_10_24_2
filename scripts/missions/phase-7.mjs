@@ -235,8 +235,6 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
     // through ordinary movement before entering again.
     await a.move(0.5, 4, false, 0.15);
     await enterByContact(page, d, a, "overworld", { x: 0.5, y: 35.4, z: 0.5 });
-    const c = (await a.adventure()).stronghold;
-    await a.move(c.x + 0.5, c.z + 3.5, true, 0.15);
   }
   if ((await d.count("dragonEgg")) === 1) {
     d.narrate("通常世界へ生還。持ち帰ったドラゴンの卵を確認します。", 2);

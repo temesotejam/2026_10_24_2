@@ -83,6 +83,10 @@ export function travelCandidate(
   }
   if (next.generator >= 3 && sourceDimension !== "end" && destination !== "end")
     placeLinkedPortal(next, destination, sourcePosition, !target);
+  // End victory returns home rather than restoring the mid-jump position
+  // saved on the active stronghold gate. Keep the earned inventory and vitals.
+  if (next.generator >= 3 && sourceDimension === "end" && destination === "overworld")
+    next.position = { ...next.spawn };
   // A brewing stand belongs to its dimension; keep jobs with an explicit prefix.
   adventure.dimension = destination;
   return next;
