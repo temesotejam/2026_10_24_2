@@ -176,13 +176,18 @@ export function createModernHunting(page, d, a, options = {}) {
       };
     });
   async function surfaceForAir(state) {
+    // A surface route already swims with Space held. Do not redirect it back
+    // to a nearby bank on every step while the player's head is in open air.
+    if (state.eyeBlock !== 5) return false;
     const shore = await page.evaluate((p) => {
       const mc = window.__mc;
       if (mc.blockAt(Math.floor(p.x), Math.floor(p.y + 0.1), Math.floor(p.z)) !== 5) return null;
+      let waterTop = Math.floor(p.y + 0.1);
+      while (mc.blockAt(Math.floor(p.x), waterTop + 1, Math.floor(p.z)) === 5) waterTop++;
       const sites = [];
       for (let x = Math.floor(p.x) - 10; x <= p.x + 10; x++)
         for (let z = Math.floor(p.z) - 10; z <= p.z + 10; z++)
-          for (let y = Math.floor(p.y); y <= Math.floor(p.y) + 4; y++) {
+          for (let y = Math.floor(p.y); y <= waterTop + 2; y++) {
             if (
               [1, 2, 3, 4, 9, 11].includes(mc.blockAt(x, y - 1, z)) &&
               mc.blockAt(x, y, z) === 0 &&
@@ -842,6 +847,7 @@ export function createModernHunting(page, d, a, options = {}) {
         const latest = await observe();
         const candidates = alive(latest)
           .filter((m) => missing.some((item) => DROPS[item].includes(m.species)))
+          .filter((m) => !config.avoidWaterTargets || !m.inWater)
           .filter(
             (m) =>
               (ignored.get(m.id) ?? 0) < Date.now() ||
@@ -876,6 +882,7 @@ export function createModernHunting(page, d, a, options = {}) {
                 .filter(
                   (m) =>
                     m.species !== "villager" &&
+                    (!config.avoidWaterTargets || !m.inWater) &&
                     (ignored.get(m.id) ?? 0) < Date.now() &&
                     (night ? !FRIENDLY.includes(m.species) : FRIENDLY.includes(m.species)),
                 )

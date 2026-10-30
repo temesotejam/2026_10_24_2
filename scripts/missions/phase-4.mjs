@@ -210,6 +210,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   meta.hunting = await h.gather(targets, {
     timeoutMs: 3000000,
     patrol: false,
+    avoidWaterTargets: true,
     collectSpecies: ["wanderer", "skeleton", "chicken", "ember"],
     arrowReserve: 0,
     home: meta.huntingCamp.position ?? meta.huntingCamp,
@@ -221,8 +222,13 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     a,
     Math.min(36, (await d.count("arrow")) + 4 * (await d.count("feather"))),
   );
-  if ((await carriedFoodUnits(d)) < 40)
-    await stockVillageFood(d, page, a, v, { breadTarget: 9, waitForGrowth: true });
+  if ((await carriedFoodUnits(d)) < 40) {
+    if (await d.count("fishingRod")) {
+      await a.surfaceTo({ x: v.x - 5, z: v.z - 5 });
+      const fishing = await import("./phase-4.9.mjs");
+      await fishing.run({ page, d, a, meta, flush, chapter, out });
+    } else await stockVillageFood(d, page, a, v, { breadTarget: 9, waitForGrowth: true });
+  }
   flush();
   await chapter("戦闘でエンダーパールと糸を集め、弓と矢を製作", 5);
 }

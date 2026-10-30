@@ -147,7 +147,7 @@ export function createAdventureDriver(page, d) {
               k = key(x, z);
             if (prev.has(k) || Math.abs(x - sx) > 24 || Math.abs(z - sz) > 24) continue;
             const h = height(x, z);
-            if (h === null || node.h === null || h - node.h > 2) continue;
+            if (h === null || node.h === null || h - node.h > 1) continue;
             const drop = node.h - h,
               waterLanding = mc.blockAt(x, h - 1, z) === 5;
             if (drop > 3 && (!waterLanding || drop > 8)) continue;

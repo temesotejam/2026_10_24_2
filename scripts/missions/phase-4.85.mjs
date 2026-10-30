@@ -471,5 +471,11 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
     a.setGuard(h.guard);
   }
   await record("shallow hunt stopped", { pearls: await d.count("enderPearl") });
-  if (chapter) await chapter("浅い水中の敵を通常操作で討伐し、実際のドロップを回収", 4);
+  if (chapter)
+    await chapter(
+      events.some((e) => e.name === "controlled dive complete" && e.defeated)
+        ? "浅い水中の敵と戦い、実際のドロップを確認"
+        : "水深と帰路を確認し、安全に潜れる敵を探します",
+      4,
+    );
 }
