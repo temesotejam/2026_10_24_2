@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { wait } from "../lib/survival-driver.mjs";
 import { stockVillageFood } from "../lib/modern-resources.mjs";
+import { stashVillage } from "../lib/modern-storage.mjs";
 import { createModernHunting } from "../lib/modern-hunting.mjs";
 
 /** Ordinary recovery of the actual part-83 death; never imports a fixture. */
@@ -57,7 +58,23 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
     }
     await d.close();
     if (!(await ownsPick())) {
-      assert.ok((await d.count("cobble")) >= 3, "own three actual stored cobblestone");
+      if ((await d.count("cobble")) < 3) {
+        await a.move(189.5, -71.5, true);
+        d.setGoal("保管道具がないため、村の壁の木材から木のツルハシを作り直します。");
+        for (const cell of [
+          { x: 188, y: 35, z: -72 },
+          { x: 188, y: 36, z: -72 },
+          { x: 188, y: 37, z: -72 },
+          { x: 188, y: 35, z: -73 },
+          { x: 188, y: 36, z: -73 },
+          { x: 188, y: 37, z: -73 },
+        ]) {
+          if ((await d.count("planks")) >= 5) break;
+          if ((await d.block(cell)) === 10) await d.mine(cell);
+          await wait(700);
+        }
+        await d.collect("planks", 5);
+      }
       await a.useAt({ x: 191, y: 35, z: -72 });
       await page.waitForSelector('[data-recipe="stone_pick"]');
       if ((await d.count("stick")) < 2) {
@@ -70,19 +87,46 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
         }
         await d.make("sticks");
       }
-      await d.make("stone_pick");
+      await d.make((await d.count("cobble")) >= 3 ? "stone_pick" : "wood_pick");
       await d.close();
     }
     assert.ok(await ownsPick(), "retrieve or normally craft a real recovery pickaxe");
   }
 
-  const food = await stockVillageFood(d, page, a, village, {
-    breadTarget: 16,
-    waitForGrowth: true,
+  if (await d.count("chest")) {
+    meta.remoteCacheChest ??= village.cacheChest;
+    delete village.cacheChest;
+    await stashVillage(page, d, a, village, [
+      "seeds",
+      "sand",
+      "sapling",
+      "snow",
+      "dirt",
+      "wool",
+      "bone",
+      "netherrack",
+      "ironOre",
+      "goldOre",
+      "stoneBrick",
+    ]);
+    flush();
+  }
+  await stockVillageFood(d, page, a, village, {
+    breadTarget: 9,
+    waitForGrowth: false,
   });
-  assert.ok(food.complete && (await d.count("bread")) >= 16, "carry real village bread");
+  assert.ok((await d.count("bread")) >= 8, "carry real village bread");
   await a.eat();
-  const daytime = (await page.evaluate(() => window.__mc.time())) % 1200;
+  let daytime = (await page.evaluate(() => window.__mc.time())) % 1200;
+  if (daytime >= 720 || daytime < 24) {
+    await a.surfaceTo({ x: village.x + 7, z: village.z + 1 });
+    await a.move(village.x + 7.5, village.z + 2.5, true);
+    await a.move(village.x + 7.5, village.z + 4.5, true);
+    await a.useAt({ x: village.x + 6, y: village.y, z: village.z + 5 });
+    await wait(500);
+    daytime = (await page.evaluate(() => window.__mc.time())) % 1200;
+    await a.move(village.x + 7.5, village.z + 1.5, true);
+  }
   assert.ok(daytime < 600, "leave enough daylight for unarmed coastal recovery");
   meta.recovery4_78 = { goal, breadBeforeTravel: await d.count("bread"), legs: [] };
   flush();

@@ -131,11 +131,22 @@ export function createDriver(page, out) {
           29: "ネザーの地形を掘り、通り道を作ります。",
         }[original],
       );
-      if ([3, 11, 12, 13, 17, 18, 19, 20, 28, 29, 30, 36, 41].includes(original)) {
+      {
         const inventory = (await info()).inventory;
-        const tool = ["diamond_pick", "iron_pick", "stone_pick", "wood_pick"].find((id) =>
-          inventory.some((s) => s?.id === id),
-        );
+        const tools = [1, 2, 4, 9, 32, 44].includes(original)
+          ? ["stone_shovel", "wood_shovel", "diamond_pick", "iron_pick", "stone_pick", "wood_pick"]
+          : [6, 7, 10, 14, 15, 27].includes(original)
+            ? [
+                "iron_axe",
+                "stone_axe",
+                "wood_axe",
+                "diamond_pick",
+                "iron_pick",
+                "stone_pick",
+                "wood_pick",
+              ]
+            : ["diamond_pick", "iron_pick", "stone_pick", "wood_pick"];
+        const tool = tools.find((id) => inventory.some((s) => s?.id === id));
         if (tool) await equip(tool);
       }
       assert.notEqual(original, 8, "do not mine bedrock");
@@ -247,6 +258,7 @@ export function createDriver(page, out) {
               ![28, 31].includes(id),
               "route around portal structures instead of clearing their frame or interior",
             );
+            if ([12, 13, 14, 15, 34, 35, 38, 39].includes(id)) return false;
             if (id !== 0 && id !== 5 && id !== 8 && (await mine(cell, interrupt)) === false)
               return false;
           }

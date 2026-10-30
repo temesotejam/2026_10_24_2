@@ -9,7 +9,7 @@ import { wait } from "../lib/survival-driver.mjs";
 export async function run({ page, d, a, meta, flush, chapter, out }) {
   const v = meta.village,
     events = (meta.huntingEvents ??= []);
-  const targets = { enderPearl: 12, string: (await d.count("bow")) ? 0 : 3, ammo: 36 };
+  const targets = { enderPearl: 12, string: (await d.count("bow")) ? 0 : 3, ammo: 32 };
 
   const h = createModernHunting(page, d, a, {
     arrowReserve: 0,
@@ -140,6 +140,13 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   await h.guard();
   await a.eat();
   if (await carriedFoodUnits(d)) await a.recover(18);
+  if (
+    !v.cacheChest &&
+    meta.remoteCacheChest &&
+    Math.hypot(meta.remoteCacheChest.x - v.x, meta.remoteCacheChest.z - v.z) < 24 &&
+    (await d.block(meta.remoteCacheChest)) === 14
+  )
+    v.cacheChest = { ...meta.remoteCacheChest };
   const stashPosition = (await d.info()).position;
   if (
     !v.cacheChest ||
@@ -191,17 +198,29 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   ) {
     await a.surfaceTo(meta.huntingCamp);
     await a.reachSurface();
+  } else if (
+    Math.hypot(currentPosition.x - meta.huntingCamp.x, currentPosition.z - meta.huntingCamp.z) < 24
+  ) {
+    await a.surfaceTo(meta.huntingCamp);
+    if ((await d.info()).position.y < meta.huntingCamp.y - 0.2)
+      await a.pillarTo(meta.huntingCamp.y);
   }
   d.setGoal("夜の敵と戦い、エンダーパール・弓の糸・矢の材料を集めます。");
   meta.hunting = await h.gather(targets, {
     timeoutMs: 3000000,
+    patrol: false,
     arrowReserve: 0,
     home: meta.huntingCamp.position ?? meta.huntingCamp,
   });
   await a.surfaceTo({ x: v.x - 6, z: v.z + 1 });
-  await prepareArchery(page, d, a, 36);
-  if ((await carriedFoodUnits(d)) < 50)
-    await stockVillageFood(d, page, a, v, { breadTarget: 18, waitForGrowth: true });
+  await prepareArchery(
+    page,
+    d,
+    a,
+    Math.min(36, (await d.count("arrow")) + 4 * (await d.count("feather"))),
+  );
+  if ((await carriedFoodUnits(d)) < 40)
+    await stockVillageFood(d, page, a, v, { breadTarget: 9, waitForGrowth: true });
   flush();
   await chapter("戦闘でエンダーパールと糸を集め、弓と矢を製作", 5);
 }

@@ -8,7 +8,7 @@ export async function run({ page, d, a, chapter }) {
   while (Date.now() < until) {
     const target = await page.evaluate(() => {
       const p = window.__mc.position();
-      return __mc
+      return window.__mc
         .adventure()
         .creatures.filter((m) => m.hp > 0 && m.species === "skeleton")
         .sort(

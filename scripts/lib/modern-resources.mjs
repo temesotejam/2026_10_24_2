@@ -367,8 +367,8 @@ export async function stockVillageFood(
     }
     if ((await d.count("wheat")) >= 3) {
       await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
-      await d.walk(village.x - 5.5, village.z + 2.7, false, 0.3, 80);
-      await d.walk(village.x - 4.5, village.z + 3.5, false, 0.3, 80);
+      await d.walk(village.x - 5.5, village.z + 2.7, true, 0.3, 80);
+      await d.walk(village.x - 4.5, village.z + 3.5, true, 0.3, 80);
       await d.equip((await d.count("iron_sword")) ? "iron_sword" : "iron_pick");
       await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
       await page.waitForSelector('[data-recipe="bread"]');

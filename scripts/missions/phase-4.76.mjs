@@ -12,7 +12,7 @@ export async function run({ page, d, a, chapter }) {
     const target = await page.evaluate(() => {
       const p = window.__mc.position(),
         e = window.__mc.eyeHeight();
-      return __mc
+      return window.__mc
         .adventure()
         .creatures.filter(
           (m) =>
