@@ -152,6 +152,7 @@ writeFileSync(
         finishedAt: p.finishedAt,
         capture: p.capture,
         sourceCommit: p.sourceCommit,
+        assets: p.assets,
       })),
       navigation: metadata.endMission?.navigation,
       bedVisits: metadata.bedVisits ?? [],

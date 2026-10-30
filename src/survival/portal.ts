@@ -41,6 +41,12 @@ export class PortalContact {
     dimension: Dimension,
     getBlock: (x: number, y: number, z: number) => BlockId,
   ): Dimension | null {
+    // Unloaded arrival chunks read as air. Only actual player movement may
+    // establish that the arrival portal has been left.
+    if (!active) {
+      this.seconds = 0;
+      return null;
+    }
     let portal: Vec3 | null = null;
     let end = false;
     for (let x = Math.floor(position.x - 0.29); x <= Math.floor(position.x + 0.29); x++)
@@ -55,7 +61,7 @@ export class PortalContact {
       this.seconds = 0;
       return null;
     }
-    if (!active || this.waitingForExit) {
+    if (this.waitingForExit) {
       this.seconds = 0;
       return null;
     }

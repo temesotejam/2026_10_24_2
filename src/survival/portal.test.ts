@@ -8,6 +8,25 @@ const blocks = (x: number, y: number, z: number): BlockId => {
   return x === 0 || x === 3 || y === 34 || y === 38 ? BlockId.OBSIDIAN : BlockId.PORTAL;
 };
 describe("physical portal entry", () => {
+  it("does not arm an arrival portal while its paused chunks are still loading", () => {
+    const c = new PortalContact();
+    c.update(0.1, inside, false, false, "nether", () => BlockId.AIR);
+    for (let i = 0; i < 60; i++)
+      expect(c.update(0.1, inside, true, false, "nether", blocks)).toBeNull();
+    c.update(0.1, outside, true, false, "nether", blocks);
+    for (let i = 0; i < 39; i++)
+      expect(c.update(0.1, inside, true, false, "nether", blocks)).toBeNull();
+    expect(c.update(0.1, inside, true, false, "nether", blocks)).toBe("overworld");
+  });
+  it("lets an End victory arrival leave the loaded gate before it can re-enter", () => {
+    const c = new PortalContact();
+    const gate = (_x: number, y: number, z: number) =>
+      y === 35 && z === 0 ? BlockId.END_GATE : BlockId.AIR;
+    c.update(0.1, inside, false, false, "overworld", () => BlockId.AIR);
+    expect(c.update(0.1, inside, true, false, "overworld", gate)).toBeNull();
+    expect(c.update(0.1, outside, true, false, "overworld", gate)).toBeNull();
+    expect(c.update(0.1, inside, true, false, "overworld", gate)).toBe("end");
+  });
   it("requires four seconds of uninterrupted survival contact and resets on leaving", () => {
     const c = new PortalContact();
     const step = (p = inside) => c.update(0.1, p, true, false, "overworld", blocks);
