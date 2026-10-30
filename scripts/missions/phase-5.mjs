@@ -16,6 +16,8 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     writeFileSync(`${out}/obsidian-mission.json`, JSON.stringify(mission, null, 2));
   };
   assert.ok((await d.count("diamond_pick")) > 0, "carry the genuinely crafted diamond pickaxe");
+  await a.eat();
+  await a.recover(20);
   const base = { x: village.x, y: village.y, z: village.z + 2 };
   let existingFrame = 0;
   for (let u = 0; u < 4; u++)

@@ -3,12 +3,17 @@ import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
 
 export async function restInVillage(page, d, a, village, meta, flush = () => undefined) {
-  const bed = { x: village.x + 6, y: village.y, z: village.z + 5 };
+  const bed = meta.bedLocation ?? { x: village.x + 6, y: village.y, z: village.z + 5 };
   assert.equal(await d.block(bed), 15, "use the real generated bed");
   d.setGoal("準備中の夜は村のベッドで休み、遠征前の消耗を減らします。");
-  await a.surfaceTo({ x: village.x + 7, z: village.z + 1 });
-  await a.move(village.x + 7.5, village.z + 2.5, true);
-  await a.move(village.x + 7.5, village.z + 4.5, true);
+  if (meta.bedLocation) {
+    await a.surfaceTo({ x: bed.x + 1, z: bed.z });
+  } else {
+    await a.surfaceTo({ x: village.x + 7, z: village.z + 1 });
+    await a.move(village.x + 7.5, village.z + 2.5, true);
+    await a.move(village.x + 7.5, village.z + 4.5, true);
+  }
+  await d.equip((await d.count("iron_sword")) ? "iron_sword" : "iron_pick");
   const before = await page.evaluate(() => window.__mc.time());
   await a.useAt(bed);
   await wait(600);
