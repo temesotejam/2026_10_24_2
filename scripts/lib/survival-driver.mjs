@@ -155,6 +155,11 @@ export function createDriver(page, out) {
       const hit = await page.evaluate(() => window.__mc.target());
       if (!hit) return false;
       const before = await block(hit);
+      if (
+        (hit.x !== p.x || hit.y !== p.y || hit.z !== p.z) &&
+        [12, 13, 14, 15, 28, 31, 34, 35, 38, 39, 40].includes(before)
+      )
+        return false; // Preserve an occluding station/frame instead of mining through it.
       assert.notEqual(before, 8, "target is not bedrock");
       await page.mouse.down();
       try {

@@ -14,6 +14,7 @@ const url = new URL(option("--url", "http://127.0.0.1:4173/2026_10_24_2/"));
 url.searchParams.set("seed", "2026");
 url.searchParams.set("mode", "survival");
 const out = path.resolve(option("--out", "visual-check/dragon-fish-battle"));
+const ammunition=Number(option("--arrows","24"));
 mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({
   headless: true,
@@ -114,7 +115,7 @@ try {
   battle.inventory[0] = { id: "iron_sword", count: 1, durability: 161 };
   battle.inventory[1] = { id: "diamond_pick", count: 1, durability: 800 };
   battle.inventory[2] = { id: "bow", count: 1, durability: 287 };
-  battle.inventory[3] = { id: "arrow", count: 24 };
+  battle.inventory[3] = { id: "arrow", count: ammunition };
   battle.inventory[4] = { id: "fish", count: 20 };
   await load(battle, "full-boss-raw-fish-fixture");
   const hunter = createModernHunting(page, d, a);
@@ -154,13 +155,13 @@ try {
       dragon: state.dragon,
       egg: await d.count("dragonEgg"),
       fishConsumed: 20 - (await d.count("fish")),
-      arrowsConsumed: 24 - (await d.count("arrow")),
+      arrowsConsumed: ammunition - (await d.count("arrow")),
       inventory: info.inventory,
       hunterStats: hunter.stats,
       samples,
     };
     assert.ok(info.health > 0 && state.dragon.defeated && result.egg === 1);
-    assert.ok(result.arrowsConsumed >= 6 && result.arrowsConsumed <= 24);
+    assert.ok(result.arrowsConsumed >= 6 && result.arrowsConsumed <= ammunition);
     await page.screenshot({ path: path.join(out, "victory.png") });
     writeFileSync(path.join(out, "proof.json"), JSON.stringify(result, null, 2));
     report("200HP full battle with raw fish20, sword161, bow287 and arrows24");

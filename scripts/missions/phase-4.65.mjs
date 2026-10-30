@@ -79,7 +79,7 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   flush();
   if (
     !(await d.info()).inventory.some(
-      (s) => s && ["meat", "bread", "rawMeat", "apple", "cookedFish"].includes(s.id),
+      (s) => s && ["fish", "meat", "bread", "rawMeat", "apple", "cookedFish"].includes(s.id),
     )
   ) {
     await chapter("夜の敵から、ふさいだ避難穴へ退避", 4.77);

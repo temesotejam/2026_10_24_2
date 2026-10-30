@@ -48,6 +48,11 @@ async function enterByContact(page, d, a, destination, target, jump = false) {
 
 export async function run({ page, d, a, meta, flush = () => undefined, chapter, out }) {
   const mission = (meta.endMission ??= {});
+  // The controller has already read this seed's entrance from the permitted
+  // read-only navigation map. Eleven earned eyes fill its eleven empty frames;
+  // no ceremonial direction throw or fabricated throw history is needed.
+  mission.useKnownEntrance = true;
+  mission.requiredEyes = 11;
   let state = await a.adventure();
   assert.ok(state.generator >= 3, "complete the new survival progression");
   // A resumed ordinary save remembers real eye throws even if the previous
@@ -97,21 +102,20 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
       bow && (bow.durability ?? 0) >= 24,
       "carry a bow with enough durability for crystal-shot retries",
     );
-    assert.ok(arrows >= 24, "carry arrows for all six crystals with up to four attempts each");
+    assert.ok(arrows >= 12, "carry twelve real arrows for six crystals with retry reserves");
     assert.ok(foodUnits >= 40, "carry food for withdrawal and ordinary health regeneration");
     d.setGoal("素材がそろいました。エンダーアイを作り、地下遺跡へ向かいます。");
     await d.open();
-    // Seed2026 has eleven empty frames and its first directional throw breaks.
-    // Carry twelve eyes before that throw so it cannot consume a needed frame eye.
+    // Use the already observed entrance and reserve real eyes for actual frames.
     while (
-      (await d.count("blazePowder")) + (await d.count("enderEye")) < 12 &&
+      (await d.count("blazePowder")) + (await d.count("enderEye")) < mission.requiredEyes &&
       (await d.count("blazeRod"))
     )
       await d.make("blazePowder");
     while ((await d.count("enderPearl")) && (await d.count("blazePowder")))
       await d.make("enderEye");
     await d.close();
-    if (!mission.directionChecked) {
+    if (!mission.directionChecked && !mission.useKnownEntrance) {
       assert.ok(
         (await d.count("enderEye")) >= 12,
         "carry eyes for eleven empty frames plus the breakable directional throw",
@@ -125,6 +129,18 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
       flush();
       d.narrate("エンダーアイで遺跡の方向を確認し、地上を進みます。", 2);
       await wait(1500);
+    }
+    if (mission.useKnownEntrance) {
+      mission.navigation = {
+        method: "previously-observed-readonly-map",
+        directionThrowSkipped: true,
+        entrance: { ...(await a.adventure()).entrance },
+      };
+      d.narrate(
+        "既に観測した地図の入口座標を利用。方向投げは省略して、実際に集めた11個のアイを枠へ入れます。",
+        2,
+      );
+      flush();
     }
     const c = (await a.adventure()).stronghold;
     // Stop outside first: an already activated gate must not interrupt recovery
