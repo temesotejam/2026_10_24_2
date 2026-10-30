@@ -7,6 +7,7 @@ import { huntingCoverPath, huntingPath, perpendicularStrafe } from "./hunting-pa
 import { canMelee, clearSight, hostile, safeRetreat } from "./combat-policy.mjs";
 
 const DROPS = {
+  rawMeat: ["cow", "pig", "sheep", "chicken"],
   enderPearl: ["wanderer"],
   string: ["spider"],
   feather: ["chicken"],
@@ -15,6 +16,7 @@ const DROPS = {
   ammo: ["chicken", "skeleton"],
 };
 const LABELS = {
+  rawMeat: "生肉",
   enderPearl: "エンダーパール",
   string: "糸",
   feather: "羽根",

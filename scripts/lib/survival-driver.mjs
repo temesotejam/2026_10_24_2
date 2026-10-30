@@ -388,24 +388,39 @@ export function createDriver(page, out) {
     const x = Math.floor(s.position.x),
       y = Math.round(s.position.y),
       z = Math.floor(s.position.z);
-    const cell = { x: x + 1, y, z };
+    const candidates = [];
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ]) {
+      const c = { x: x + dx, y, z: z + dz };
+      const below = await block({ ...c, y: y - 1 });
+      if ([0, 5, 26, 12, 13, 14, 15, 34, 35, 38, 39, 40].includes(below)) continue;
+      const low = await block(c),
+        high = await block({ ...c, y: y + 1 });
+      if (
+        [12, 13, 14, 15, 28, 31, 34, 35, 38, 39, 40].includes(low) ||
+        [12, 13, 14, 15, 28, 31, 34, 35, 38, 39, 40].includes(high)
+      )
+        continue;
+      candidates.push({ cell: c, score: (low === 0 ? 1 : 0) + (high === 0 ? 1 : 0) });
+    }
+    candidates.sort((a, b) => b.score - a.score);
+    assert.ok(candidates.length, "find supported non-interactive ground for a station");
+    const cell = candidates[0].cell;
     for (let dy = 0; dy < 2; dy++) {
       const p = { ...cell, y: y + dy };
       if ((await block(p)) !== 0) await mine(p);
     }
-    if ((await block({ x: x + 1, y: y - 1, z })) === 0) {
-      await equip("dirt");
-      await aim({ x: x + 1.5, y: y - 1.5, z: z + 0.5 });
-      await page.mouse.down({ button: "right" });
-      await page.mouse.up({ button: "right" });
-    }
     await equip(id);
-    await aim({ x: x + 1.5, y: y - 0.5, z: z + 0.5 });
+    await aim({ x: cell.x + 0.5, y: y - 0.01, z: cell.z + 0.5 });
     await page.mouse.down({ button: "right" });
     await page.mouse.up({ button: "right" });
     await wait(300);
-    assert.ok((await block(cell)) !== 0, `place ${id}`);
-    await aim({ x: x + 1.5, y: y + 0.5, z: z + 0.5 });
+    assert.equal(await block(cell), { table: 12, furnace: 13 }[id], `place ${id}`);
+    await aim({ x: cell.x + 0.5, y: y + 0.5, z: cell.z + 0.5 });
     await page.mouse.down({ button: "right" });
     await page.mouse.up({ button: "right" });
     await page.waitForSelector("#inventory-panel:not([hidden])");

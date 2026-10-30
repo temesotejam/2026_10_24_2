@@ -25,6 +25,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
           await d.count("arrow"),
         );
       writeFileSync(`${out}/hunting-events.json`, JSON.stringify(events, null, 2));
+      flush();
     },
     ensureWeapon: async () => {
       const table = await d.station("table");

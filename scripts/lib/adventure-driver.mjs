@@ -213,7 +213,18 @@ export function createAdventureDriver(page, d) {
         const arrived = await d.walk(
           route[end].x + 0.5,
           route[end].z + 0.5,
-          p.h > current.position.y + 0.1 || water,
+          p.h > current.position.y + 0.1 ||
+            water ||
+            (await d.block({
+              x: Math.floor(current.position.x),
+              y: Math.floor(current.position.y + 0.4),
+              z: Math.floor(current.position.z),
+            })) === 5 ||
+            (await d.block({
+              x: Math.floor(current.position.x),
+              y: Math.floor(current.position.y + current.eye),
+              z: Math.floor(current.position.z),
+            })) === 5,
           0.25,
           0,
         );

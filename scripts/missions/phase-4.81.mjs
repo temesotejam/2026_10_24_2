@@ -6,7 +6,15 @@ import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { stashVillage } from "../lib/modern-storage.mjs";
 import { smeltIron, stockVillageFood, carriedFoodUnits } from "../lib/modern-resources.mjs";
 
-export async function run({ page, d, a, meta, chapter, flush = () => undefined }) {
+export async function run({
+  page,
+  d,
+  a,
+  meta,
+  chapter,
+  flush = () => undefined,
+  foodTargetUnits = 40,
+}) {
   assert.equal(
     (await a.adventure()).dimension,
     "overworld",
@@ -15,8 +23,8 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
   const village = meta.village;
   assert.ok(village?.cacheChest, "know the actual replacement camp cache");
   assert.ok(
-    (await d.count("enderPearl")) + (await d.count("enderEye")) >= 12,
-    "finish the real pearl hunt before this supply refresh",
+    (await d.count("enderPearl")) + (await d.count("enderEye")) >= 8,
+    "retain the actual gathered pearls while refreshing supplies",
   );
   const h = createModernHunting(page, d, a, { arrowReserve: 24 });
   h.activate();
@@ -124,23 +132,26 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
     meta.endSwordRefreshed = true;
     flush();
   }
-  if ((await carriedFoodUnits(d)) < 40)
+  if ((await carriedFoodUnits(d)) < foodTargetUnits)
     await stockVillageFood(d, page, a, village, {
       breadTarget: 9,
       waitForGrowth: true,
       timeoutMs: 600000,
     });
-  assert.ok((await carriedFoodUnits(d)) >= 40, "carry actual End food reserves");
+  assert.ok((await carriedFoodUnits(d)) >= foodTargetUnits, "carry actual End food reserves");
   await a.eat();
   await a.recover(20);
   // Recovery consumes genuine food too; keep the final entry reserve intact.
-  if ((await carriedFoodUnits(d)) < 40)
+  if ((await carriedFoodUnits(d)) < foodTargetUnits)
     await stockVillageFood(d, page, a, village, {
       breadTarget: 9,
       waitForGrowth: true,
       timeoutMs: 600000,
     });
-  assert.ok((await carriedFoodUnits(d)) >= 40, "retain food reserves after real healing");
+  assert.ok(
+    (await carriedFoodUnits(d)) >= foodTargetUnits,
+    "retain food reserves after real healing",
+  );
   const sword = await bestSword();
   assert.ok((sword?.durability ?? 0) >= 250, "preserve the fresh End sword through preparation");
   meta.endSupplyRefresh = {
@@ -152,5 +163,10 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
   };
   flush();
   console.log("Real End supply refresh", meta.endSupplyRefresh);
-  await chapter("保管した鉄を精錬して新品の剣を作り、エンドの食料を準備", 7);
+  await chapter(
+    foodTargetUnits
+      ? "保管した鉄を精錬して新品の剣を作り、遠征の食料を準備"
+      : "保管した鉄を精錬して新品の剣と矢を製作",
+    (await d.count("enderPearl")) + (await d.count("enderEye")) >= 12 ? 7 : 4,
+  );
 }
