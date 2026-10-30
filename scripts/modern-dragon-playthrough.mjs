@@ -14,6 +14,11 @@ const args = process.argv.slice(2),
 const out = path.resolve(option("--out", `visual-check/dragon-playthrough/run-${Date.now()}`));
 const resume = Number(option("--resume", "0"));
 const until = Number(option("--until", "1"));
+const renderScale = option("--render-scale", "0.5");
+process.env.RECORDING_RENDER_SCALE = renderScale;
+const captureQuality = Number(option("--capture-quality", "28"));
+assert.ok(["0.5", "0.75", "1"].includes(renderScale));
+assert.ok(Number.isInteger(captureQuality) && captureQuality >= 0 && captureQuality <= 51);
 const inspectPaused = args.includes("--inspect");
 const manualStart = args.includes("--manual-start");
 const url = new URL(option("--url", "http://127.0.0.1:4173/2026_10_24_2/"));
@@ -87,7 +92,14 @@ const startRecording = async () => {
   assert.equal(generation, 3, "new survival recording requires generator3");
   part.generator = generation;
   meta.generator = generation;
-  await page.select("#render-scale", "0.5");
+  await page.select("#render-scale", renderScale);
+  part.capture = {
+    width: 1280,
+    height: 720,
+    fps: 15,
+    quality: captureQuality,
+    renderScale: Number(renderScale),
+  };
   part.assets = await page.$$eval("script[src]", (els) => els.map((el) => el.getAttribute("src")));
   part.initial = await d.info();
   part.dimension = (await a.adventure()).dimension;
@@ -106,7 +118,7 @@ const startRecording = async () => {
     path: path.join(out, part.path),
     format: "mp4",
     fps: 15,
-    quality: 28,
+    quality: captureQuality,
     speed: 1,
     ffmpegPath: path.resolve("scripts/ffmpeg-capture.py"),
   });

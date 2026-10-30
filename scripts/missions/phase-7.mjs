@@ -21,7 +21,7 @@ function outsideFrame(frame, center) {
 }
 async function resumeControls(page, a) {
   await a.boot();
-  await page.select("#render-scale", "0.5");
+  await page.select("#render-scale", process.env.RECORDING_RENDER_SCALE ?? "0.5");
   if ((await page.evaluate(() => window.__mc.mode())) !== "pointer") {
     await page.locator("#play-button").click();
     await page.waitForFunction(() => window.__mc.mode() === "pointer");

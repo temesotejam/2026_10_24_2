@@ -622,7 +622,7 @@ export function createAdventureDriver(page, d) {
       destination,
     );
     await boot();
-    await page.select("#render-scale", "0.5");
+    await page.select("#render-scale", process.env.RECORDING_RENDER_SCALE ?? "0.5");
     await page.locator("#play-button").click();
     await page.waitForFunction(() => window.__mc.mode() === "pointer");
   }
