@@ -96,6 +96,7 @@ export function createModernHunting(page, d, a, options = {}) {
     terrainFallbacks: 0,
     shootingStrafes: 0,
     closeObstructionsBroken: 0,
+    wanderersLured: 0,
   };
   const ignored = new Map();
   const corpses = [];
@@ -878,6 +879,69 @@ export function createModernHunting(page, d, a, options = {}) {
           // Terrain movement still reacts to hostile danger, but must not
           // re-enter combat with this unreachable gathering target mid-approach.
           const chosen = focus;
+          // One normal arrow turns a passive wanderer hostile. Keep our
+          // supported position while it approaches, rather than crossing an
+          // entire hillside/coast just to deliver the first melee hit.
+          const reserve = Math.max(12, config.arrowReserve ?? options.arrowReserve ?? 12);
+          const arrows = latest.inventory
+            .filter((stack) => stack?.id === "arrow")
+            .reduce((n, stack) => n + stack.count, 0);
+          const ground = blockQuery(latest),
+            p = latest.position;
+          const pass = [0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43];
+          let supported = false;
+          if (Math.abs(p.y - Math.round(p.y)) < 0.05)
+            for (let x = Math.floor(p.x - 0.3 + 1e-4); x <= Math.floor(p.x + 0.3 - 1e-4); x++)
+              for (let z = Math.floor(p.z - 0.3 + 1e-4); z <= Math.floor(p.z + 0.3 - 1e-4); z++)
+                if (!pass.includes(ground(x, Math.round(p.y) - 1, z))) supported = true;
+          if (
+            chosen.species === "wanderer" &&
+            chosen.fuse !== 2 &&
+            supported &&
+            distance(chosen.position, p) > 3 &&
+            distance(chosen.position, p) <= 16 &&
+            arrows > reserve &&
+            latest.inventory.some((stack) => stack?.id === "bow") &&
+            (await rangedVisible(latest, chosen))
+          ) {
+            const beforeLureConfig = currentConfig;
+            currentConfig = { ...currentConfig, arrowReserve: reserve };
+            try {
+              await shoot(latest, chosen);
+              stats.wanderersLured++;
+              await record("wanderer-lure-shot", {
+                id: chosen.id,
+                position: chosen.position,
+                reserve,
+              });
+              const lureDeadline = Date.now() + 15000;
+              let engaged = false;
+              while (Date.now() < lureDeadline) {
+                const now = await observe(),
+                  target = alive(now).find((m) => m.id === chosen.id);
+                assert.ok(now.health > 0, "survive while the normally shot wanderer approaches");
+                if (!target) {
+                  await enqueueKill(chosen, now);
+                  engaged = true;
+                  break;
+                }
+                if (distance(target.position, now.position) <= 4.2) {
+                  await huntingGuard();
+                  engaged = true;
+                  break;
+                }
+                const otherDanger = nearestDanger(now);
+                if (otherDanger && otherDanger.id !== chosen.id) await huntingGuard();
+                else await wait(250);
+              }
+              if (!engaged) ignored.set(chosen.id, Date.now() + 10000);
+              await collectDrops();
+              focus = null;
+              continue;
+            } finally {
+              currentConfig = beforeLureConfig;
+            }
+          }
           focus = null;
           try {
             await a.surfaceTo({
@@ -938,7 +1002,7 @@ export function createModernHunting(page, d, a, options = {}) {
             d.narrate("夜に出現する敵を待ち、食料と装備を温存しています。", 1);
             await a.eat();
             await a.waitSafe(5000);
-          } else if (idle % 6 === 0) await patrol(home, patrolIndex++);
+          } else if (config.patrol !== false && idle % 6 === 0) await patrol(home, patrolIndex++);
           else {
             await a.eat();
             await wait(1000);
