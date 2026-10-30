@@ -5,6 +5,7 @@ import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { hostile } from "../lib/combat-policy.mjs";
 
 export async function run({ page, d, a, meta, flush = () => undefined, chapter }) {
+  const fishTarget = 30;
   const h = createModernHunting(page, d, a, { arrowReserve: 24 });
   // Default hunting guard also eats. Invoke it only for an actual nearby enemy,
   // so a quiet fishing cast keeps its rod equipped until the bite is reeled in.
@@ -50,7 +51,13 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
   }
   await d.close();
   d.setGoal("近くの本物の水面で釣り、体力を回復しながらエンド用の魚を集めます。");
-  if (!(await d.count("fishingRod"))) {
+  const rodDurability = Math.max(
+    0,
+    ...(await d.info()).inventory
+      .filter((s) => s?.id === "fishingRod")
+      .map((s) => s.durability ?? 0),
+  );
+  if (rodDurability < Math.max(1, fishTarget - (await d.count("fish")) + 2)) {
     assert.ok((await d.count("string")) >= 2, "own actual spider string for the rod");
     const table = await d.station("table");
     while ((await d.count("stick")) < 3) {
@@ -73,7 +80,7 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
   const progress = (meta.fishingFood ??= { caught: 0 });
   const until = Date.now() + 900000;
   let failures = 0;
-  while ((await d.info()).health < 20 || (await d.count("fish")) < 20) {
+  while ((await d.info()).health < 20 || (await d.count("fish")) < fishTarget) {
     assert.ok(Date.now() < until, "finish native fishing within the ordinary recording window");
     await guard();
     const state = await d.info();
@@ -174,12 +181,15 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
     console.log("Native fishing", JSON.stringify(progress));
     flush();
   }
-  assert.ok((await d.count("fish")) >= 20, "carry twenty genuinely caught fish");
+  assert.ok(
+    (await d.count("fish")) >= fishTarget,
+    "carry the genuinely caught travel and battle reserve",
+  );
   assert.equal(
     (await d.info()).health,
     20,
     "recover by eating genuine fish and normal regeneration",
   );
   await d.equip("iron_pick");
-  await chapter("実際に釣った魚で全快し、エンド用の生魚20匹を確保", 4);
+  await chapter(`実際に釣った魚で全快し、移動とエンド用の生魚${fishTarget}匹を確保`, 4);
 }

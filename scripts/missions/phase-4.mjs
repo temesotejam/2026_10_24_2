@@ -222,7 +222,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     a,
     Math.min(36, (await d.count("arrow")) + 4 * (await d.count("feather"))),
   );
-  if ((await carriedFoodUnits(d)) < 40) {
+  if ((await carriedFoodUnits(d)) < 60) {
     if (await d.count("fishingRod")) {
       await a.surfaceTo({ x: v.x - 5, z: v.z - 5 });
       const fishing = await import("./phase-4.9.mjs");
