@@ -129,6 +129,7 @@ export function createCompactProof(metadata, download, parts) {
     captionCorrections: metadata.captionCorrections,
     progression: {
       playerBuiltPortal: metadata.portal,
+      endMission: metadata.endMission,
       naturallyMinedObsidianInventoryCount: metadata.obsidianMission.mining.inventoryCount,
       minedNaturalLavaCoordinates: metadata.obsidianMission.mining.mined,
       bedSet: metadata.bedSet === true,
@@ -203,6 +204,7 @@ export function renderWatchPage(proof, style) {
       <h1>修正後のサバイバル：所持品ゼロからドラゴン討伐・帰還まで</h1>
       <p>三人称・日本語の実況字幕付き・約1.5倍速・${length}。自然の素材を採掘してネザーゲートを自作し、敵との戦闘で素材を集めてエンドへ進んだ、新しい仕様でのプレイ記録です。</p>
       <p>途中の死亡${proof.deathCount}回と装備の回収、操作の調整、通常保存からの再開も含みます。${proof.recordingPartCount}本の録画パートを順番につなぎ、プレイ映像を途中で切り取らず収録しています。</p>
+      ${proof.progression?.endMission?.useKnownEntrance ? "<p>遺跡へは、操作中に読み取った入口の座標を使って移動しました。アイを投げて方向を探す手順は省略し、実際の空枠11個を作成したアイで埋めています。</p>" : ""}
       <video id="recording" controls playsinline preload="metadata"
         poster="./${posterName}" data-proof="./${proofName}"
         data-expected-duration="${proof.export.duration}" aria-label="修正後のサバイバル討伐の全工程">
