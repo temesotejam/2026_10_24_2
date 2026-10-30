@@ -10,14 +10,105 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
   h.activate();
   d.setGoal("壊れた畑に実際の土を戻し、クワで耕して種を植え直します。");
   // Reach the field's real walking level with carried material, never teleport.
-  if ((await d.info()).position.y < 34.9) await a.pillarTo(35);
-  const walk = async (x, z, jump = false) => {
-    await d.walk(x, z, jump, 0.24, jump ? 450 : 60);
-    assert.ok((await d.info()).health > 0, "survive ordinary farm repairs");
+  if (Math.hypot((await d.info()).position.x - 187.5, (await d.info()).position.z + 83.5) > 12)
+    await a.surfaceTo({ x: 187, z: -84 });
+  const right = async () => {
+    await page.mouse.down({ button: "right" });
+    await page.mouse.up({ button: "right" });
+    await wait(120);
+  };
+  const stable = async () => {
+    await page.keyboard.up("Space");
+    await wait(300);
+    if ((await d.info()).position.y < 34.9) await a.pillarTo(35);
+    for (let step = 0; step < 5 && (await d.info()).position.y > 35.1; step++) {
+      await d.center();
+      const p = (await d.info()).position;
+      const floor = { x: Math.floor(p.x), y: Math.round(p.y) - 1, z: Math.floor(p.z) };
+      assert.ok(
+        [1, 2, 3, 4, 9, 11, 21].includes(await d.block(floor)),
+        "lower only ordinary high footing",
+      );
+      await d.equip("iron_pick");
+      await d.mine(floor);
+      await wait(450);
+      if ((await d.info()).position.y < 34.9) await a.pillarTo(35);
+    }
+    await d.center();
+    assert.ok(
+      Math.abs((await d.info()).position.y - 35) < 0.12,
+      "stable feet at field level before moving",
+    );
+  };
+  const irrigation = (x, z) => x === 196 && z >= -83 && z <= -80;
+  const fillFloor = async (x, z) => {
+    assert.ok(!irrigation(x, z), "never fill the original irrigation");
+    if (![0, 5].includes(await d.block({ x, y: 34, z }))) return;
+    let foundation = 33;
+    while (foundation >= 30 && [0, 5].includes(await d.block({ x, y: foundation, z })))
+      foundation--;
+    assert.ok(foundation >= 31, "reachable native foundation under the real hole");
+    const p = (await d.info()).position;
+    const dx = x + 0.5 - p.x,
+      dz = z + 0.5 - p.z;
+    const length = Math.hypot(dx, dz);
+    assert.ok(length < 1.3 && length > 0.5, "repair one adjacent column from dry footing");
+    await d.equip("dirt");
+    await page.keyboard.down("ShiftLeft");
+    try {
+      // Lean safely over the supported edge so the low ray clears our own
+      // floor. Crouching also brings foundation31 within ordinary reach.
+      await d.walk(p.x + (dx / length) * 0.35, p.z + (dz / length) * 0.35, false, 0.07, 50);
+      await wait(200);
+      for (let y = foundation + 1; y <= 34; y++) {
+        await d.aim({ x: x + 0.5, y: y - 0.01, z: z + 0.5 });
+        for (let attempt = 0; attempt < 4 && [0, 5].includes(await d.block({ x, y, z })); attempt++)
+          await right();
+        assert.equal(await d.block({ x, y, z }), 2, `place real foundation dirt ${x},${y},${z}`);
+      }
+    } finally {
+      await page.keyboard.up("ShiftLeft");
+    }
+    await d.center();
+  };
+  const walk = async (x, z) => {
+    await stable();
+    // Axis-aligned, one-column steps; repair every landing before entering it.
+    for (let leg = 0; leg < 100; leg++) {
+      const p = (await d.info()).position;
+      const cx = Math.floor(p.x),
+        cz = Math.floor(p.z),
+        tx = Math.floor(x),
+        tz = Math.floor(z);
+      if (cx === tx && cz === tz) break;
+      let nx = cx,
+        nz = cz,
+        jump = false;
+      if (cx !== tx) nx += Math.sign(tx - cx);
+      else nz += Math.sign(tz - cz);
+      if (irrigation(nx, nz)) {
+        assert.ok(nx !== cx, "cross irrigation sideways on the preserved two-cell jump");
+        nx += Math.sign(tx - cx);
+        jump = true;
+      }
+      // A two-cell irrigation landing is a previously repaired row. Keep it
+      // intact; all ordinary adjacent landings can be rebuilt from here.
+      if (jump)
+        assert.ok(
+          ![0, 5].includes(await d.block({ x: nx, y: 34, z: nz })),
+          "dry irrigation jump landing",
+        );
+      else await fillFloor(nx, nz);
+      await d.walk(nx + 0.5, nz + 0.5, jump, 0.18, jump ? 600 : 60);
+      await stable();
+      assert.ok((await d.info()).health > 0, "survive ordinary farm repairs");
+    }
+    const p = (await d.info()).position;
+    assert.ok(Math.hypot(p.x - x, p.z - z) < 0.3, "reach repaired walkway target");
   };
   // Keep all approach travel outside the broken farm: surfaceTo's terrain
   // excavation is deliberately never used within the crop rectangle.
-  await walk(187.5, -85.5);
+  await walk(187.5, -83.5);
   await walk(187.5, -74.5);
   await walk(188.5, -74.5);
   await a.useAt(v.cacheChest);
@@ -50,8 +141,8 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
   assert.ok((await d.count("seeds")) >= 56, "own actual seeds to restore the entire field");
   assert.ok((await d.count("dirt")) >= 40, "own actual soil for the missing field bases");
   if (!(await d.count("stone_hoe"))) {
-    await walk(190.5, -72.5);
-    await a.useAt({ x: 191, y: 35, z: -72 });
+    await walk(188.5, -78.5);
+    const table = await d.station("table");
     await page.waitForSelector('[data-recipe="stone_hoe"]');
     assert.ok(
       (await d.count("cobble")) >= 2 && (await d.count("stick")) >= 2,
@@ -59,27 +150,19 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
     );
     await d.make("stone_hoe");
     await d.close();
+    await d.equip("iron_pick");
+    await d.mine(table);
+    await wait(600);
+    await d.collect("table", 1);
   }
   await walk(187.5, -74.5);
-  await walk(187.5, -84.5);
-  const right = async () => {
-    await page.mouse.down({ button: "right" });
-    await page.mouse.up({ button: "right" });
-    await wait(100);
-  };
+  await walk(187.5, -83.5);
   const repair = async (x, z) => {
     const base = { x, y: 34, z },
       crop = { x, y: 35, z };
     let soil = await d.block(base);
     if ([0, 5].includes(soil)) {
-      assert.ok(
-        ![0, 5, 26].includes(await d.block({ x, y: 33, z })),
-        "native support below repair soil",
-      );
-      await d.equip("dirt");
-      await d.aim({ x: x + 0.5, y: 33.99, z: z + 0.5 });
-      for (let attempt = 0; attempt < 3 && [0, 5].includes(await d.block(base)); attempt++)
-        await right();
+      await fillFloor(x, z);
       soil = await d.block(base);
       assert.equal(soil, 2, `place actual dirt at ${x},34,${z}`);
     }
@@ -102,8 +185,8 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
   // Each row is repaired from its northern neighbour, which is either the
   // intact perimeter or the previous restored row. Never stand in placed dirt.
   for (let z = -83; z <= -80; z++) {
-    await walk(188.5, -84.5);
-    await walk(189.5, -84.5);
+    await walk(188.5, -83.5);
+    await walk(189.5, -83.5);
     await walk(189.5, z - 0.5);
     for (let x = 189; x <= 203; x++) {
       if (x === 196) continue; // Preserve all four original irrigation cells.
@@ -119,7 +202,7 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
     await walk(197.5, z - 0.5);
     await walk(195.5, z - 0.5, true);
     await walk(188.5, z - 0.5);
-    await walk(188.5, -84.5);
+    await walk(188.5, -83.5);
   }
   for (let z = -83; z <= -80; z++) {
     assert.equal(await d.block({ x: 196, y: 34, z }), 5, "preserve original irrigation");
