@@ -366,15 +366,31 @@ export async function stockVillageFood(
       await a.harvest(village, neededWheat, true);
     }
     if ((await d.count("wheat")) >= 3) {
-      await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
-      await d.walk(village.x - 5.5, village.z + 2.7, true, 0.3, 80);
-      await d.walk(village.x - 4.5, village.z + 3.5, true, 0.3, 80);
-      await d.equip((await d.count("iron_sword")) ? "iron_sword" : "iron_pick");
-      await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
+      let portableTable;
+      if (!(await d.count("table")) && (await d.count("planks")) >= 4) {
+        await d.open();
+        await d.make("table");
+        await d.close();
+      }
+      if (await d.count("table")) {
+        await a.surfaceTo({ x: village.x - 8, z: village.z - 1 });
+        if ((await d.info()).position.y < village.y - 0.1) await a.pillarTo(village.y);
+        portableTable = await d.station("table");
+      } else {
+        await a.surfaceTo({ x: village.x - 6, z: village.z + 1 });
+        await d.walk(village.x - 5.5, village.z + 2.7, true, 0.3, 80);
+        await d.walk(village.x - 4.5, village.z + 3.5, true, 0.3, 80);
+        await a.useAt({ x: village.x - 5, y: village.y, z: village.z + 5 });
+      }
       await page.waitForSelector('[data-recipe="bread"]');
       while ((await d.count("bread")) < breadTarget && (await d.count("wheat")) >= 3)
         await d.make("bread");
       await d.close();
+      if (portableTable) {
+        await d.mine(portableTable);
+        await wait(600);
+        await d.collect("table", 1);
+      }
     }
     if (!waitForGrowth || (await d.count("bread")) >= breadTarget) break;
     d.setGoal("小麦の生長を待ちながら、周囲の安全を確かめます。");
