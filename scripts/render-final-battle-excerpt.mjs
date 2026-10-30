@@ -1,7 +1,10 @@
-/** Optional excerpt AFTER the completed full-length render. Does not replace it.
+/** Optional excerpt after the actual clear. Does not replace the required full movie.
  * node scripts/render-final-battle-excerpt.mjs /workspace/artifacts/generation3-clear
+ * Add --standalone before the primary render: creates separate proof and NEVER
+ * writes recording.json or invents a primary export. Publish as an excerpt only.
  */
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import {
   existsSync,
@@ -16,7 +19,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { narrationCues, ass, srt } from "./lib/narration.mjs";
 import { segmentCues } from "./render-playthrough-parts.mjs";
-import { validateCompletedRecording } from "./publish-generation3-video.mjs";
+import { validateActualClear, validateCompletedRecording } from "./publish-generation3-video.mjs";
 
 export function finalBattleWindow(metadata) {
   const offsets = new Map();
@@ -70,19 +73,56 @@ export function finalBattleWindow(metadata) {
 }
 
 export function main(args = process.argv.slice(2)) {
-  const directory = path.resolve(args[0] ?? "/workspace/artifacts/generation3-clear");
+  const standalone = args.includes("--standalone");
+  const directory = path.resolve(
+    args.find((arg) => !arg.startsWith("--")) ?? "/workspace/artifacts/generation3-clear",
+  );
   const metadataFile = path.join(directory, "recording.json");
   const original = readFileSync(metadataFile, "utf8");
   const metadata = JSON.parse(original);
-  validateCompletedRecording(metadata);
-  assert.ok(
-    existsSync(path.join(directory, metadata.export.file)),
-    "render and verify the mandatory full movie first",
-  );
-  assert.equal(
-    readFileSync(path.join(directory, "recorded-parts.ffconcat"), "utf8"),
-    "ffconcat version 1.0\n" + metadata.parts.map((part) => `file '${part.path}'\n`).join(""),
-  );
+  if (standalone) {
+    assert.equal(metadata.completed, true, "finish the actual clear first");
+    assert.ok(
+      metadata.parts.every((part) => part.finishedAt),
+      "stop the final recorder before exporting",
+    );
+    for (const part of metadata.parts) {
+      assert.match(part.path, /^part-\d+\.mp4$/);
+      const result = spawnSync(
+        "ffprobe",
+        [
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-show_entries",
+          "stream=codec_name,width,height,pix_fmt:format=duration",
+          "-of",
+          "json",
+          path.join(directory, part.path),
+        ],
+        { encoding: "utf8" },
+      );
+      assert.equal(result.status, 0, result.stderr);
+      const probe = JSON.parse(result.stdout);
+      assert.equal(probe.streams[0].codec_name, "h264");
+      part.duration = Number(probe.format.duration);
+    }
+    validateActualClear(metadata);
+    assert.ok(metadata.parts.every((part) => part.camera?.perspective === 1));
+    const samples = metadata.parts.flatMap((part) => part.cameraSamples ?? []);
+    assert.ok(samples.length >= 10 && samples.every((sample) => sample.perspective === 1));
+  } else {
+    validateCompletedRecording(metadata);
+    assert.ok(
+      existsSync(path.join(directory, metadata.export.file)),
+      "render and verify the mandatory full movie first",
+    );
+    assert.equal(
+      readFileSync(path.join(directory, "recorded-parts.ffconcat"), "utf8"),
+      "ffconcat version 1.0\n" + metadata.parts.map((part) => `file '${part.path}'\n`).join(""),
+    );
+  }
   const excerpt = {
     ...finalBattleWindow(metadata),
     file: "survival-generation3-final-battle.mp4",
@@ -192,9 +232,44 @@ export function main(args = process.argv.slice(2)) {
     );
     for (const name of [excerpt.file, excerpt.subtitleFile])
       renameSync(path.join(staging, name), path.join(directory, name));
-    metadata.export.finalBattleExcerpt = excerpt;
-    writeFileSync(path.join(staging, "recording.json"), JSON.stringify(metadata, null, 2) + "\n");
-    renameSync(path.join(staging, "recording.json"), metadataFile);
+    if (standalone) {
+      const proofName = "final-battle-excerpt-proof.json";
+      const proof = {
+        schemaVersion: 1,
+        kind: "final-battle-excerpt",
+        includesFullPlaythrough: false,
+        completed: metadata.completed,
+        generator: metadata.generator,
+        seed: metadata.seed,
+        mode: metadata.mode,
+        fixtureImports: metadata.fixtureImports,
+        stateMutationAPI: metadata.stateMutationAPI,
+        initialInventoryEmpty: metadata.parts[0].initial.inventory.every((slot) => slot === null),
+        deathCount: metadata.deaths.length,
+        perspective: metadata.perspective,
+        allCameraSamplesThirdPerson: true,
+        sourceMetadataSha256: createHash("sha256").update(original).digest("hex"),
+        sourceParts: metadata.parts.map((part) => ({
+          path: part.path,
+          duration: part.duration,
+          sourceCommit: part.sourceCommit,
+        })),
+        chapters: metadata.chapters.filter((chapter) => chapter.phase === 8 || chapter.phase === 9),
+        final: metadata.final,
+        excerpt: {
+          ...excerpt,
+          sha256: createHash("sha256")
+            .update(readFileSync(path.join(directory, excerpt.file)))
+            .digest("hex"),
+        },
+      };
+      writeFileSync(path.join(staging, proofName), JSON.stringify(proof, null, 2) + "\n");
+      renameSync(path.join(staging, proofName), path.join(directory, proofName));
+    } else {
+      metadata.export.finalBattleExcerpt = excerpt;
+      writeFileSync(path.join(staging, "recording.json"), JSON.stringify(metadata, null, 2) + "\n");
+      renameSync(path.join(staging, "recording.json"), metadataFile);
+    }
     console.log(JSON.stringify(excerpt, null, 2));
   } finally {
     rmSync(staging, { recursive: true, force: true });

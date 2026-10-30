@@ -31,7 +31,7 @@ const posterName = "poster-generation3.jpg";
 const subtitleName = "survival-generation3.srt";
 const proofName = "generation3-proof.json";
 
-export function validateCompletedRecording(metadata) {
+export function validateActualClear(metadata) {
   assert.equal(metadata.completed, true, "finish the actual survival clear before publishing");
   assert.equal(
     metadata.generator,
@@ -71,6 +71,17 @@ export function validateCompletedRecording(metadata) {
     metadata.obsidianMission?.mining?.inventoryCount >= 10,
     "verify actual obsidian pickup",
   );
+  assert.ok(Array.isArray(metadata.deaths), "keep the recorded deaths visible in the provenance");
+  for (const death of metadata.deaths)
+    assert.ok(
+      metadata.parts.some((part) => part.path === death.part),
+      "include each recorded death's part",
+    );
+  return rawDuration;
+}
+
+export function validateCompletedRecording(metadata) {
+  const rawDuration = validateActualClear(metadata);
   assert.equal(metadata.export?.speed, 1.5);
   assert.equal(metadata.export.fullDecodeVerified, true);
   assert.equal(metadata.export.audio, false);
@@ -86,12 +97,6 @@ export function validateCompletedRecording(metadata) {
     "speed up without removing parts",
   );
   assert.ok(metadata.export.duration > 0);
-  assert.ok(Array.isArray(metadata.deaths), "keep the recorded deaths visible in the provenance");
-  for (const death of metadata.deaths)
-    assert.ok(
-      metadata.parts.some((part) => part.path === death.part),
-      "include each recorded death's part",
-    );
   return rawDuration;
 }
 
