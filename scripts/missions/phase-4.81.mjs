@@ -91,6 +91,11 @@ export async function run({ page, d, a, meta, chapter, flush = () => undefined }
   assert.ok((await carriedFoodUnits(d)) >= 40, "carry actual End food reserves");
   await a.eat();
   await a.recover(20);
+  // Recovery consumes genuine food too; keep the final entry reserve intact.
+  if ((await carriedFoodUnits(d)) < 40)
+    await stockVillageFood(d, page, a, village,
+      { breadTarget: 9, waitForGrowth: true, timeoutMs: 600000 });
+  assert.ok((await carriedFoodUnits(d)) >= 40, "retain food reserves after real healing");
   const sword = await bestSword();
   assert.ok((sword?.durability ?? 0) >= 250, "preserve the fresh End sword through preparation");
   meta.endSupplyRefresh = {
