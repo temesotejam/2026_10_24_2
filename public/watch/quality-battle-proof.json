@@ -1,0 +1,72 @@
+{
+  "kind": "source-quality-battle-excerpt",
+  "includesFullPlaythrough": false,
+  "completed": true,
+  "generator": 3,
+  "seed": 2026,
+  "initialInventoryEmpty": true,
+  "fixtureImports": false,
+  "stateMutationAPI": false,
+  "final": {
+    "health": 17,
+    "dragon": {
+      "health": 0,
+      "phase": 251.68333332967086,
+      "defeated": true
+    },
+    "eggCount": 1,
+    "dimension": "overworld"
+  },
+  "navigation": {
+    "method": "previously-observed-readonly-map",
+    "directionThrowSkipped": true,
+    "entrance": {
+      "x": 13,
+      "y": 37,
+      "z": -236
+    }
+  },
+  "deathCount": 10,
+  "sourceMetadataSha256": "930dd808ce5210d234eb703940c590fc74dd1ae1ca7206ceae01847e966ef110",
+  "sourcePartCount": 137,
+  "sourceRawDuration": 12943.466664,
+  "settings": {
+    "width": 1280,
+    "height": 720,
+    "crf": 18,
+    "bitrateCap": false,
+    "denoise": false,
+    "speed": 1.5,
+    "fps": 30,
+    "audio": false,
+    "captions": "Japanese, burned into picture"
+  },
+  "downloads": [
+    {
+      "rawStart": 12668.806997,
+      "rawEnd": 12943.466664,
+      "start": 8445.871331333334,
+      "end": 8628.977776,
+      "duration": 183.066667,
+      "sourceWindow": {
+        "start": {
+          "part": "part-137.mp4",
+          "seconds": 102.40699999999924
+        },
+        "end": {
+          "part": "part-137.mp4",
+          "seconds": 377.06666699999914
+        },
+        "endEntryRawSeconds": 12680.806997,
+        "victoriousReturnRawSeconds": 12942.172997,
+        "contiguous": true
+      },
+      "file": "survival-generation3-battle-720p.mp4",
+      "subtitleFile": "survival-generation3-battle-720p.srt",
+      "bytes": 14249529,
+      "captionCount": 15,
+      "fullDecodeVerified": true,
+      "sha256": "6b5b030355a26a107ad32ebac15beef1609fb7a110839398f033e51bd1408fc6"
+    }
+  ]
+}

@@ -8,6 +8,8 @@ const url = at >= 0 ? process.argv[at + 1] : "http://127.0.0.1:4173/2026_10_24_2
 const option = (key, fallback) =>
   process.argv.includes(key) ? process.argv[process.argv.indexOf(key) + 1] : fallback;
 const file = option("--file", null);
+const expectedWidth = Number(option("--expected-width", "960"));
+assert.ok(Number.isInteger(expectedWidth) && expectedWidth > 0);
 const explicitDuration = option("--expected-duration", option("--duration", null));
 if (explicitDuration !== null)
   assert.ok(
@@ -63,11 +65,12 @@ try {
   assert.ok(Math.abs(duration - expectedDuration) < 1, `complete video duration: ${duration}`);
   await page.locator('[data-time="0"]').click();
   await page.waitForFunction(
-    () => {
+    (expectedWidth) => {
       const v = document.querySelector("video");
-      return !v.paused && v.currentTime > 1 && v.videoWidth === 960 && v.error === null;
+      return !v.paused && v.currentTime > 1 && v.videoWidth === expectedWidth && v.error === null;
     },
     { timeout: 120000 },
+    expectedWidth,
   );
   await page.screenshot({ path: `${out}/playing.png` });
   const seek = Math.max(0, expectedDuration - 4);
