@@ -48,7 +48,9 @@ export function finalBattleWindow(metadata) {
   const enteredAt = Math.min(...entries.map(chapterTime));
   const returnedAt = Math.max(...returns.map(chapterTime));
   assert.ok(returnedAt > enteredAt);
-  const rawStart = Math.max(0, enteredAt - 2);
+  // Entry chapter is saved after contact, realm transfer and control resume.
+  // Include the approach and physical gateway contact before that timestamp.
+  const rawStart = Math.max(0, enteredAt - 12);
   const rawEnd = rawDuration;
   const locate = (time) => {
     const part =

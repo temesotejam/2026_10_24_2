@@ -419,7 +419,7 @@ export async function main(args = process.argv.slice(2)) {
     assert.ok(entries.length && returns.length);
     const enteredAt = Math.min(...entries),
       returnedAt = Math.max(...returns);
-    assert.ok(enteredAt >= item.rawStart && enteredAt - item.rawStart <= 2.001);
+    assert.ok(enteredAt >= item.rawStart && enteredAt - item.rawStart <= 12.001);
     assert.ok(returnedAt > enteredAt && returnedAt <= item.rawEnd);
     assert.ok(Math.abs(item.rawEnd - metadata.export.rawDuration) < 0.001);
     assert.ok(Math.abs(item.start - item.rawStart / 1.5) < 0.001);
