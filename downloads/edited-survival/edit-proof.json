@@ -1,0 +1,1175 @@
+{
+  "sourceRun": "http://127.0.0.1:4175/2026_10_24_2/?seed=2026&mode=survival&view=third-person",
+  "sourceStartedAt": "2026-10-30T19:29:01.160Z",
+  "sourceInitialInventoryEmpty": true,
+  "sourceDeathCount": 2,
+  "sourceRecordings": [
+    {
+      "file": "part-1.mp4",
+      "startedAt": "2026-10-30T19:29:01.160Z",
+      "finishedAt": "2026-10-30T19:31:54.612Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "4fc601ac204d3a3738ab46cd1d878bf1ebea7eb8",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-2.mp4",
+      "startedAt": "2026-10-30T19:32:01.941Z",
+      "finishedAt": "2026-10-30T19:38:18.516Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "6a9ddcb4128fd0c812175a4b66ff52153f6408d2",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-3.mp4",
+      "startedAt": "2026-10-30T19:38:27.415Z",
+      "finishedAt": "2026-10-30T19:42:59.371Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "6a9ddcb4128fd0c812175a4b66ff52153f6408d2",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-4.mp4",
+      "startedAt": "2026-10-30T19:43:23.378Z",
+      "finishedAt": "2026-10-30T19:52:49.941Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "6a9ddcb4128fd0c812175a4b66ff52153f6408d2",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-5.mp4",
+      "startedAt": "2026-10-30T19:53:02.613Z",
+      "finishedAt": "2026-10-30T19:53:14.516Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "422c9113be4672fd98f859e167ee1bd57b285090",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-6.mp4",
+      "startedAt": "2026-10-30T19:53:34.536Z",
+      "finishedAt": "2026-10-30T20:09:25.325Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "422c9113be4672fd98f859e167ee1bd57b285090",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-7.mp4",
+      "startedAt": "2026-10-30T20:09:44.545Z",
+      "finishedAt": "2026-10-30T20:12:24.533Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "3dc346a48e545e7e9d5ea96bb9c287e130f69cf7",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-8.mp4",
+      "startedAt": "2026-10-30T20:12:44.779Z",
+      "finishedAt": "2026-10-30T20:21:59.834Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 15,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "3dc346a48e545e7e9d5ea96bb9c287e130f69cf7",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-9.mp4",
+      "startedAt": "2026-10-30T20:25:12.444Z",
+      "finishedAt": "2026-10-30T20:25:27.785Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "99d37bbbe1e42ec55a8af7dd00c162d7ed312745",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-10.mp4",
+      "startedAt": "2026-10-30T20:28:06.337Z",
+      "finishedAt": "2026-10-30T20:28:59.813Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "99d37bbbe1e42ec55a8af7dd00c162d7ed312745",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-11.mp4",
+      "startedAt": "2026-10-30T20:32:20.328Z",
+      "finishedAt": "2026-10-30T20:32:42.288Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "99d37bbbe1e42ec55a8af7dd00c162d7ed312745",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-12.mp4",
+      "startedAt": "2026-10-30T20:34:02.097Z",
+      "finishedAt": "2026-10-30T20:35:35.630Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "99d37bbbe1e42ec55a8af7dd00c162d7ed312745",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-13.mp4",
+      "startedAt": "2026-10-30T20:37:57.219Z",
+      "finishedAt": "2026-10-30T20:40:21.279Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "ea03f7e975be40ab84dbb364dc96ef767f306972",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-14.mp4",
+      "startedAt": "2026-10-30T20:40:37.607Z",
+      "finishedAt": "2026-10-30T20:46:52.391Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "ea03f7e975be40ab84dbb364dc96ef767f306972",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-15.mp4",
+      "startedAt": "2026-10-30T20:46:56.622Z",
+      "finishedAt": "2026-10-30T20:48:15.551Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "ea03f7e975be40ab84dbb364dc96ef767f306972",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-16.mp4",
+      "startedAt": "2026-10-30T20:48:50.571Z",
+      "finishedAt": "2026-10-30T20:56:19.519Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "ea03f7e975be40ab84dbb364dc96ef767f306972",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-17.mp4",
+      "startedAt": "2026-10-30T20:59:53.671Z",
+      "finishedAt": "2026-10-30T21:00:18.723Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "97b1ea2d983ec295a94df3b72347172ca44f96e9",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-18.mp4",
+      "startedAt": "2026-10-30T21:01:24.076Z",
+      "finishedAt": "2026-10-30T21:12:43.154Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "97b1ea2d983ec295a94df3b72347172ca44f96e9",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-19.mp4",
+      "startedAt": "2026-10-30T21:12:47.295Z",
+      "finishedAt": "2026-10-30T21:14:33.817Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "6513dd06cdd1afa6760409eeb51347205d226780",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-20.mp4",
+      "startedAt": "2026-10-30T21:18:26.516Z",
+      "finishedAt": "2026-10-30T21:21:35.034Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "6513dd06cdd1afa6760409eeb51347205d226780",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-21.mp4",
+      "startedAt": "2026-10-30T21:22:23.241Z",
+      "finishedAt": "2026-10-30T21:39:03.602Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "6513dd06cdd1afa6760409eeb51347205d226780",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-22.mp4",
+      "startedAt": "2026-10-30T21:39:08.608Z",
+      "finishedAt": "2026-10-30T21:41:05.134Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "7862fc19ebd59057e73e38265d822b4b02d0afb7",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-23.mp4",
+      "startedAt": "2026-10-30T21:42:34.281Z",
+      "finishedAt": "2026-10-30T21:50:26.125Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "6f2eacf8c0cc79d3e9d0437e6588134cd773e974",
+      "assets": ["./assets/index-BO-kpD8f.js"]
+    },
+    {
+      "file": "part-24.mp4",
+      "startedAt": "2026-10-30T21:56:23.275Z",
+      "finishedAt": "2026-10-30T21:57:37.223Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "b743be578dcfd4d575a946dd34d713a128488e31",
+      "assets": ["./assets/index-NyHitjzy.js"]
+    },
+    {
+      "file": "part-25.mp4",
+      "startedAt": "2026-10-30T22:03:08.945Z",
+      "finishedAt": "2026-10-30T22:03:23.485Z",
+      "capture": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "quality": 18,
+        "renderScale": 1
+      },
+      "sourceCommit": "d517e7b251135e4fc3a68d7bcf1cd3946ba3d199",
+      "assets": ["./assets/index-Dlkpje3Q.js"]
+    }
+  ],
+  "navigation": {
+    "method": "native-eye-confirmation-with-readonly-map-route",
+    "directionThrowSkipped": false
+  },
+  "bedVisits": [
+    {
+      "before": 1550.591666672604,
+      "after": 1551.3916666726143,
+      "slept": false,
+      "notice": "復活地点を設定しました。夜は眠れます"
+    },
+    {
+      "before": 3224.99166666181,
+      "after": 3225.374999995138,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3231.8749999950433,
+      "after": 3232.2416666617046,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3233.24166666169,
+      "after": 3233.591666661685,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3234.2416666616755,
+      "after": 3234.574999995004,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3235.5416666616566,
+      "after": 3235.7416666616537,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3238.50833332828,
+      "after": 3238.708333328277,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3239.7416666615954,
+      "after": 3240.124999994923,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3242.441666661556,
+      "after": 3242.874999994883,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3243.574999994873,
+      "after": 3244.0249999948664,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3244.8416666615212,
+      "after": 3244.9749999948526,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3245.891666661506,
+      "after": 3246.2249999948344,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3247.041666661489,
+      "after": 3247.2916666614856,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3248.124999994807,
+      "after": 3248.4749999948017,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3249.308333328123,
+      "after": 3249.658333328118,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3250.3916666614405,
+      "after": 3250.7083333281025,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3251.5249999947573,
+      "after": 3251.7749999947537,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3252.5916666614085,
+      "after": 3252.924999994737,
+      "slept": false,
+      "notice": "近くに敵がいます"
+    },
+    {
+      "before": 3270.2666666611512,
+      "after": 3900.23333333333,
+      "slept": true,
+      "notice": "朝になりました。復活地点を設定しました",
+      "location": {
+        "x": 198,
+        "y": 35,
+        "z": -72
+      }
+    },
+    {
+      "before": 4579.0499999901185,
+      "after": 5100.533333333326,
+      "slept": true,
+      "notice": "朝になりました。復活地点を設定しました"
+    },
+    {
+      "before": 5549.358333326794,
+      "after": 6300.566666666658,
+      "slept": true,
+      "notice": "朝になりました。復活地点を設定しました"
+    },
+    {
+      "before": 7005.174999989738,
+      "after": 7500.549999999992,
+      "slept": true,
+      "notice": "朝になりました。復活地点を設定しました"
+    }
+  ],
+  "sourceCompleted": true,
+  "sourceFinal": {
+    "health": 18,
+    "dragon": {
+      "health": 0,
+      "phase": 229.38333332999537,
+      "defeated": true
+    },
+    "eggCount": 1,
+    "dimension": "overworld"
+  },
+  "plan": {
+    "title": "所持品ゼロからドラゴン討伐：新しいサバイバルの字幕実況",
+    "status": "reviewed edit from the completed new run; all clips in chronological order",
+    "episodes": [
+      {
+        "title": "道具づくりと最初の戦闘",
+        "clips": [
+          {
+            "part": "part-1.mp4",
+            "start": 0,
+            "end": 32,
+            "speed": 1.25,
+            "text": "所持品ゼロで出発。木を集めて、最初の道具を作ります。",
+            "gamma": 1
+          },
+          {
+            "part": "part-1.mp4",
+            "start": 35,
+            "end": 70,
+            "speed": 3,
+            "text": "石を掘って、石のツルハシとかまどを準備。（3倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-1.mp4",
+            "start": 74,
+            "end": 98,
+            "speed": 4,
+            "text": "鉄の道具を目指して採掘。繰り返しの作業を短縮します。（4倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-1.mp4",
+            "start": 140,
+            "end": 172,
+            "speed": 1.5,
+            "text": "鉄を精錬してツルハシを作り、自然のダイヤを探します。",
+            "gamma": 1.2,
+            "captions": [
+              {
+                "start": 18,
+                "end": 21.2,
+                "text": "ダイヤを入手。次の道具を準備します。"
+              }
+            ]
+          },
+          {
+            "part": "part-2.mp4",
+            "start": 6,
+            "end": 46,
+            "speed": 4,
+            "text": "ネザーへ行くには黒曜石が必要。追加のダイヤと鉄を集めます。（4倍速）",
+            "gamma": 1.2
+          },
+          {
+            "part": "part-2.mp4",
+            "start": 100,
+            "end": 159,
+            "speed": 3,
+            "text": "ダイヤのツルハシ、鉄の剣、バケツを製作。遠征の装備がそろいました。（3倍速）",
+            "gamma": 1.2
+          },
+          {
+            "part": "part-2.mp4",
+            "start": 238,
+            "end": 262,
+            "speed": 3,
+            "text": "地上へ。食料を用意するため村に向かいます。（移動を一部省略）",
+            "gamma": 1
+          },
+          {
+            "part": "part-2.mp4",
+            "start": 350,
+            "end": 376,
+            "speed": 1.5,
+            "text": "村に到着。自然生成の宝箱を調べます。",
+            "gamma": 1.3
+          },
+          {
+            "part": "part-3.mp4",
+            "start": 0,
+            "end": 20,
+            "speed": 1.5,
+            "text": "畑の小麦を収穫し、パンを準備します。",
+            "gamma": 1.4
+          },
+          {
+            "part": "part-3.mp4",
+            "start": 60,
+            "end": 120,
+            "speed": 6,
+            "text": "収穫した場所には種を植え直します。準備中にも敵が来るので警戒。（6倍速）",
+            "gamma": 1.4
+          },
+          {
+            "part": "part-3.mp4",
+            "start": 145,
+            "end": 180,
+            "speed": 1.4,
+            "text": "収穫した小麦をパンに。体力回復と遠征のために持っていきます。",
+            "gamma": 1.3
+          },
+          {
+            "part": "part-4.mp4",
+            "start": 123,
+            "end": 174,
+            "speed": 3,
+            "text": "弓や矢、予備の道具に使う木材も補充。（移動と作業を短縮）",
+            "gamma": 1.2
+          },
+          {
+            "part": "part-4.mp4",
+            "start": 185,
+            "end": 218,
+            "speed": 2,
+            "text": "砂利から火打ち石を集めます。置き直して掘る作業も普通の操作です。（2倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-4.mp4",
+            "start": 383,
+            "end": 401,
+            "speed": 1.5,
+            "text": "繰り返しを省略。実際に集めた火打ち石10個から着火具を作ります。",
+            "gamma": 1
+          },
+          {
+            "part": "part-4.mp4",
+            "start": 426,
+            "end": 444,
+            "speed": 1.25,
+            "text": "村の井戸で水を汲み、黒曜石の採掘に備えます。",
+            "gamma": 1
+          },
+          {
+            "part": "part-4.mp4",
+            "start": 549,
+            "end": 565,
+            "speed": 1.5,
+            "text": "食料と予備の剣も確保。遠征の準備ができました。",
+            "gamma": 1
+          },
+          {
+            "part": "part-5.mp4",
+            "start": 0.5,
+            "end": 11.4,
+            "speed": 1,
+            "text": "村のベッドで復活地点を設定。準備中の夜にはここで休みます。",
+            "gamma": 1
+          },
+          {
+            "part": "part-6.mp4",
+            "start": 14,
+            "end": 27,
+            "speed": 1,
+            "text": "パールを落とす敵との戦闘。倒しても、毎回ドロップするとは限りません。",
+            "gamma": 1
+          },
+          {
+            "part": "part-6.mp4",
+            "start": 96,
+            "end": 116,
+            "speed": 1,
+            "text": "見つけた敵を剣で倒し、落としたパールを回収します。",
+            "gamma": 1
+          },
+          {
+            "part": "part-6.mp4",
+            "start": 123,
+            "end": 149,
+            "speed": 4,
+            "text": "鶏の羽根も集めます。矢づくりに使う素材です。（4倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-6.mp4",
+            "start": 405,
+            "end": 425,
+            "speed": 2,
+            "text": "夜の戦闘と素材集めを短縮。パールも少しずつ増えてきました。（2倍速）",
+            "gamma": 1.3
+          },
+          {
+            "part": "part-7.mp4",
+            "start": 3,
+            "end": 22,
+            "speed": 1.25,
+            "text": "集めた糸と羽根から弓矢を製作。繰り返しの素材集めは一部省略しています。",
+            "gamma": 1
+          }
+        ]
+      },
+      {
+        "title": "自作ゲート・失敗からの回収・ネザー遠征",
+        "clips": [
+          {
+            "part": "part-8.mp4",
+            "start": 12,
+            "end": 48,
+            "speed": 6,
+            "text": "自然の溶岩を探すため、安全な階段を掘って地下へ。（6倍速）",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-8.mp4",
+            "start": 194,
+            "end": 232,
+            "speed": 1.25,
+            "text": "溶岩だまりを発見。持ってきた水で冷やし、黒曜石に変えます。",
+            "gamma": 1.25,
+            "captions": [
+              {
+                "start": 20,
+                "end": 30,
+                "text": "ダイヤのツルハシで採掘。ゲート用に10個集めます。"
+              }
+            ]
+          },
+          {
+            "part": "part-8.mp4",
+            "start": 320,
+            "end": 344,
+            "speed": 4,
+            "text": "黒曜石の採掘を短縮。すべて、このプレイで実際に集めた素材です。（4倍速）",
+            "gamma": 1.2
+          },
+          {
+            "part": "part-8.mp4",
+            "start": 360,
+            "end": 375,
+            "speed": 3,
+            "text": "黒曜石10個を確保。地上へ戻る道のりは省略します。（3倍速）",
+            "gamma": 1.2
+          },
+          {
+            "part": "part-8.mp4",
+            "start": 486,
+            "end": 516,
+            "speed": 2,
+            "text": "集めた黒曜石で、ネザーゲートの枠を一から組み立てます。（2倍速）",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-8.mp4",
+            "start": 543,
+            "end": 554.5,
+            "speed": 1,
+            "text": "夜の敵に追い詰められ、ここで倒されてしまいました。",
+            "gamma": 1.4
+          },
+          {
+            "part": "part-9.mp4",
+            "start": 0,
+            "end": 14.8,
+            "speed": 1,
+            "text": "ベッドから復活して装備を回収。入口を土でふさいで家へ退避します。",
+            "gamma": 1.35
+          },
+          {
+            "part": "part-10.mp4",
+            "start": 16,
+            "end": 28,
+            "speed": 1.5,
+            "text": "壁から迎撃。しかし、弓を持ったまま寝ようとして矢を無駄に消費。操作ミスです。",
+            "gamma": 1.35
+          },
+          {
+            "part": "part-11.mp4",
+            "start": 2,
+            "end": 21.4,
+            "speed": 1,
+            "text": "敵が近くて眠れないので、ベッドを家の反対側へ持ち運びます。",
+            "gamma": 1.3,
+            "captions": [
+              {
+                "start": 13,
+                "end": 19.4,
+                "text": "置き直したベッドで朝に。明るいうちに準備を続けます。"
+              }
+            ]
+          },
+          {
+            "part": "part-12.mp4",
+            "start": 79,
+            "end": 92.5,
+            "speed": 1,
+            "text": "作業の続きからゲートを仕上げ、火打ち石で点火。自作ゲートが完成しました。",
+            "gamma": 1
+          },
+          {
+            "part": "part-15.mp4",
+            "start": 69,
+            "end": 74.5,
+            "speed": 1,
+            "text": "減った矢を、集め直した羽根と火打ち石から補充します。",
+            "gamma": 1
+          },
+          {
+            "part": "part-16.mp4",
+            "start": 6,
+            "end": 12,
+            "speed": 1,
+            "text": "出発前にもベッドで休み、食料と体力を整えます。",
+            "gamma": 1
+          },
+          {
+            "part": "part-16.mp4",
+            "start": 157,
+            "end": 179,
+            "speed": 1,
+            "text": "自分で建てたゲートから、いよいよネザーへ。",
+            "gamma": 1.15
+          },
+          {
+            "part": "part-16.mp4",
+            "start": 185,
+            "end": 196,
+            "speed": 1,
+            "text": "ロッドを落とすネザーの敵と戦闘。まずは弓で距離を保ちます。",
+            "gamma": 1.25,
+            "captions": []
+          },
+          {
+            "part": "part-16.mp4",
+            "start": 210,
+            "end": 236,
+            "speed": 1,
+            "text": "近づいた敵には剣で対応。食事で回復しながら必要なロッドを集めます。",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-16.mp4",
+            "start": 308,
+            "end": 320,
+            "speed": 2,
+            "text": "必要数を確保し、建てたゲートへ帰還します。（移動を短縮）",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-16.mp4",
+            "start": 436,
+            "end": 448.3,
+            "speed": 1,
+            "text": "ところが、帰還ゲートの手前で倒されてしまいました。ロッドも落としています。",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-17.mp4",
+            "start": 0,
+            "end": 24.6,
+            "speed": 1,
+            "text": "ゲートから入り直して、実際に落とした装備とロッドを回収します。",
+            "gamma": 1.2,
+            "captions": [
+              {
+                "start": 13,
+                "end": 24.5,
+                "text": "今度は帰還を優先。ロッドを持って通常世界へ戻れました。"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "食料の立て直し・パール集め・エンドへの準備",
+        "clips": [
+          {
+            "part": "part-18.mp4",
+            "start": 6,
+            "end": 22,
+            "speed": 2,
+            "text": "ネザーで消耗した剣を、手持ちの鉄から作り直します。（準備を短縮）",
+            "gamma": 1
+          },
+          {
+            "part": "part-18.mp4",
+            "start": 30,
+            "end": 46,
+            "speed": 1,
+            "text": "次は残りのパール。地上の敵との戦闘を再開します。",
+            "gamma": 1
+          },
+          {
+            "part": "part-18.mp4",
+            "start": 518,
+            "end": 534,
+            "speed": 1.5,
+            "text": "同じ狩りを一部省略し、パールを少しずつ集めます。",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-20.mp4",
+            "start": 14,
+            "end": 30,
+            "speed": 1,
+            "text": "食料が減ったので井戸で釣り。足場の安定した場所で補充します。",
+            "gamma": 1
+          },
+          {
+            "part": "part-20.mp4",
+            "start": 171,
+            "end": 187,
+            "speed": 3,
+            "text": "待ち時間を短縮して魚30匹を確保。これで狩りを続けられます。（3倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-21.mp4",
+            "start": 300,
+            "end": 323,
+            "speed": 1,
+            "text": "食料を確保して再挑戦。パールを落とす敵を見つけて戦います。",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-21.mp4",
+            "start": 452,
+            "end": 465,
+            "speed": 1,
+            "text": "あと少し。周囲にも気を配りながら素材を集めます。",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-21.mp4",
+            "start": 613,
+            "end": 650,
+            "speed": 2.5,
+            "text": "繰り返しの戦闘を短縮。必要な数に近づいてきました。（2.5倍速）",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-21.mp4",
+            "start": 688,
+            "end": 707,
+            "speed": 1.25,
+            "text": "必要なパール12個がそろいました。遠征の装備を整えます。",
+            "gamma": 1.25
+          },
+          {
+            "part": "part-22.mp4",
+            "start": 18,
+            "end": 37,
+            "speed": 2,
+            "text": "食料を補充し、村に預けていた鉱石も取り出して精錬します。（2倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-22.mp4",
+            "start": 55,
+            "end": 75,
+            "speed": 2,
+            "text": "実際の鉄から新品の剣を製作。最終戦に備えます。（2倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-22.mp4",
+            "start": 102,
+            "end": 115.5,
+            "speed": 1.5,
+            "text": "クリスタル6個に対して矢16本を準備。予備も携えて出発です。",
+            "gamma": 1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 2,
+            "end": 14,
+            "speed": 1.25,
+            "text": "ロッドを粉にし、パールと合わせてエンダーアイ12個を作ります。",
+            "gamma": 1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 14,
+            "end": 23,
+            "speed": 1,
+            "text": "投げたアイで北西を確認。観測用の地図で遺跡までの経路を選びます。",
+            "gamma": 1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 24,
+            "end": 72,
+            "speed": 6,
+            "text": "遺跡へ移動。長い道のりは一部カット・早送りしています。（6倍速）",
+            "gamma": 1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 140,
+            "end": 168,
+            "speed": 1.25,
+            "text": "地下遺跡で、空いている11個の枠にアイを入れ、ゲートを開きます。",
+            "gamma": 1.2
+          }
+        ]
+      },
+      {
+        "title": "クリスタル破壊・ドラゴン討伐・卵を持って生還",
+        "clips": [
+          {
+            "part": "part-23.mp4",
+            "start": 170,
+            "end": 208,
+            "speed": 1.25,
+            "text": "エンドに到着。まずは周囲のクリスタル6個を、弓で順番に壊します。",
+            "gamma": 1.1,
+            "captions": [
+              {
+                "start": 17,
+                "end": 29.9,
+                "text": "回復源を壊したら、降りてきたドラゴンに剣で攻撃します。"
+              }
+            ]
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 208,
+            "end": 217,
+            "speed": 1,
+            "text": "中央へ降りてきたところを狙い、剣で攻撃を入れます。",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 217,
+            "end": 248,
+            "speed": 4,
+            "text": "体力が減ったら離れて食事。回復待ちは早送りします。（4倍速）",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 248,
+            "end": 258,
+            "speed": 1,
+            "text": "回復したら、もう一度中央へ。無理をせず、攻撃を重ねます。",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 258,
+            "end": 292,
+            "speed": 5,
+            "text": "飛んでいる間と回復の待ち時間を短縮。（5倍速）",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 292,
+            "end": 307,
+            "speed": 1,
+            "text": "残り半分が見えてきました。降りたタイミングに攻撃します。",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 307,
+            "end": 340,
+            "speed": 5,
+            "text": "再び離れて回復。食料の準備がここで役立ちます。（5倍速）",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 340,
+            "end": 354,
+            "speed": 1,
+            "text": "あと一息。近づいたら確実に攻撃を入れます。",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 354,
+            "end": 385,
+            "speed": 5,
+            "text": "最後も体力を戻してから接近します。（5倍速）",
+            "gamma": 1.1
+          },
+          {
+            "part": "part-23.mp4",
+            "start": 385,
+            "end": 405,
+            "speed": 1,
+            "text": "最後の攻撃。ドラゴンを討伐します。",
+            "gamma": 1.1,
+            "captions": [
+              {
+                "start": 14,
+                "end": 20,
+                "text": "討伐成功！ドラゴンの卵を入手しました。"
+              }
+            ]
+          },
+          {
+            "part": "part-25.mp4",
+            "start": 0,
+            "end": 7.2,
+            "speed": 1,
+            "text": "帰還ゲートの不具合を修正し、同じセーブで帰還をやり直します。",
+            "gamma": 1
+          },
+          {
+            "part": "part-25.mp4",
+            "start": 7.2,
+            "end": 14.1,
+            "speed": 1,
+            "text": "卵を持って通常世界へ生還。所持品ゼロからの再挑戦、クリアです。",
+            "gamma": 1
+          }
+        ]
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "title": "道具づくりと最初の戦闘",
+      "file": "survival-edited-01.mp4",
+      "subtitleFile": "survival-edited-01.srt",
+      "duration": 314.1,
+      "bytes": 70944357,
+      "sha256": "f84c0e6e669cb5749199afec2e6486607e0a08db38c8ca56e5911df078926b65",
+      "fullDecodeVerified": true,
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-01.mp4"
+    },
+    {
+      "title": "自作ゲート・失敗からの回収・ネザー遠征",
+      "file": "survival-edited-02.mp4",
+      "subtitleFile": "survival-edited-02.srt",
+      "duration": 243,
+      "bytes": 41262299,
+      "sha256": "44dc4278bc14c8b18a183c1d56e70817c2c42bbcab16ceb988d0b0896906f9b6",
+      "fullDecodeVerified": true,
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-02.mp4"
+    },
+    {
+      "title": "食料の立て直し・パール集め・エンドへの準備",
+      "file": "survival-edited-03.mp4",
+      "subtitleFile": "survival-edited-03.srt",
+      "duration": 199.5,
+      "bytes": 40915046,
+      "sha256": "d4a54125a139ce3a2aed2bc2ad838126e9d542b883a0be88373a29b2b96f052d",
+      "fullDecodeVerified": true,
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-03.mp4"
+    },
+    {
+      "title": "クリスタル破壊・ドラゴン討伐・卵を持って生還",
+      "file": "survival-edited-04.mp4",
+      "subtitleFile": "survival-edited-04.srt",
+      "duration": 139.866667,
+      "bytes": 19008186,
+      "sha256": "6824a9f8ddad72e8c643e1823b7268c5254b075282c9ec0d148a0c8e3ae7ef2f",
+      "fullDecodeVerified": true,
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-04.mp4"
+    }
+  ],
+  "settings": {
+    "width": 1280,
+    "height": 720,
+    "crf": 18,
+    "bitrateCap": null,
+    "narration": "Japanese subtitles",
+    "footageReusedFromPreviousRun": false
+  }
+}

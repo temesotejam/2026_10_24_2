@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>再挑戦のサバイバル・短く編集した字幕実況</title>
+    <style>
+      body {
+        margin: 0;
+        background: #171b22;
+        color: #eee;
+        font:
+          17px/1.7 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1100px;
+        margin: auto;
+        padding: 24px;
+      }
+      a {
+        color: #9ed2ff;
+      }
+      video {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #000;
+      }
+      li {
+        margin: 16px 0;
+      }
+      button {
+        font: inherit;
+        padding: 8px 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>再挑戦のサバイバル：短く編集した字幕実況</h1>
+      <p>
+        新規セーブの所持品ゼロから、ドラゴン討伐・卵の入手・生還まで。日本語字幕と三人称視点で、合計14分56秒に編集しました。採掘や待ち時間を短縮し、主要な戦闘と失敗からの立て直しを残しています。
+      </p>
+      <h2>全4章をダウンロード</h2>
+      <p>番号順に再生してください。字幕は動画に入っています。</p>
+      <ol>
+        <li>
+          <a
+            href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-01.mp4"
+            download
+            >1. 道具づくりと最初の戦闘（5分14秒・約71MB）をダウンロード</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-02.mp4"
+            download
+            >2. 自作ゲート・失敗からの回収・ネザー遠征（4分03秒・約42MB）をダウンロード</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-03.mp4"
+            download
+            >3. 食料の立て直し・パール集め・エンドへの準備（3分20秒・約41MB）をダウンロード</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/survival-edited-04.mp4"
+            download
+            >4. クリスタル破壊・ドラゴン討伐・卵を持って生還（2分20秒・約20MB）をダウンロード</a
+          >
+        </li>
+      </ol>
+      <p>
+        実況は字幕です（音声なし）。討伐後の帰還ゲートの不具合を修正し、同じ通常セーブから帰還を再試行しています。
+      </p>
+      <h2>最終章のプレビュー</h2>
+      <video controls playsinline preload="metadata">
+        <source src="./survival-edited-finale.mp4" type="video/mp4" />
+      </video>
+      <p><button data-time="0">最終章を最初から再生</button></p>
+      <p>
+        <a
+          href="https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/edited-survival/README.md"
+          >ダウンロード一覧</a
+        >
+        / <a href="./edited-proof.json">編集とクリアの記録</a> /
+        <a href="../?seed=20261029&amp;mode=survival&amp;view=third-person">ゲームを遊ぶ</a>
+      </p>
+    </main>
+    <script>
+      document.querySelector('[data-time="0"]').addEventListener("click", async () => {
+        const video = document.querySelector("video");
+        video.currentTime = 0;
+        await video.play();
+      });
+    </script>
+  </body>
+</html>
