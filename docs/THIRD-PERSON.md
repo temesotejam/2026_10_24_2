@@ -1,6 +1,10 @@
 # 三人称カメラと録画
 
-このページの公開済み動画と完走結果は、進行を見直す前の仕様の記録です。新仕様での本番録画は継続中で、まだ討伐・帰還を完了していません。
+## 新仕様の実際のクリア映像
+
+生成方式3・所持品ゼロから討伐と帰還まで完了しました。[全工程MP4（約2時間24分）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) / [最後のボス戦と帰還のMP4（3分3秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4)。どちらも字幕付き・背後視点・約1.5倍速で、普通の動画ファイルとして保存できます。
+
+137録画パート・死亡10回と回収を含む実プレイです。カメラ観測6,421件は全て背後視点。最終HP17・卵1個。操作スクリプトは通常入力を使い、遺跡への移動は以前観測した地図の座標を使いました。アイの投擲による探索は行っていません。[録画条件と検証記録](PLAYTHROUGH.md)。
 
 F5で一人称→背後→正面→一人称を切り替えます。WebGL版ではURLに `view=third-person` を指定して背後視点から開始できます。CPU描画では一人称を使います。
 
@@ -18,13 +22,13 @@ Minecraft本体の新しい三人称プレイ映像との直接比較は、こ�
 - 近すぎる場合は体を非表示にして視界を確保します。狭い坑道では一人称に近い映像になります。壁越しに地形を表示しません。
 - 攻撃・採掘・設置の射程と照準はプレイヤーの実際の目から計算し、カメラの位置を変えても届く距離は変わりません。自動操作の目の高さの観測も表示カメラから分離しました。
 
-## 撮り直し
+## 旧仕様の収録方法（アーカイブ）
 
 `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium node scripts/dragon-playthrough.mjs --third-person --out visual-check/dragon-playthrough/run-6-third-person`
 
 新規プロファイル・所持品ゼロから通常操作で記録し、`render-narrated-playthrough.mjs` で日本語字幕と1.5倍速を付けます。途中の通常セーブ再開は各パートに記録します。`cameraSamples` は録画中の実際の視点と距離の読み取りです。
 
-## 前回の録画結果（距離の安定化前）
+## 旧仕様の録画結果（距離の安定化前）
 
 - 空の所持品から始め、ロッド2本、エンダーアイ4個、クリスタル6個の破壊、ドラゴン討伐、卵を持った帰還まで記録しました。最後の体力は10、ドラゴンの体力は0、卵は1個です。
 - 録画は2パートで、畑で操作を調整した通常セーブからの再開が1回あります。ゲームプレイの途中はカットしていません。
@@ -44,4 +48,4 @@ Minecraft本体の新しい三人称プレイ映像との直接比較は、こ�
 
 所持品ゼロから討伐・帰還まで完走しました。1パート、通常セーブからの再開0回、体力7、卵1個。動画は約1.5倍速・10分13秒・約19MB、字幕85件です。録画中の視点の観測は全459回が背後視点でした。
 
-[新しいMP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4) / [検証データ](../public/watch/steady-camera-proof.json)
+[旧仕様のMP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4) / [検証データ](../public/watch/steady-camera-proof.json)

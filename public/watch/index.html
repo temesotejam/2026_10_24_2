@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>サバイバル討伐動画 | Classic Voxel Survival</title>
+    <title>修正後のサバイバル討伐動画 | Classic Voxel Survival</title>
     <style>
       :root {
         color-scheme: dark;
@@ -70,55 +70,210 @@
   </head>
   <body>
     <main>
-      <a href="../">← ゲームへ</a>
-      <h1>三人称・字幕実況付き：所持品ゼロから、ドラゴン討伐まで</h1>
+      <a href="../?seed=20261029&amp;mode=survival&amp;view=third-person">← 修正後の新しい冒険へ</a>
+      <h1>修正後のサバイバル：所持品ゼロからドラゴン討伐・帰還まで</h1>
       <p>
-        カメラ距離の急変を抑えて撮り直した全工程・約1.5倍速・10分13秒。日本語の実況字幕付きです。所持品ゼロからドラゴン討伐と帰還まで収録しています。
+        三人称・日本語の実況字幕付き・約1.5倍速・2時間23分49秒。自然の素材を採掘してネザーゲートを自作し、敵との戦闘で素材を集めてエンドへ進んだ、新しい仕様でのプレイ記録です。
       </p>
       <p>
-        この動画は進行の仕様を見直す前の記録です。現在の新規ワールドでは、村のゲートや素材の入手方法が変わっています。
-        <a href="../?seed=20261029&amp;mode=survival&amp;view=third-person"
-          >修正後の新しい冒険を始める</a
-        >
+        途中の死亡10回と装備の回収、操作の調整、通常保存からの再開も含みます。137本の録画パートを順番につなぎ、プレイ映像を途中で切り取らず収録しています。
+      </p>
+      <p>
+        遺跡へは、操作中に読み取った入口の座標を使って移動しました。アイを投げて方向を探す手順は省略し、実際の空枠11個を作成したアイで埋めています。
       </p>
       <video
         id="recording"
         controls
         playsinline
         preload="metadata"
-        poster="./poster-steady-camera.jpg"
-        aria-label="サバイバル討伐の全工程"
+        poster="./poster-generation3.jpg"
+        data-proof="./generation3-proof.json"
+        data-expected-duration="8628.966667"
+        aria-label="修正後のサバイバル討伐の全工程"
       >
-        <source src="./survival-steady-camera.mp4" type="video/mp4" />
-        <a href="./survival-steady-camera.mp4">動画ファイルを直接開く</a>
+        <source src="./survival-generation3.mp4" type="video/mp4" />
+        <a
+          href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4"
+          >MP4を直接ダウンロード</a
+        >
       </video>
       <nav aria-label="動画の再生とダウンロード">
         <button type="button" data-time="0">最初から再生</button>
+        <a class="download" href="#high-quality">高画質の全工程をダウンロード（3分割）</a>
         <a
           class="download"
-          href="./survival-steady-camera.mp4"
-          download="survival-steady-camera-1.5x.mp4"
-          >調整後のMP4をダウンロード（約19MB）</a
+          href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4"
+          download="survival-generation3-1.5x.mp4"
+          >全工程を1本でダウンロード（軽量版・約77MB）</a
         >
-        <a
-          class="download"
-          href="./survival-third-person.mp4"
-          download="survival-third-person-previous.mp4"
-          >前回の三人称（調整前）</a
-        >
-        <a class="download" href="./survival-narrated.mp4" download="survival-first-person-1.5x.mp4"
-          >前回の動画（一人称・字幕付き）</a
-        >
-        <a class="download" href="../?view=third-person&amp;mode=survival"
-          >三人称でゲームを始める</a
-        >
-        <a class="download" href="./survival.mp4" download="survival-original-1.5x.mp4"
-          >最初の動画（字幕なし）</a
-        >
+        <a class="download" href="./survival-generation3.srt" download>字幕ファイル</a>
+        <a class="download" href="./generation3-proof.json">進行と録画の検証記録</a>
       </nav>
+      <details>
+        <summary>場面を選んで再生</summary>
+        <nav aria-label="動画の章">
+          <button type="button" data-time="103.22733333333333">
+            所持品ゼロから木・石・鉄の道具と自然のダイヤを入手
+          </button>
+          <button type="button" data-time="201.97688866666667">
+            追加の鉱石を採掘し、ダイヤのツルハシ・鉄の剣・バケツを製作
+          </button>
+          <button type="button" data-time="313.080222">
+            地上へ戻り、村の自然生成された宝箱を探索
+          </button>
+          <button type="button" data-time="1057.796444">
+            パン・木材・天然の火打石・水・予備の剣を用意
+          </button>
+          <button type="button" data-time="1636.9475553333334">
+            装備を回収し、弓と実際の矢を作成・食料補給・村を拠点化
+          </button>
+          <button type="button" data-time="1939.0693333333336">
+            自然溶岩を水で冷却して黒曜石10個を採掘し、自分でネザーゲートを建造・点火
+          </button>
+          <button type="button" data-time="2762.2162226666674">
+            村へ安全に撤退し、食料と弓矢を補充
+          </button>
+          <button type="button" data-time="3051.4799999999996">
+            倒した敵が落としたロッドを7本回収
+          </button>
+          <button type="button" data-time="3297.412444666667">足場の上でりんごを食べて回復</button>
+          <button type="button" data-time="3360.949556666666">
+            三段の足場から敵を倒し、失ったロッド・パール・道具を回収して帰還
+          </button>
+          <button type="button" data-time="4552.461778666666">
+            岩の角で追いかけてきた敵にジャンプ攻撃で対応
+          </button>
+          <button type="button" data-time="4763.621777999999">
+            保管していた食料で、ふさいだ避難穴の中から体力を回復
+          </button>
+          <button type="button" data-time="4833.215110666665">
+            海岸側から落としたパール・ロッド・装備を回収
+          </button>
+          <button type="button" data-time="5156.879332666666">
+            焼肉8個を準備し、拾った火打ち石で矢を補充
+          </button>
+          <button type="button" data-time="5410.571554666666">浅瀬から泳いで岸へ避難</button>
+          <button type="button" data-time="5421.3106653333325">岸の射手に剣で応戦</button>
+          <button type="button" data-time="5474.9046659999985">
+            夜の敵から、ふさいだ避難穴へ退避
+          </button>
+          <button type="button" data-time="5488.119332666666">
+            村のベッドで眠り、朝を迎えて回収の準備
+          </button>
+          <button type="button" data-time="5979.335999333333">
+            村でパンを補給し、パール8個とロッド14本を回収して元の村へ帰還
+          </button>
+          <button type="button" data-time="5982.938221333334">
+            落とした素材と装備を回収し、村の石畳へ帰還
+          </button>
+          <button type="button" data-time="6553.644888">近くの家畜から得た肉をかまどで調理</button>
+          <button type="button" data-time="6714.187332666667">
+            保管した鉄を精錬して新品の剣と矢を製作
+          </button>
+          <button type="button" data-time="6884.143553999999">
+            海岸で落としたパール9個とロッド14本、装備を回収
+          </button>
+          <button type="button" data-time="6902.659109333333">
+            浅い水中の敵を通常操作で討伐し、実際のドロップを回収
+          </button>
+          <button type="button" data-time="6904.5128873333315">
+            実際に落ちている素材を確認し、回収場所を調べます
+          </button>
+          <button type="button" data-time="6906.543998666665">
+            敵の位置を確認し、水中ではないため潜水対象から除外
+          </button>
+          <button type="button" data-time="6918.8991099999985">
+            浅い水中の敵を通常操作で討伐し、実際のドロップを回収
+          </button>
+          <button type="button" data-time="7364.801331333332">
+            実際に釣った魚で全快し、エンド用の生魚20匹を確保
+          </button>
+          <button type="button" data-time="7478.536664666666">
+            敵の水深を確認し、6ブロックを超えるため潜水を見送る
+          </button>
+          <button type="button" data-time="7618.056886666666">
+            低い岸へ順番に泳ぎ、地面へ脱出
+          </button>
+          <button type="button" data-time="7679.046886666667">
+            低い岸へ順番に泳ぎ、地面へ脱出
+          </button>
+          <button type="button" data-time="7723.294220000001">
+            実際に釣った魚で全快し、エンド用の生魚20匹を確保
+          </button>
+          <button type="button" data-time="7920.124220666668">
+            夜の敵から、ふさいだ避難穴へ退避
+          </button>
+          <button type="button" data-time="8251.965554">
+            実際に釣った魚で全快し、移動とエンド用の生魚30匹を確保
+          </button>
+          <button type="button" data-time="8376.847998000001">
+            水深と帰路を確認し、安全に潜れる敵を探します
+          </button>
+          <button type="button" data-time="8453.871331333334">
+            全ての空枠にエンダーアイを入れ、エンドへ進入
+          </button>
+          <button type="button" data-time="8628.115331333333">
+            ドラゴン討伐・卵入手・通常世界へ帰還
+          </button>
+        </nav>
+      </details>
+      <section id="high-quality">
+        <h2>高画質・分割版（全3本）</h2>
+        <p>
+          同じ全工程を時系列に3分割し、各動画の画質を上げています。順番に見ると全編を視聴できます。三人称・日本語字幕・1.5倍速です。
+        </p>
+        <nav aria-label="高画質の分割動画">
+          <a
+            class="download"
+            href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-part-1.mp4"
+            download="survival-generation3-part-1.mp4"
+            >1/3をダウンロード（47分56秒・約83MB）</a
+          >
+          <a
+            class="download"
+            href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-part-2.mp4"
+            download="survival-generation3-part-2.mp4"
+            >2/3をダウンロード（47分56秒・約80MB）</a
+          >
+          <a
+            class="download"
+            href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-part-3.mp4"
+            download="survival-generation3-part-3.mp4"
+            >3/3をダウンロード（47分56秒・約79MB）</a
+          >
+        </nav>
+      </section>
+      <section>
+        <h2>最終戦の抜粋</h2>
+        <p>
+          エンド進入直前から、ドラゴンとの戦い・卵の入手・通常世界への帰還までを抜き出した動画です。冒険の全工程は上の全編動画に収録しています。
+        </p>
+        <a
+          class="download"
+          href="https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4"
+          download="survival-generation3-final-battle.mp4"
+          >最終戦の抜粋をダウンロード（3分3秒・約5MB）</a
+        >
+      </section>
       <p>
-        字幕は映像に入っているので設定は不要です。キャラクターの背後から追う、自動操作の実録です。壁を先読みして徐々に近づき、開けた場所でも少し待ってからゆっくり引きます。狭い坑道や壁際ではカメラが近づき、体が視界を塞ぐ場合は非表示になります。今回は通常セーブからの再開を挟まず、続けて収録しています。ゲーム内ではF5で一人称・背後・正面を切り替えられます。音声はありません。
+        字幕は映像に入っているので設定は不要です。長時間の全工程を収めるため画質を軽量化しています。音声はありません。壁際や狭い坑道ではカメラが近づき、体が視界を塞ぐ場合は非表示になります。
       </p>
+      <details>
+        <summary>旧仕様の動画（生成方式2・改善前）</summary>
+        <p>
+          以下は、村のゲートや素材の入手方法などを見直す前の記録です。現在の新規ワールドの進行とは異なります。
+        </p>
+        <nav aria-label="旧仕様の動画">
+          <a class="download" href="./survival-steady-camera.mp4" download
+            >旧仕様・三人称・カメラ調整後</a
+          >
+          <a class="download" href="./survival-third-person.mp4" download
+            >旧仕様・三人称・カメラ調整前</a
+          >
+          <a class="download" href="./survival-narrated.mp4" download>旧仕様・一人称・字幕付き</a>
+          <a class="download" href="./survival.mp4" download>最初の旧仕様の動画・字幕なし</a>
+        </nav>
+      </details>
       <p id="status" role="status" aria-live="polite"></p>
     </main>
     <script>

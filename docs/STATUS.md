@@ -1,4 +1,16 @@
-# 基本サバイバル統合版の進捗
+# 進捗と検証記録
+
+## 最新：生成方式3の実プレイ完了（2026年10月30日）
+
+新規プロファイル・所持品ゼロから、自然素材の採掘、手作りネザーゲート、敵からのロッド14本とパール入手、アイ11個の製作と全11空き枠への設置、200HPのドラゴン討伐、卵を持った通常世界への帰還まで完了しました。137録画パート・死亡10回を含み、最終HP17・卵1個です。
+
+[全工程MP4（字幕・背後視点・約1.5倍速、2時間23分49秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) / [最後のボス戦と帰還（3分3秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4) / [条件と検証記録](PLAYTHROUGH.md)
+
+地形・位置の読み取りと通常入力を使った自動プレイです。本番には支給品や検証用セーブを使っていません。遺跡へは以前観測した座標で移動し、アイを投げて方向を探す工程は省いています（`eyeThrows=0`）。別ブラウザの戦闘fixtureとは区別します。
+
+最終確認では、ESLint・Prettier・Pages用ビルド、439件のゲーム試験と24件の操作・字幕試験が通過しました。全編は厳密なデコード検査を行い、全編・戦闘抜粋はブラウザでの再生と終盤へのシークも確認しています。
+
+## 初期公開時の記録（2026年10月25日）
 
 2026年10月25日（日本時間）。[公開ゲーム](https://temesotejam.github.io/2026_10_24_2/)。
 基本サバイバルの実装と最終調整をmainへ統合済み。[公開タグ v0.1.0-beta.1](https://github.com/temesotejam/2026_10_24_2/releases/tag/v0.1.0-beta.1)。自動検証の数値は [validation-results.json](validation-results.json) に記録。

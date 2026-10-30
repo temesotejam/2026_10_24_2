@@ -1,0 +1,2106 @@
+{
+  "schemaVersion": 1,
+  "generator": 3,
+  "seed": 2026,
+  "mode": "survival",
+  "completed": true,
+  "fixtureImports": false,
+  "stateMutationAPI": false,
+  "initialInventoryEmpty": true,
+  "perspective": "third-person-behind",
+  "allRecordedPartsIncluded": true,
+  "recordingPartCount": 137,
+  "ordinarySaveResumeCount": 136,
+  "deathCount": 10,
+  "deaths": [
+    {
+      "part": "part-5.mp4",
+      "position": {
+        "x": 207.5000491479081,
+        "y": 38.00000002966979,
+        "z": -89.29591658722688
+      },
+      "recordedErrorOrCause": "skeleton attack during attempted crafting recovery"
+    },
+    {
+      "part": "part-6.mp4",
+      "position": {
+        "x": 207.5000491479081,
+        "y": 38.00000002966979,
+        "z": -89.29591658722688
+      },
+      "recordedErrorOrCause": "skeleton attack while centering on an unsupported ledge after recovering dropped items"
+    },
+    {
+      "part": "part-9.mp4",
+      "position": {
+        "x": 193.10958312176595,
+        "y": 35.00000000423914,
+        "z": -75.36388121961564
+      },
+      "recordedErrorOrCause": "failed pursuit around a village house while under skeleton fire"
+    },
+    {
+      "part": "part-11.mp4",
+      "position": {
+        "x": 170.81628410756318,
+        "y": 45.19787767410202,
+        "z": -88.69999932002844
+      },
+      "recordedErrorOrCause": "Error: AssertionError [ERR_ASSERTION]: survive travel"
+    },
+    {
+      "part": "part-28.mp4",
+      "position": {
+        "x": 24.52748708553198,
+        "y": 26.000000033908016,
+        "z": -21.360592871587514
+      },
+      "recordedErrorOrCause": "Error: TimeoutError: Waiting failed: 120000ms exceeded"
+    },
+    {
+      "part": "part-30.mp4",
+      "position": {
+        "x": 190.49871321000168,
+        "y": 35.2400000339084,
+        "z": -72.29990024248988
+      },
+      "recordedErrorOrCause": "Error: Error: defeated while defending without recovered equipment"
+    },
+    {
+      "part": "part-56.mp4",
+      "position": {
+        "x": 305.4990026311989,
+        "y": 34.0000000021174,
+        "z": -81.42178214840628
+      },
+      "recordedErrorOrCause": "Error: TimeoutError: Timed out after waiting 30000ms"
+    },
+    {
+      "part": "part-60.mp4",
+      "position": {
+        "x": 298.5142903758514,
+        "y": 48.000000031789234,
+        "z": -72.50344219216012
+      },
+      "recordedErrorOrCause": "Observed actual death before normal respawn"
+    },
+    {
+      "part": "part-83.mp4",
+      "position": {
+        "x": 272.5124530997615,
+        "y": 36.00000001907037,
+        "z": -65.61746310872192
+      },
+      "recordedErrorOrCause": "Observed actual death before normal respawn"
+    },
+    {
+      "part": "part-103.mp4",
+      "position": {
+        "x": 244.49971037130433,
+        "y": 33.00000000635581,
+        "z": -124.68832534518492
+      },
+      "recordedErrorOrCause": "Observed actual death before normal respawn"
+    }
+  ],
+  "parts": [
+    {
+      "path": "part-1.mp4",
+      "duration": 156.933333,
+      "resumePhase": 0,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": true,
+      "bytes": 10881519,
+      "sha256": "885ca8282a7a144b8bfc11871abf644058384b7c35b2a6d10f9dbb3c6884e4d1"
+    },
+    {
+      "path": "part-2.mp4",
+      "duration": 147.6,
+      "resumePhase": 1,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": true,
+      "bytes": 2520536,
+      "sha256": "0385f4ab0eea8d03e38c86171874c408852e2d624dd7404a8a131cfc59a3b779"
+    },
+    {
+      "path": "part-3.mp4",
+      "duration": 167.6,
+      "resumePhase": 2,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": true,
+      "bytes": 27461645,
+      "sha256": "d74ee7d3b1e2a37825e31b5846994010d21c8106d73195ea825f51861ac195ed"
+    },
+    {
+      "path": "part-4.mp4",
+      "duration": 150.333333,
+      "resumePhase": 3,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": false,
+      "recordedError": "AssertionError [ERR_ASSERTION]: finish or safely escape the current combat encounter",
+      "bytes": 32563026,
+      "sha256": "645a6d9a773f1e1eb2fa23937b228029c2d96ebeb59d8371be453d965a10fb3e"
+    },
+    {
+      "path": "part-5.mp4",
+      "duration": 38.8,
+      "resumePhase": 3,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": false,
+      "recordedError": "AssertionError [ERR_ASSERTION]: survive travel",
+      "bytes": 743425,
+      "sha256": "e74edd790476fd6f032abfbcfb08559e4e9c7a9171333016b4dd87d6c4076a27"
+    },
+    {
+      "path": "part-6.mp4",
+      "duration": 165.533333,
+      "resumePhase": 3,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": false,
+      "recordedError": "AssertionError [ERR_ASSERTION]: survive travel",
+      "bytes": 14065994,
+      "sha256": "3191bd376602a7d1a022ffd102ae003fd33d90736074483cf6a43661350028cc"
+    },
+    {
+      "path": "part-7.mp4",
+      "duration": 373.666667,
+      "resumePhase": 3,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": false,
+      "recordedError": "TimeoutError: Timed out after waiting 30000ms",
+      "bytes": 50215739,
+      "sha256": "c309fe4ea724ab6000ba8264ccc22e3714358ef7ab4cf42ca05cfdae23b982ac"
+    },
+    {
+      "path": "part-8.mp4",
+      "duration": 388.466667,
+      "resumePhase": 3,
+      "generator": 3,
+      "sourceCommit": "4e8d1a1ab870efd5a59f7cdd00f59925c302824b",
+      "completed": true,
+      "bytes": 91029399,
+      "sha256": "eb79b7ceb2a71437ce5efe8be3e1d32eefdab493e9568fb9edd715b43020cf8e"
+    },
+    {
+      "path": "part-9.mp4",
+      "duration": 328.133333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "7c5d6ff531ab2050338a6a1ae52069195fe0024a",
+      "completed": false,
+      "recordedError": "AssertionError [ERR_ASSERTION]: survive travel",
+      "bytes": 42250556,
+      "sha256": "c105f13659a9793e669f7b8e6ef04d613d5e5eff9c99fdb6f8082f086fa7ce98"
+    },
+    {
+      "path": "part-10.mp4",
+      "duration": 293.6,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f",
+      "completed": false,
+      "recordedError": "AssertionError [ERR_ASSERTION]: mining target changed or blocked {\"x\":163,\"y\":38,\"z\":-81}",
+      "bytes": 26510975,
+      "sha256": "a39673787935e8188229e0653bae82827ca67acb49dd9f56eded4a3635c35b21"
+    },
+    {
+      "path": "part-11.mp4",
+      "duration": 58.4,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: survive travel",
+      "bytes": 7939530,
+      "sha256": "b026b789ba30f95de417d168c692bb30d0ad345e90676984b10da971a4130546"
+    },
+    {
+      "path": "part-12.mp4",
+      "duration": 67.666667,
+      "resumePhase": 4.1,
+      "generator": 3,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: own iron_pick",
+      "bytes": 11363029,
+      "sha256": "6d9acb8b5bb0e645a3cc01d22bec8ebf19371f6bdbfb02b369763818b6b80f48"
+    },
+    {
+      "path": "part-13.mp4",
+      "duration": 120.133333,
+      "resumePhase": 4.1,
+      "generator": 3,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f",
+      "completed": true,
+      "bytes": 25306723,
+      "sha256": "80d506f9dd51353c28a07a6413e29fd3e5e16d582a1beef3b711c3514befdee1"
+    },
+    {
+      "path": "part-14.mp4",
+      "duration": 157.866667,
+      "resumePhase": 5,
+      "generator": 3,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot reach {\"x\":187,\"y\":4,\"z\":-73}",
+      "bytes": 12777938,
+      "sha256": "653b14fd5c7f2f439d3d6f50c5cd6a4c1589e3774086f9de94aead0eb2ea5fd3"
+    },
+    {
+      "path": "part-15.mp4",
+      "duration": 1.8,
+      "resumePhase": 5.1,
+      "generator": 3,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f",
+      "completed": true,
+      "bytes": 314670,
+      "sha256": "899073736aa67993ad4911fc7b98f2e8e3a17d0f4d85e7c999047be8ba45fb4d"
+    },
+    {
+      "path": "part-16.mp4",
+      "duration": 217.8,
+      "resumePhase": 5,
+      "generator": 3,
+      "sourceCommit": "5f0e4275ef354e5a00ed82835e6ef254b72c5d6f",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: aim at the actual supporting top face for {\"x\":196,\"y\":37,\"z\":-75}",
+      "bytes": 28073806,
+      "sha256": "b7cc37588d964910c86bf0385013d4fb603113ad5ab3f3d7df842f1cc7d76e78"
+    },
+    {
+      "path": "part-17.mp4",
+      "duration": 42.666667,
+      "resumePhase": 5,
+      "generator": 3,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: clear or water-filled placement cell {\"x\":196,\"y\":38,\"z\":-75}",
+      "bytes": 9523407,
+      "sha256": "db334136855e7b5e6116ec2def532c072f6931f6c9349a385a6052660b737975"
+    },
+    {
+      "path": "part-18.mp4",
+      "duration": 33.2,
+      "resumePhase": 5,
+      "generator": 3,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b",
+      "completed": true,
+      "bytes": 9612800,
+      "sha256": "ad8b18a409f8dd88ee3b3b069c4be6b735c51c5a0e774fd60ba4cfb4d6704b13"
+    },
+    {
+      "path": "part-19.mp4",
+      "duration": 36.4,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Waiting for selector `[data-area=\"chest\"]` failed",
+      "bytes": 3067489,
+      "sha256": "e445510def68535a4976a80e276092dc794694eada6c669c00e74eaa9b407fb3"
+    },
+    {
+      "path": "part-20.mp4",
+      "duration": 8.666667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Waiting for selector `[data-area=\"chest\"]` failed",
+      "bytes": 880366,
+      "sha256": "701fc6b6d1274d0d73da10a6c2c2c165c4a6ebd6a3825d2a150f6e10309ab75a"
+    },
+    {
+      "path": "part-21.mp4",
+      "duration": 381.266667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "ec940f8db28cd6ea1d5fb03f931e5c1eb439981b",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: room in discovered chest for surplus",
+      "bytes": 47791394,
+      "sha256": "0abf77f886da22365f5b138af7a521bb904448191caecc4027af1316328826d1"
+    },
+    {
+      "path": "part-22.mp4",
+      "duration": 190,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+      "bytes": 20439394,
+      "sha256": "7ff1b7475f919ecb2b8a4cf8ad0adf0cc1866c0dd149e129892b21ae324347b3"
+    },
+    {
+      "path": "part-23.mp4",
+      "duration": 376.8,
+      "resumePhase": 4.2,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": true,
+      "bytes": 64699512,
+      "sha256": "d4f22f7ebbff24172c7f779f35f2768174b77573dd5b025499aa193cf3dc5dd3"
+    },
+    {
+      "path": "part-24.mp4",
+      "duration": 241.733333,
+      "resumePhase": 4.2,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": true,
+      "bytes": 45411034,
+      "sha256": "409621e315c8099630979d25f47dd9f32161da947e60af337b996a7cab698798"
+    },
+    {
+      "path": "part-25.mp4",
+      "duration": 72.4,
+      "resumePhase": 6,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: find the block actually supporting the player",
+      "bytes": 11269295,
+      "sha256": "e0b0fb214554005d03f247ab77d649c94991e368466f450625aa92397e8d5873"
+    },
+    {
+      "path": "part-26.mp4",
+      "duration": 340.933333,
+      "resumePhase": 6,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": true,
+      "bytes": 49674008,
+      "sha256": "c07170ffb6952a38221026775185c5ea44b7105f236e67ac465cf10dc1077cb9"
+    },
+    {
+      "path": "part-27.mp4",
+      "duration": 20.133333,
+      "resumePhase": 6.1,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": true,
+      "bytes": 3550057,
+      "sha256": "a3ba6622ab6cc319ee06c2d8fbf8c8402c38f45a3c12641d21facc90387ddab0"
+    },
+    {
+      "path": "part-28.mp4",
+      "duration": 192.866667,
+      "resumePhase": 6,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Waiting failed: 120000ms exceeded",
+      "bytes": 11379598,
+      "sha256": "e581fe23316b6a6a12697b54ed51456b914ef64c94bc56b7278a7eb44b9c2a87"
+    },
+    {
+      "path": "part-29.mp4",
+      "duration": 35.533333,
+      "resumePhase": 6.2,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": true,
+      "bytes": 4842263,
+      "sha256": "1c5d3adbe9deb805ba38e1fda3db43f2b94d9402e79f2713fe8524d0e8576026"
+    },
+    {
+      "path": "part-30.mp4",
+      "duration": 2.8,
+      "resumePhase": 6.21,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": false,
+      "recordedError": "Error: Error: defeated while defending without recovered equipment",
+      "bytes": 514984,
+      "sha256": "0c44eda49ad3c84a63786ce806df6940857817895282b8f435a95419782ce92f"
+    },
+    {
+      "path": "part-31.mp4",
+      "duration": 14.2,
+      "resumePhase": 6.2,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: recover the stone pickaxe previously stored in this chest",
+      "bytes": 2593035,
+      "sha256": "b116ede9430e179d73168dc5cecbf5b94f0f4d887ac353b2ca5cef8d860ea024"
+    },
+    {
+      "path": "part-32.mp4",
+      "duration": 2.866667,
+      "resumePhase": 6.2,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: use the actually stored リンゴ",
+      "bytes": 317268,
+      "sha256": "b072409304535e218ddc0edc34930c67206065232bda02604110fa2310b13a03"
+    },
+    {
+      "path": "part-33.mp4",
+      "duration": 43.866667,
+      "resumePhase": 6.2,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": true,
+      "bytes": 9752852,
+      "sha256": "584f7c4a1077e03c5b3200dd25571c87fe0ec2a97e5977473338ff98b5663d4f"
+    },
+    {
+      "path": "part-34.mp4",
+      "duration": 76.466667,
+      "resumePhase": 6.23,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": true,
+      "bytes": 3078142,
+      "sha256": "6f286666116f882cf01610645b9350d1deaa4a996d957a75ecb73bfe0acac196"
+    },
+    {
+      "path": "part-35.mp4",
+      "duration": 36.466667,
+      "resumePhase": 6.22,
+      "generator": 3,
+      "sourceCommit": "292be951baf5bf98b95cc3f300b12d06f2cfed95",
+      "completed": false,
+      "recordedError": "Error: Error: 'left' is already pressed.",
+      "bytes": 11078802,
+      "sha256": "d372b1ada3f1ad05d704d414cbc3a8fab2c1b2a5de313eaa744281c3c0d8bb7e"
+    },
+    {
+      "path": "part-36.mp4",
+      "duration": 19.8,
+      "resumePhase": 6.3,
+      "generator": 3,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: the verified recovery tactic requires the ember floor at height26",
+      "bytes": 4066114,
+      "sha256": "f8b2614ff5eabbe07f5723e0b7e8a9813ac7838cc68f67b76f5c211fda188c04"
+    },
+    {
+      "path": "part-37.mp4",
+      "duration": 1.2,
+      "resumePhase": 6.3,
+      "generator": 3,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849",
+      "completed": false,
+      "recordedError": "Error: ReferenceError: Cannot access 'gate' before initialization",
+      "bytes": 259566,
+      "sha256": "cbedb232065ed53e75879e1983bcf341ec232dd39c0ae1a56c4fce14944fcfe9"
+    },
+    {
+      "path": "part-38.mp4",
+      "duration": 1.466667,
+      "resumePhase": 6.3,
+      "generator": 3,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: no elevated ember beside the rescue platform",
+      "bytes": 337970,
+      "sha256": "5d52c0816ed0c605e26c223c854e9f818ff558f642ccf03b27c4b57880099b51"
+    },
+    {
+      "path": "part-39.mp4",
+      "duration": 24.466667,
+      "resumePhase": 6.3,
+      "generator": 3,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: a dry walking route exists to {\"x\":16.5,\"y\":25,\"z\":-19.5}",
+      "bytes": 3729562,
+      "sha256": "567ffc9c71281c5ebd0d4b393a398d2cbbc2c4a2f55a90f9bfb945ba6730e01d"
+    },
+    {
+      "path": "part-40.mp4",
+      "duration": 12.466667,
+      "resumePhase": 6.3,
+      "generator": 3,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849",
+      "completed": true,
+      "bytes": 1470018,
+      "sha256": "1e517203ab81f48c2cb16bd2c46fed3a8157a01d07e0721542464484cc3a1032"
+    },
+    {
+      "path": "part-41.mp4",
+      "duration": 97.4,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "cb1d4b0b4bd4489005a6fad381b8329a1a9bc849",
+      "completed": true,
+      "bytes": 21484892,
+      "sha256": "f965c5f9696aa7191be3dbc77f2166d809e020fb28c5847d9a249061b1f5d5bd"
+    },
+    {
+      "path": "part-42.mp4",
+      "duration": 18.333333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "ff88ccf1ffac9b764e975ec1bcb025c3abb4136f",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: route around an obsidian frame",
+      "bytes": 3495938,
+      "sha256": "0e4afa84240c5b889ac57d8e033e222168f86f229e3e2c217c5e05ba97b3481c"
+    },
+    {
+      "path": "part-43.mp4",
+      "duration": 652.733333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "ff88ccf1ffac9b764e975ec1bcb025c3abb4136f",
+      "completed": true,
+      "bytes": 94046708,
+      "sha256": "62a41b1b78c26e55c757ecb38b5b20bd54cd12e2badc4b8d2823c5236188db82"
+    },
+    {
+      "path": "part-44.mp4",
+      "duration": 180.8,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "92242433f5110cc31ef810c0d1e231ffa8a629ac",
+      "completed": true,
+      "bytes": 18427979,
+      "sha256": "0bee5246653d06fe63bdeef25ca92d8c8998a87f36f8745232d277827bd9aee3"
+    },
+    {
+      "path": "part-45.mp4",
+      "duration": 394.266667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "9d5524dc8e977d7f771ab3960e74ee9e3e8ae6a0",
+      "completed": true,
+      "bytes": 93912133,
+      "sha256": "9b73601186123a565b8af74ebd9ce6fedbf164a4df4829cd6b1e0e8675a254cf"
+    },
+    {
+      "path": "part-46.mp4",
+      "duration": 136.533333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 11312005,
+      "sha256": "2284e7e8347969debf6932ae63c791640a585870da9cd4f9e98c7bfb9783cbab"
+    },
+    {
+      "path": "part-47.mp4",
+      "duration": 84,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 19038703,
+      "sha256": "9df5479d57ecee514b1ef27442a4c9a441189c99a1977912ab6eab0fe50ed8d5"
+    },
+    {
+      "path": "part-48.mp4",
+      "duration": 45.2,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: center on a block actually supporting the player",
+      "bytes": 8040849,
+      "sha256": "ebc16843e93ac0f9eb968b99748e979a987a6afcc76585c638eebea73ef42fdc"
+    },
+    {
+      "path": "part-49.mp4",
+      "duration": 158.6,
+      "resumePhase": 4.6,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 18239913,
+      "sha256": "03249773e551e65531e0217055610c402d76c2daaea893e6d0cd2bcf01880de8"
+    },
+    {
+      "path": "part-50.mp4",
+      "duration": 4.466667,
+      "resumePhase": 4.6,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+      "bytes": 458753,
+      "sha256": "f03315bc488b2f8e92d0feae3edebeae20382911f54cfaf74aad83aa1f155dee"
+    },
+    {
+      "path": "part-51.mp4",
+      "duration": 2.533333,
+      "resumePhase": 4.6,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+      "bytes": 297261,
+      "sha256": "cb0cf8a66b3a7bd8dd557be61c889114f30be471168b0540da36700d9b46949d"
+    },
+    {
+      "path": "part-52.mp4",
+      "duration": 12.333333,
+      "resumePhase": 4.61,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 858680,
+      "sha256": "dfd33b7cc8dd82ef732bb420800bc94559e151077eb6862e6412f074318ba9aa"
+    },
+    {
+      "path": "part-53.mp4",
+      "duration": 123.2,
+      "resumePhase": 4.6,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+      "bytes": 10622887,
+      "sha256": "0ce17d0f4db99fa92c320990277d92450ac0ebeeb1c62897555e9eb3d2d3b3a7"
+    },
+    {
+      "path": "part-54.mp4",
+      "duration": 1.6,
+      "resumePhase": 4.62,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: dig only three consecutive supported dry blocks",
+      "bytes": 292773,
+      "sha256": "f59969003cf36c9408e96edc2291db689de6d2659c108e35268885c8e8f45001"
+    },
+    {
+      "path": "part-55.mp4",
+      "duration": 2.733333,
+      "resumePhase": 4.62,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 281124,
+      "sha256": "9be0f5d46a6dfceb9721449d3aadc333025fff918685a4f823cf89c8d5f127cf"
+    },
+    {
+      "path": "part-56.mp4",
+      "duration": 32.733333,
+      "resumePhase": 4.62,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Timed out after waiting 30000ms",
+      "bytes": 387685,
+      "sha256": "481274319714823ccf00dcc6aacb38d7e8b47f7538ad7a47fa848474084a8a5d"
+    },
+    {
+      "path": "part-57.mp4",
+      "duration": 82.4,
+      "resumePhase": 4.64,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 8016291,
+      "sha256": "d3a36705b85b0c00074be245fdcb6769a667e34678a6bdba48c71dcc5f52f18b"
+    },
+    {
+      "path": "part-58.mp4",
+      "duration": 73.733333,
+      "resumePhase": 4.65,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 850732,
+      "sha256": "884fa2ce6b40983ca18ae89c06f19e0b5c078789ea9c7e78eb4ed40ff1e2ed00"
+    },
+    {
+      "path": "part-59.mp4",
+      "duration": 10.733333,
+      "resumePhase": 4.66,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Waiting failed: 4000ms exceeded",
+      "bytes": 722060,
+      "sha256": "a669a2c8f869cf53db07c0f421e4e1990c3c76329483c2ef2ca30fdff2486502"
+    },
+    {
+      "path": "part-60.mp4",
+      "duration": 2.133333,
+      "resumePhase": 4.67,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: observe a close, deep-water landing away from the nearby enemies",
+      "bytes": 254172,
+      "sha256": "62eb0ea7963de4aee52fa6e2e2d8851be6dfd5dc8c7792b2fa99310213813a97"
+    },
+    {
+      "path": "part-61.mp4",
+      "duration": 91.6,
+      "resumePhase": 4.68,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 10969737,
+      "sha256": "90ece8f5bc7edf8ef91a552b7950b07833bb5935cce60aaca38491acbc6f8a92"
+    },
+    {
+      "path": "part-62.mp4",
+      "duration": 67.466667,
+      "resumePhase": 4.69,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: travel to 305.5018369419134,-81.2452869244171; position={\"x\":306.30000050456636,\"y\":33.00000000635788,\"z\":-81.2451878338361}",
+      "bytes": 1938786,
+      "sha256": "b5871675f844a80e29408b39799959ee8b901f00cf32fc78072e3827cb21480a"
+    },
+    {
+      "path": "part-63.mp4",
+      "duration": 102.933333,
+      "resumePhase": 4.69,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: recover through ordinary food and regeneration",
+      "bytes": 1187072,
+      "sha256": "cf84059124d445c7b3806aacd147a332a7a94cd22896cc3dc23ed248fb7ed54e"
+    },
+    {
+      "path": "part-64.mp4",
+      "duration": 25.8,
+      "resumePhase": 4.7,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: leave space for both cooked meat and the recovered furnace",
+      "bytes": 3888849,
+      "sha256": "facb4415ffcc81fe6e6eda14e777aac9b4d20f8a0b0ae4d5c6c981e55c1f0cfb"
+    },
+    {
+      "path": "part-65.mp4",
+      "duration": 11.6,
+      "resumePhase": 4.7,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: TypeError: slot(...).evaluate is not a function",
+      "bytes": 1890096,
+      "sha256": "d2bb00ffbccecbb46cf172fc8f5db2cbe665f1748981dc7a9ff372ff7be2b148"
+    },
+    {
+      "path": "part-66.mp4",
+      "duration": 261.533333,
+      "resumePhase": 4.7,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 31928802,
+      "sha256": "7e71df12a70b1bf28735e69eac4ff2f951e7cbddd001973c80ecb9470561ac14"
+    },
+    {
+      "path": "part-67.mp4",
+      "duration": 16.533333,
+      "resumePhase": 4.71,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": true,
+      "bytes": 2461946,
+      "sha256": "d39740076ab5433ea77330e9fdd074e08e9a45f1dd25dda4ff6219bad0351948"
+    },
+    {
+      "path": "part-68.mp4",
+      "duration": 22,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Waiting failed: 15000ms exceeded",
+      "bytes": 2251753,
+      "sha256": "f8e34e1ff4cb482926de025e639104d8e2726cf2cc8f7572b69d62577b02d33f"
+    },
+    {
+      "path": "part-69.mp4",
+      "duration": 50.733333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "e4d7681762c8d49f5a3f81dfd65a2d016ce17194",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: mining target changed or blocked {\"x\":311,\"y\":45,\"z\":-70}",
+      "bytes": 7853653,
+      "sha256": "28748655f19c3ff9f1f1b0253b774400ab55ab44b22e08c27f3e2192ea4e43c7"
+    },
+    {
+      "path": "part-70.mp4",
+      "duration": 19.933333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "98e7047106da9f221e4ed2deb19552377c10caa9",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: target {\"x\":309,\"y\":41,\"z\":-71}",
+      "bytes": 3340975,
+      "sha256": "95c3d16180b671236f18a85eb3be54423fa8e00786d2d18c1af6656a4c97f913"
+    },
+    {
+      "path": "part-71.mp4",
+      "duration": 131.8,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "98e7047106da9f221e4ed2deb19552377c10caa9",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: center on a block actually supporting the player",
+      "bytes": 26675279,
+      "sha256": "77091c16f5993990bafa46886cbbf275908dbf4aa76d4983cd0a97330daa665f"
+    },
+    {
+      "path": "part-72.mp4",
+      "duration": 33.866667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "1b7c0c1425f9722ef5b91de6ea57b08cbfdb23d9",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: mining target changed or blocked {\"x\":257,\"y\":33,\"z\":-46}",
+      "bytes": 4880037,
+      "sha256": "b6ad4f87c9165dd6a211a49990b461d2b09b22969201b4f02345094a2c2e33d0"
+    },
+    {
+      "path": "part-73.mp4",
+      "duration": 1.133333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "1b7c0c1425f9722ef5b91de6ea57b08cbfdb23d9",
+      "completed": false,
+      "recordedError": "Error: SyntaxError: Unexpected token 'const'",
+      "bytes": 290425,
+      "sha256": "697655dc9fdc24d0d9825b303bdf2b9d1cba770db5529d87758131a1f21ba87e"
+    },
+    {
+      "path": "part-74.mp4",
+      "duration": 113.866667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "1b7c0c1425f9722ef5b91de6ea57b08cbfdb23d9",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+      "bytes": 16250312,
+      "sha256": "02a6432021786b91b4253211b37716c39f5bc89e4f9845a5d4b8a5a3c646d237"
+    },
+    {
+      "path": "part-75.mp4",
+      "duration": 1.466667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+      "bytes": 318010,
+      "sha256": "fb7626eb5666c5ed91f774d0226aa98c1d12c2b8d178adfddef04865f6940487"
+    },
+    {
+      "path": "part-76.mp4",
+      "duration": 5.466667,
+      "resumePhase": 4.72,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": true,
+      "bytes": 784642,
+      "sha256": "25fb8f8660b6458e70d2de70b65be68937a532d4dab864ff7c0691cc91aa8d8c"
+    },
+    {
+      "path": "part-77.mp4",
+      "duration": 4.6,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": true,
+      "bytes": 850360,
+      "sha256": "1514f313ddb61cd1c7ce59021f0d0d3e126ece07383dd22078263f3d00e5192e"
+    },
+    {
+      "path": "part-78.mp4",
+      "duration": 1.933333,
+      "resumePhase": 4.65,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: find a nearby safe supported well with intact natural side walls",
+      "bytes": 254494,
+      "sha256": "c7368d36ad950febb74e39316f7c14ad318961025492d9bb39803125080bea4a"
+    },
+    {
+      "path": "part-79.mp4",
+      "duration": 2.333333,
+      "resumePhase": 4.74,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": true,
+      "bytes": 308530,
+      "sha256": "c754d63eefb6470e1151e18778f1f20456352bdd6fbec85880ae6b3e4303320a"
+    },
+    {
+      "path": "part-80.mp4",
+      "duration": 3.133333,
+      "resumePhase": 4.74,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": true,
+      "bytes": 330174,
+      "sha256": "3b8a30c3cfed6009a9a8cc8d9f59805c727351274127a2a6e05730e0f0646dd7"
+    },
+    {
+      "path": "part-81.mp4",
+      "duration": 4.266667,
+      "resumePhase": 4.75,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": true,
+      "bytes": 522877,
+      "sha256": "70c3cd1694061b6a1344a57b0972db533cf52a6071eee13f890c063419ac4a35"
+    },
+    {
+      "path": "part-82.mp4",
+      "duration": 66.866667,
+      "resumePhase": 4.76,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": true,
+      "bytes": 2249149,
+      "sha256": "51e3215c00bb431f9e9e9dc480ef2ab38e67dcc20bb0b6d118e6b9d142b2135e"
+    },
+    {
+      "path": "part-83.mp4",
+      "duration": 6.266667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "af48f7be07ad6bc8aa78ba2ec4166f375188f065",
+      "completed": true,
+      "bytes": 910376,
+      "sha256": "710d7232c3cbdb898ca4ed95bb441a3c61c3cbea85f64135694e5345bd7182d2"
+    },
+    {
+      "path": "part-84.mp4",
+      "duration": 6.933333,
+      "resumePhase": 4.65,
+      "generator": 3,
+      "sourceCommit": "a86de33dea88dde0e75be6c1b18588b5f61c151c",
+      "completed": true,
+      "bytes": 778879,
+      "sha256": "6214fd51467eae5c91bd9b1699be4b463e9644958c36b3dd57e94c352d39b977"
+    },
+    {
+      "path": "part-85.mp4",
+      "duration": 9.866667,
+      "resumePhase": 4.77,
+      "generator": 3,
+      "sourceCommit": "a86de33dea88dde0e75be6c1b18588b5f61c151c",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: sleep normally until morning",
+      "bytes": 844818,
+      "sha256": "1d37d09d77e3cba925ef08008af0d7a82debb9510a75d95af0b67ba760e45cf1"
+    },
+    {
+      "path": "part-86.mp4",
+      "duration": 10.133333,
+      "resumePhase": 4.77,
+      "generator": 3,
+      "sourceCommit": "a86de33dea88dde0e75be6c1b18588b5f61c151c",
+      "completed": true,
+      "bytes": 1324633,
+      "sha256": "d87da7b20c0e72908df0f28d7f21c6ed614c94e6982fb7b914b127f90b3e9262"
+    },
+    {
+      "path": "part-87.mp4",
+      "duration": 11.8,
+      "resumePhase": 4.78,
+      "generator": 3,
+      "sourceCommit": "a888dbf34a5364f55fd53e3e2b0d21e432e333d8",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: retrieve the actual original chest spare pickaxe",
+      "bytes": 2215374,
+      "sha256": "3165958488ac09c3e7d4e7993407675612d33aa4e376a6f26da926fcf023816e"
+    },
+    {
+      "path": "part-88.mp4",
+      "duration": 6.2,
+      "resumePhase": 4.78,
+      "generator": 3,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: own three actual stored cobblestone",
+      "bytes": 1185717,
+      "sha256": "a238fe5bb5b4f9a7471b9eea5a7d695173fad68ff0bfd20fed7e740d7e1d2784"
+    },
+    {
+      "path": "part-89.mp4",
+      "duration": 441.466667,
+      "resumePhase": 4.78,
+      "generator": 3,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: grow enough real wheat for expedition food",
+      "bytes": 41084236,
+      "sha256": "cd9b9f4e51e1656c1c86c0c165ad30214017f29359cb9ef4e6256061dad6967b"
+    },
+    {
+      "path": "part-90.mp4",
+      "duration": 277.333333,
+      "resumePhase": 4.78,
+      "generator": 3,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08",
+      "completed": true,
+      "bytes": 80638696,
+      "sha256": "52bc959d010a941817d449ea1695b8cea0d13afa1a3c22297597b4dc8da46fa7"
+    },
+    {
+      "path": "part-91.mp4",
+      "duration": 5.6,
+      "resumePhase": 4.79,
+      "generator": 3,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08",
+      "completed": true,
+      "bytes": 1284859,
+      "sha256": "79ee78dee095bf9aeeefbd727a342ef8c679aa2bafa430a77db199a42bf5f723"
+    },
+    {
+      "path": "part-92.mp4",
+      "duration": 111.333333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: travel to 191.5,-73.5; position={\"x\":190.70009989581715,\"y\":34.00000002331234,\"z\":-74.29990015051138}",
+      "bytes": 13741082,
+      "sha256": "6b85cd70aa1c4705b23d3cbd3496cc571126acf7cec720e7a0cc7723029f98d3"
+    },
+    {
+      "path": "part-93.mp4",
+      "duration": 462.666667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "561077959e93941bd7fbf958d60e9acad2698a08",
+      "completed": true,
+      "bytes": 54435121,
+      "sha256": "669f7ce70b952dc6b465f6fb85ab69187c2bd7aacd603e7c60aaf6b134ee3317"
+    },
+    {
+      "path": "part-94.mp4",
+      "duration": 207.8,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "1c8cba10178364493cf4761a71effd760053aa94",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: travel to 195.5,-83.5; position={\"x\":191.46348228560686,\"y\":33.00000001907134,\"z\":-85.77018587815164}",
+      "bytes": 48751421,
+      "sha256": "b31818367ebbe22a42d8c020486997fa309cdfd4ba9cf60a205b6a5f64a3623d"
+    },
+    {
+      "path": "part-95.mp4",
+      "duration": 74.266667,
+      "resumePhase": 4.83,
+      "generator": 3,
+      "sourceCommit": "54c5014bad401ffc2d28fc4a49808c6d6247e76e",
+      "completed": true,
+      "bytes": 13212428,
+      "sha256": "19359c0aa133051dd786862e58b0f6c2666e6489f385fe2f80b0fdff22e17a44"
+    },
+    {
+      "path": "part-96.mp4",
+      "duration": 90.133333,
+      "resumePhase": 4.82,
+      "generator": 3,
+      "sourceCommit": "5045cb8428d715d7b7a10ece26fb996b0e4146b2",
+      "completed": true,
+      "bytes": 10449418,
+      "sha256": "0f8d5b07dc03cb964c8858967271589a54dbe753751375ba6610a7efd01226e8"
+    },
+    {
+      "path": "part-97.mp4",
+      "duration": 66.2,
+      "resumePhase": 4.82,
+      "generator": 3,
+      "sourceCommit": "5045cb8428d715d7b7a10ece26fb996b0e4146b2",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: travel to 187.5,-83.5; position={\"x\":188.30000001522856,\"y\":32.00000003178694,\"z\":-81.69999969514919}",
+      "bytes": 4567748,
+      "sha256": "1f207009077400731b54611fdd6f58f645b7cc576c74fa67229c1a12109fba60"
+    },
+    {
+      "path": "part-98.mp4",
+      "duration": 15.266667,
+      "resumePhase": 4.84,
+      "generator": 3,
+      "sourceCommit": "934f85b76217b02585792a8fddc5b5f48048f62f",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: place furnace",
+      "bytes": 2974060,
+      "sha256": "55d6fce2283283cf224b474bbf7c919cd90890be622f556c3842a75346d0b6b7"
+    },
+    {
+      "path": "part-99.mp4",
+      "duration": 69.533333,
+      "resumePhase": 4.84,
+      "generator": 3,
+      "sourceCommit": "934f85b76217b02585792a8fddc5b5f48048f62f",
+      "completed": true,
+      "bytes": 3034996,
+      "sha256": "c793430da9b7aac2c40ef580941e276347f7bae43005bcf635d31845e984e453"
+    },
+    {
+      "path": "part-100.mp4",
+      "duration": 85.333333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "b72caf007f3b48e41e671d8ff3b3e648e64eb60b",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Waiting for selector `[data-recipe=\"bread\"]` failed",
+      "bytes": 12601354,
+      "sha256": "06897f248814303e1e89952ad06926ecdc0972e7d1c4580e0019426509f260ea"
+    },
+    {
+      "path": "part-101.mp4",
+      "duration": 82.133333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "b72caf007f3b48e41e671d8ff3b3e648e64eb60b",
+      "completed": true,
+      "bytes": 22928438,
+      "sha256": "7521034c1da9237d8f9f727111db0b0d4e01b6e9be4088ca6b5b4639eef101cc"
+    },
+    {
+      "path": "part-102.mp4",
+      "duration": 8.133333,
+      "resumePhase": 4.85,
+      "generator": 3,
+      "sourceCommit": "2b816c6bc929ff972a4d628267ed8c2f50c93e99",
+      "completed": false,
+      "recordedError": "Error: Error: 'left' is already pressed.",
+      "bytes": 1950759,
+      "sha256": "8dc9fc5e964d4b66a5238ef809abd7ffeaac88ce9f394699df9c855c7a4ce12a"
+    },
+    {
+      "path": "part-103.mp4",
+      "duration": 15.4,
+      "resumePhase": 4.85,
+      "generator": 3,
+      "sourceCommit": "2b816c6bc929ff972a4d628267ed8c2f50c93e99",
+      "completed": true,
+      "bytes": 1446336,
+      "sha256": "4ae8d66576a3ebca305e891be1276016f73bcc21de2d105a9c5868be110b9d3c"
+    },
+    {
+      "path": "part-104.mp4",
+      "duration": 63.533333,
+      "resumePhase": 4.87,
+      "generator": 3,
+      "sourceCommit": "4170350bd42d43b63d9d085f979fbff558bcf688",
+      "completed": true,
+      "bytes": 10545989,
+      "sha256": "5e2850e0fbfa04bb26b943f5dcd05e47e80e30670b4eab3e1cda3fb5ceb018e3"
+    },
+    {
+      "path": "part-105.mp4",
+      "duration": 27.666667,
+      "resumePhase": 4.85,
+      "generator": 3,
+      "sourceCommit": "4170350bd42d43b63d9d085f979fbff558bcf688",
+      "completed": true,
+      "bytes": 5279477,
+      "sha256": "92160a385e939ceeb1ef4fe2d8d1e30809fd6a0a68b9ee1dc563f2d82115564b"
+    },
+    {
+      "path": "part-106.mp4",
+      "duration": 2.866667,
+      "resumePhase": 4.86,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": true,
+      "bytes": 313888,
+      "sha256": "ac5d4ec6144aef0051da1ce6c5a61588be343adb84b9042e4b4fec2290471cc6"
+    },
+    {
+      "path": "part-107.mp4",
+      "duration": 3.066667,
+      "resumePhase": 4.85,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": true,
+      "bytes": 381657,
+      "sha256": "963ca12ba97dd8d79b4a57fcf7a4978c8324d21b56e4582910e1b1e4b36124f9"
+    },
+    {
+      "path": "part-108.mp4",
+      "duration": 18.533333,
+      "resumePhase": 4.85,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": true,
+      "bytes": 3281873,
+      "sha256": "1df1d67785debbcaf7702e9bb3ff2e6adf8f13ab0f43c14feacf4b76fd18ec55"
+    },
+    {
+      "path": "part-109.mp4",
+      "duration": 155.333333,
+      "resumePhase": 4.82,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: place real foundation dirt 188,32,-77",
+      "bytes": 24693594,
+      "sha256": "c3dc988f816ffd3b96eee4840ff1754f584a1fc95659abf6a27fc4e6b77d810b"
+    },
+    {
+      "path": "part-110.mp4",
+      "duration": 303.733333,
+      "resumePhase": 4.82,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": true,
+      "bytes": 40066650,
+      "sha256": "676effd60eb3387c576773f6a7ccf54254d7a4051f8fd0f0dd6e08c3da53a543"
+    },
+    {
+      "path": "part-111.mp4",
+      "duration": 1.266667,
+      "resumePhase": 4.89,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": true,
+      "bytes": 86943,
+      "sha256": "7504b24a9a9afb2f4016f57035646a6e2536f592364488b66eed4c1a1b766cc6"
+    },
+    {
+      "path": "part-112.mp4",
+      "duration": 1.333333,
+      "resumePhase": 4.88,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": true,
+      "bytes": 87051,
+      "sha256": "1d5dc12b58a01317f9e68d32ea5cd2446bb163e03924edf031bd5e7177ca9ee3"
+    },
+    {
+      "path": "part-113.mp4",
+      "duration": 4.733333,
+      "resumePhase": 4.88,
+      "generator": 3,
+      "sourceCommit": "291157dea68958f3acc5a01563b152a7285abb9d",
+      "completed": true,
+      "bytes": 544469,
+      "sha256": "cc4364898710f85a1fb2ab031f4ad48ad4c20c9425bf1754a448e0d3078a8a84"
+    },
+    {
+      "path": "part-114.mp4",
+      "duration": 4.6,
+      "resumePhase": 4.9,
+      "generator": 3,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: place table",
+      "bytes": 917190,
+      "sha256": "f73ff73db9d56f76a7c853adcca62a7d4caf7e7bffa6b91a20cd23a625dd9b7e"
+    },
+    {
+      "path": "part-115.mp4",
+      "duration": 23.6,
+      "resumePhase": 4.9,
+      "generator": 3,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81",
+      "completed": false,
+      "recordedError": "Error: TimeoutError: Waiting failed: 15000ms exceeded",
+      "bytes": 1812396,
+      "sha256": "66b080a150f2cf3c16895aeb75c9b7bc34e66841ff90e4a775be73b547f1584b"
+    },
+    {
+      "path": "part-116.mp4",
+      "duration": 174,
+      "resumePhase": 4.9,
+      "generator": 3,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81",
+      "completed": true,
+      "bytes": 13832468,
+      "sha256": "57e3639e471fb670deecf763879b8a9bf5e5693481c8f803f542f51120190dee"
+    },
+    {
+      "path": "part-117.mp4",
+      "duration": 167.6,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "522d8553415d03ae0684d7b6e691366268f59b81",
+      "completed": true,
+      "bytes": 50929338,
+      "sha256": "ff86173a6ab918d93e46ea843d7d0549e5f3d101636bc4640753033f2ded8bf5"
+    },
+    {
+      "path": "part-118.mp4",
+      "duration": 2.866667,
+      "resumePhase": 4.85,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": true,
+      "bytes": 423110,
+      "sha256": "54231ea5c20761b88a32f5e45eb1d0f0e1a52034f8b04a8da59e63c2208ccbd7"
+    },
+    {
+      "path": "part-119.mp4",
+      "duration": 117.933333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: travel to 176.5,-160.5; position={\"x\":174.51864834637968,\"y\":34.20000023735922,\"z\":-152.57173398552138}",
+      "bytes": 25863760,
+      "sha256": "a6db1159860850d302055760efb8a919aaf5d362cf702a3ce07126623c814d18"
+    },
+    {
+      "path": "part-120.mp4",
+      "duration": 86.333333,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": true,
+      "bytes": 11941435,
+      "sha256": "0eec3e3ac19dbf40441356fda0402143f52764f8b205e83552f8da674252f038"
+    },
+    {
+      "path": "part-121.mp4",
+      "duration": 5.133333,
+      "resumePhase": 4.91,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": true,
+      "bytes": 781840,
+      "sha256": "97a3b4f9b15f2af15d9b564cfe8667c101e2dca563a15e8ed48198d287191964"
+    },
+    {
+      "path": "part-122.mp4",
+      "duration": 85.866667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": true,
+      "bytes": 12642446,
+      "sha256": "96e3bb6df3689ba3b852fe9372f2dac629259c4b7debaae695ac701bf2db9ff0"
+    },
+    {
+      "path": "part-123.mp4",
+      "duration": 1.6,
+      "resumePhase": 4.9,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: checkpoint: no reachable water from safe dry ground; do not enter water blindly",
+      "bytes": 251878,
+      "sha256": "9b5ae25dfecdc924b5c3ac86cad323bb65764d6bd93807696ac40ae5a5338c80"
+    },
+    {
+      "path": "part-124.mp4",
+      "duration": 70.466667,
+      "resumePhase": 4.91,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": true,
+      "bytes": 2234177,
+      "sha256": "4b84f51baf0ca6399fde3817de77f7263b43109257cb6d741160a82bb3d4e9c1"
+    },
+    {
+      "path": "part-125.mp4",
+      "duration": 286.466667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "27721c256f263620836d79a36471ae3597a262df",
+      "completed": false,
+      "recordedError": "Error: Error: Cannot safely reach or shelter from ranged enemies; checkpoint before further work",
+      "bytes": 28697736,
+      "sha256": "e56831a0eaac7377e60e9de6c4521275748d44e578516cd5123cc2261ef44e3f"
+    },
+    {
+      "path": "part-126.mp4",
+      "duration": 1.266667,
+      "resumePhase": 4,
+      "generator": 3,
+      "sourceCommit": "8fb498250eb842a61e4b3e504079ef9d5ef6396c",
+      "completed": true,
+      "bytes": 73001,
+      "sha256": "932fe61cd6fdf644cfab13cf4ba8d8828b16dd80d2b770fe30fa0ada759ff5fc"
+    },
+    {
+      "path": "part-127.mp4",
+      "duration": 7.133333,
+      "resumePhase": 4.65,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": true,
+      "bytes": 695837,
+      "sha256": "347241a4d6ba018a40fec5165d1ee2ab2615783770ed5ca56abdb71fa34d3337"
+    },
+    {
+      "path": "part-128.mp4",
+      "duration": 237.8,
+      "resumePhase": 4.97,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": true,
+      "bytes": 1602207,
+      "sha256": "8a3ea3d6406ccaee1b2124da3f1b7fa333583f27ad0e9ba2bf040e2e5e71e3af"
+    },
+    {
+      "path": "part-129.mp4",
+      "duration": 70.866667,
+      "resumePhase": 4.98,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": true,
+      "bytes": 14481646,
+      "sha256": "b2f3feb90a639aaae51c6e2c6fcab0c89066393cb970ecfe5646ec29a25d2208"
+    },
+    {
+      "path": "part-130.mp4",
+      "duration": 189.733333,
+      "resumePhase": 4.99,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": true,
+      "bytes": 10628212,
+      "sha256": "f59ec065c0caae0be0cc22c34c23066d43356c3031df2bb7705fc248372b4c08"
+    },
+    {
+      "path": "part-131.mp4",
+      "duration": 98.733333,
+      "resumePhase": 5.01,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": true,
+      "bytes": 22201938,
+      "sha256": "a6c246c18b276312052a629e0b7523cb8c68d292a54c598ccad5e99bca7115b0"
+    },
+    {
+      "path": "part-132.mp4",
+      "duration": 5.933333,
+      "resumePhase": 5.03,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: own table",
+      "bytes": 1371664,
+      "sha256": "e6a9ae3887ad57baac02a3375475ca8bf24cf2bce1d79ca16273f5e299b4845b"
+    },
+    {
+      "path": "part-133.mp4",
+      "duration": 23.533333,
+      "resumePhase": 5.03,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: make real inventory space for feathers",
+      "bytes": 4574220,
+      "sha256": "66844da10f77569dc1c7cf45460d2b047d0caa015bd548bc63e93800c836464f"
+    },
+    {
+      "path": "part-134.mp4",
+      "duration": 14.066667,
+      "resumePhase": 5.04,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": false,
+      "recordedError": "Error: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+      "bytes": 3391736,
+      "sha256": "3d3131f9a64ae4d3622e1bc1db76ce0ad114bf0004ec8dc49a3c3498bc3e95c3"
+    },
+    {
+      "path": "part-135.mp4",
+      "duration": 20.266667,
+      "resumePhase": 5.04,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": true,
+      "bytes": 2211213,
+      "sha256": "a50536143e4b5fe3a4a9df17a0f1cb8acfc90033d957cbbaaef97106c0d0d9c8"
+    },
+    {
+      "path": "part-136.mp4",
+      "duration": 24.4,
+      "resumePhase": 4.85,
+      "generator": 3,
+      "sourceCommit": "305392513f720e61b23b3ec7171fd403d9e20ad0",
+      "completed": true,
+      "bytes": 5157249,
+      "sha256": "cf9f49df0e94a54d761c7b2d26d2e1f72f05679f90648be207ecbc3f5796c5dc"
+    },
+    {
+      "path": "part-137.mp4",
+      "duration": 377.066667,
+      "resumePhase": 7,
+      "generator": 3,
+      "sourceCommit": "e31572b9a14f2efe1e87b7dfdc11fc68cae134a0",
+      "completed": true,
+      "bytes": 38268517,
+      "sha256": "23f2e3a207e0f81d712c61cbfa28f461286a1aa9219485de7275a5a0244ac56c"
+    }
+  ],
+  "chapters": [
+    {
+      "name": "所持品ゼロから木・石・鉄の道具と自然のダイヤを入手",
+      "phase": 1,
+      "part": "part-1.mp4",
+      "at": "2026-10-29T15:02:06.182Z",
+      "seconds": 154.841
+    },
+    {
+      "name": "追加の鉱石を採掘し、ダイヤのツルハシ・鉄の剣・バケツを製作",
+      "phase": 2,
+      "part": "part-2.mp4",
+      "at": "2026-10-29T15:06:11.489Z",
+      "seconds": 146.032
+    },
+    {
+      "name": "地上へ戻り、村の自然生成された宝箱を探索",
+      "phase": 3,
+      "part": "part-3.mp4",
+      "at": "2026-10-29T15:09:26.605Z",
+      "seconds": 165.087
+    },
+    {
+      "name": "パン・木材・天然の火打石・水・予備の剣を用意",
+      "phase": 4,
+      "part": "part-8.mp4",
+      "at": "2026-10-29T15:37:39.075Z",
+      "seconds": 386.228
+    },
+    {
+      "name": "装備を回収し、弓と実際の矢を作成・食料補給・村を拠点化",
+      "phase": 4,
+      "part": "part-13.mp4",
+      "at": "2026-10-29T16:02:51.245Z",
+      "seconds": 118.688
+    },
+    {
+      "name": "自然溶岩を水で冷却して黒曜石10個を採掘し、自分でネザーゲートを建造・点火",
+      "phase": 6,
+      "part": "part-18.mp4",
+      "at": "2026-10-29T16:20:29.684Z",
+      "seconds": 31.604
+    },
+    {
+      "name": "村へ安全に撤退し、食料と弓矢を補充",
+      "phase": 4,
+      "part": "part-24.mp4",
+      "at": "2026-10-29T16:56:09.823Z",
+      "seconds": 239.991
+    },
+    {
+      "name": "倒した敵が落としたロッドを7本回収",
+      "phase": 6,
+      "part": "part-27.mp4",
+      "at": "2026-10-29T17:10:46.499Z",
+      "seconds": 18.82
+    },
+    {
+      "name": "足場の上でりんごを食べて回復",
+      "phase": 6.22,
+      "part": "part-34.mp4",
+      "at": "2026-10-29T18:04:27.899Z",
+      "seconds": 75.452
+    },
+    {
+      "name": "三段の足場から敵を倒し、失ったロッド・パール・道具を回収して帰還",
+      "phase": 6,
+      "part": "part-40.mp4",
+      "at": "2026-10-29T18:11:27.474Z",
+      "seconds": 10.891
+    },
+    {
+      "name": "岩の角で追いかけてきた敵にジャンプ攻撃で対応",
+      "phase": 4.6,
+      "part": "part-52.mp4",
+      "at": "2026-10-29T18:47:13.625Z",
+      "seconds": 10.826
+    },
+    {
+      "name": "保管していた食料で、ふさいだ避難穴の中から体力を回復",
+      "phase": 4.66,
+      "part": "part-58.mp4",
+      "at": "2026-10-29T19:04:43.743Z",
+      "seconds": 72.566
+    },
+    {
+      "name": "海岸側から落としたパール・ロッド・装備を回収",
+      "phase": 4.6,
+      "part": "part-61.mp4",
+      "at": "2026-10-29T19:12:58.736Z",
+      "seconds": 90.356
+    },
+    {
+      "name": "焼肉8個を準備し、拾った火打ち石で矢を補充",
+      "phase": 4,
+      "part": "part-67.mp4",
+      "at": "2026-10-29T19:30:24.111Z",
+      "seconds": 14.919
+    },
+    {
+      "name": "浅瀬から泳いで岸へ避難",
+      "phase": 4,
+      "part": "part-76.mp4",
+      "at": "2026-10-29T19:53:01.996Z",
+      "seconds": 4.124
+    },
+    {
+      "name": "岸の射手に剣で応戦",
+      "phase": 4,
+      "part": "part-81.mp4",
+      "at": "2026-10-29T19:55:11.445Z",
+      "seconds": 2.766
+    },
+    {
+      "name": "夜の敵から、ふさいだ避難穴へ退避",
+      "phase": 4.77,
+      "part": "part-84.mp4",
+      "at": "2026-10-29T19:58:44.592Z",
+      "seconds": 5.757
+    },
+    {
+      "name": "村のベッドで眠り、朝を迎えて回収の準備",
+      "phase": 4.78,
+      "part": "part-86.mp4",
+      "at": "2026-10-29T20:00:32.199Z",
+      "seconds": 8.779
+    },
+    {
+      "name": "村でパンを補給し、パール8個とロッド14本を回収して元の村へ帰還",
+      "phase": 4,
+      "part": "part-90.mp4",
+      "at": "2026-10-30T00:43:50.091Z",
+      "seconds": 276.004
+    },
+    {
+      "name": "落とした素材と装備を回収し、村の石畳へ帰還",
+      "phase": 4,
+      "part": "part-91.mp4",
+      "at": "2026-10-30T00:44:03.772Z",
+      "seconds": 4.074
+    },
+    {
+      "name": "近くの家畜から得た肉をかまどで調理",
+      "phase": 4.82,
+      "part": "part-95.mp4",
+      "at": "2026-10-30T01:02:36.721Z",
+      "seconds": 72.734
+    },
+    {
+      "name": "保管した鉄を精錬して新品の剣と矢を製作",
+      "phase": 4,
+      "part": "part-99.mp4",
+      "at": "2026-10-30T01:13:44.196Z",
+      "seconds": 67.681
+    },
+    {
+      "name": "海岸で落としたパール9個とロッド14本、装備を回収",
+      "phase": 4.85,
+      "part": "part-104.mp4",
+      "at": "2026-10-30T01:31:02.111Z",
+      "seconds": 62.082
+    },
+    {
+      "name": "浅い水中の敵を通常操作で討伐し、実際のドロップを回収",
+      "phase": 4,
+      "part": "part-105.mp4",
+      "at": "2026-10-30T01:32:18.849Z",
+      "seconds": 26.322
+    },
+    {
+      "name": "実際に落ちている素材を確認し、回収場所を調べます",
+      "phase": 4,
+      "part": "part-106.mp4",
+      "at": "2026-10-30T01:34:28.007Z",
+      "seconds": 1.436
+    },
+    {
+      "name": "敵の位置を確認し、水中ではないため潜水対象から除外",
+      "phase": 4,
+      "part": "part-107.mp4",
+      "at": "2026-10-30T01:35:56.523Z",
+      "seconds": 1.616
+    },
+    {
+      "name": "浅い水中の敵を通常操作で討伐し、実際のドロップを回収",
+      "phase": 4,
+      "part": "part-108.mp4",
+      "at": "2026-10-30T01:36:38.318Z",
+      "seconds": 17.082
+    },
+    {
+      "name": "実際に釣った魚で全快し、エンド用の生魚20匹を確保",
+      "phase": 4,
+      "part": "part-116.mp4",
+      "at": "2026-10-30T02:19:01.188Z",
+      "seconds": 172.802
+    },
+    {
+      "name": "敵の水深を確認し、6ブロックを超えるため潜水を見送る",
+      "phase": 4,
+      "part": "part-118.mp4",
+      "at": "2026-10-30T13:04:33.719Z",
+      "seconds": 1.805
+    },
+    {
+      "name": "低い岸へ順番に泳ぎ、地面へ脱出",
+      "phase": 4,
+      "part": "part-121.mp4",
+      "at": "2026-10-30T13:10:38.394Z",
+      "seconds": 3.952
+    },
+    {
+      "name": "低い岸へ順番に泳ぎ、地面へ脱出",
+      "phase": 4,
+      "part": "part-124.mp4",
+      "at": "2026-10-30T13:13:41.932Z",
+      "seconds": 2.837
+    },
+    {
+      "name": "実際に釣った魚で全快し、エンド用の生魚20匹を確保",
+      "phase": 4,
+      "part": "part-124.mp4",
+      "at": "2026-10-30T13:14:48.303Z",
+      "seconds": 69.208
+    },
+    {
+      "name": "夜の敵から、ふさいだ避難穴へ退避",
+      "phase": 4.77,
+      "part": "part-127.mp4",
+      "at": "2026-10-30T13:24:35.986Z",
+      "seconds": 6.253
+    },
+    {
+      "name": "実際に釣った魚で全快し、移動とエンド用の生魚30匹を確保",
+      "phase": 4,
+      "part": "part-130.mp4",
+      "at": "2026-10-30T13:37:41.725Z",
+      "seconds": 188.215
+    },
+    {
+      "name": "水深と帰路を確認し、安全に潜れる敵を探します",
+      "phase": 4,
+      "part": "part-136.mp4",
+      "at": "2026-10-30T13:52:24.100Z",
+      "seconds": 23.272
+    },
+    {
+      "name": "全ての空枠にエンダーアイを入れ、エンドへ進入",
+      "phase": 8,
+      "part": "part-137.mp4",
+      "at": "2026-10-30T13:59:37.535Z",
+      "seconds": 114.407
+    },
+    {
+      "name": "ドラゴン討伐・卵入手・通常世界へ帰還",
+      "phase": 9,
+      "part": "part-137.mp4",
+      "at": "2026-10-30T14:03:58.901Z",
+      "seconds": 375.773
+    }
+  ],
+  "captionCorrections": [
+    {
+      "field": "chapters.name",
+      "part": "part-107.mp4",
+      "at": "2026-10-30T01:35:56.523Z",
+      "seconds": 1.616,
+      "original": "浅い水中の敵を通常操作で討伐し、実際のドロップを回収",
+      "corrected": "敵の位置を確認し、水中ではないため潜水対象から除外",
+      "reason": "The recorded target was rejected before combat; no kill or pickup is supported by this part's observations.",
+      "evidence": {
+        "source": "/tmp/gen3-clear-107.log",
+        "observation": "UNDERWATER_WANDERER_OBSERVATIONS",
+        "entityId": 2738,
+        "feetBlock": 0,
+        "headBlock": 0,
+        "rejection": "feet are not in water (possibly a cave)"
+      }
+    },
+    {
+      "field": "chapters.name",
+      "part": "part-118.mp4",
+      "at": "2026-10-30T13:04:33.719Z",
+      "seconds": 1.805,
+      "original": "浅い水中の敵を通常操作で討伐し、実際のドロップを回収",
+      "corrected": "敵の水深を確認し、6ブロックを超えるため潜水を見送る",
+      "reason": "The recorded target was rejected before combat; no kill or pickup is supported by this part's observations.",
+      "evidence": {
+        "source": "/tmp/gen3-clear-118.log",
+        "observation": "UNDERWATER_WANDERER_OBSERVATIONS",
+        "entityId": 2961,
+        "feetBlock": 5,
+        "headBlock": 5,
+        "contiguousWaterTop": 32,
+        "depth": 7.999999993642298,
+        "rejection": "water deeper than six blocks"
+      }
+    }
+  ],
+  "progression": {
+    "playerBuiltPortal": {
+      "base": {
+        "x": 196,
+        "y": 35,
+        "z": -75
+      },
+      "entry": {
+        "x": 197,
+        "y": 36,
+        "z": -75
+      },
+      "interior": [
+        {
+          "x": 197,
+          "y": 36,
+          "z": -75
+        },
+        {
+          "x": 198,
+          "y": 36,
+          "z": -75
+        },
+        {
+          "x": 197,
+          "y": 37,
+          "z": -75
+        },
+        {
+          "x": 198,
+          "y": 37,
+          "z": -75
+        },
+        {
+          "x": 197,
+          "y": 38,
+          "z": -75
+        },
+        {
+          "x": 198,
+          "y": 38,
+          "z": -75
+        }
+      ]
+    },
+    "endMission": {
+      "useKnownEntrance": true,
+      "requiredEyes": 11,
+      "endSupplies": {
+        "arrows": 12,
+        "bread": 0,
+        "foodUnits": 58,
+        "swordDurability": 251,
+        "bowDurability": 280
+      },
+      "navigation": {
+        "method": "previously-observed-readonly-map",
+        "directionThrowSkipped": true,
+        "entrance": {
+          "x": 13,
+          "y": 37,
+          "z": -236
+        }
+      },
+      "framesFilled": 11,
+      "portalActivated": true
+    },
+    "naturallyMinedObsidianInventoryCount": 10,
+    "minedNaturalLavaCoordinates": [
+      {
+        "x": 189,
+        "y": 4,
+        "z": -74
+      },
+      {
+        "x": 188,
+        "y": 4,
+        "z": -74
+      },
+      {
+        "x": 188,
+        "y": 4,
+        "z": -73
+      },
+      {
+        "x": 189,
+        "y": 4,
+        "z": -75
+      },
+      {
+        "x": 188,
+        "y": 4,
+        "z": -75
+      },
+      {
+        "x": 188,
+        "y": 4,
+        "z": -76
+      },
+      {
+        "x": 189,
+        "y": 4,
+        "z": -76
+      },
+      {
+        "x": 189,
+        "y": 4,
+        "z": -77
+      },
+      {
+        "x": 190,
+        "y": 4,
+        "z": -76
+      },
+      {
+        "x": 187,
+        "y": 4,
+        "z": -75
+      },
+      {
+        "x": 187,
+        "y": 4,
+        "z": -74
+      },
+      {
+        "x": 186,
+        "y": 4,
+        "z": -74
+      }
+    ],
+    "bedSet": true
+  },
+  "final": {
+    "health": 17,
+    "dragon": {
+      "health": 0,
+      "phase": 251.68333332967086,
+      "defeated": true
+    },
+    "eggCount": 1,
+    "dimension": "overworld"
+  },
+  "export": {
+    "file": "survival-generation3.mp4",
+    "speed": 1.5,
+    "rawDuration": 12943.466664,
+    "duration": 8628.966667,
+    "audio": false,
+    "outputFps": 30,
+    "maximumRateKbps": 73,
+    "captions": "Japanese, burned into the picture",
+    "captionCount": 981,
+    "subtitleFile": "survival-generation3.srt",
+    "fullDecodeVerified": true,
+    "cameraVerification": {
+      "perspective": "third-person-behind",
+      "samples": 6421,
+      "allSamplesThirdPerson": true,
+      "bodyVisibleSamples": 5485,
+      "minimumDistance": 0,
+      "maximumDistance": 4
+    },
+    "additionalDownloads": [
+      {
+        "file": "survival-generation3-part-1.mp4",
+        "subtitleFile": "survival-generation3-part-1.srt",
+        "rawStart": 0,
+        "rawEnd": 4314.488888,
+        "start": 0,
+        "end": 2876.325925333333,
+        "duration": 2876.333333,
+        "maximumRateKbps": 262,
+        "bytes": 82158529,
+        "speed": 1.5,
+        "captionCount": 329,
+        "captions": "Japanese, burned into the picture",
+        "fullDecodeVerified": true,
+        "outputFps": 30,
+        "audio": false,
+        "sha256": "9b3731adcf32799f5f19dcfcc51e04e1814832b71a6102e21c5024613a398977",
+        "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-part-1.mp4"
+      },
+      {
+        "file": "survival-generation3-part-2.mp4",
+        "subtitleFile": "survival-generation3-part-2.srt",
+        "rawStart": 4314.488888,
+        "rawEnd": 8628.977776,
+        "start": 2876.325925333333,
+        "end": 5752.651850666666,
+        "duration": 2876.333333,
+        "maximumRateKbps": 262,
+        "bytes": 79492932,
+        "speed": 1.5,
+        "captionCount": 356,
+        "captions": "Japanese, burned into the picture",
+        "fullDecodeVerified": true,
+        "outputFps": 30,
+        "audio": false,
+        "sha256": "39e752ac7a6f2f2addd1ad0a4fd9811703eeb0312a33b6f930bb2ca32bf57965",
+        "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-part-2.mp4"
+      },
+      {
+        "file": "survival-generation3-part-3.mp4",
+        "subtitleFile": "survival-generation3-part-3.srt",
+        "rawStart": 8628.977776,
+        "rawEnd": 12943.466664,
+        "start": 5752.651850666666,
+        "end": 8628.977776,
+        "duration": 2876.3,
+        "maximumRateKbps": 262,
+        "bytes": 78975476,
+        "speed": 1.5,
+        "captionCount": 298,
+        "captions": "Japanese, burned into the picture",
+        "fullDecodeVerified": true,
+        "outputFps": 30,
+        "audio": false,
+        "sha256": "2ec48e71d122860c5cd36b035f69a3b88d992aa2edafa04be3d220aa4f95be51",
+        "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-part-3.mp4"
+      }
+    ],
+    "finalBattleExcerpt": {
+      "rawStart": 12668.806997,
+      "rawEnd": 12943.466664,
+      "start": 8445.871331333334,
+      "end": 8628.977776,
+      "duration": 183.066667,
+      "sourceWindow": {
+        "start": {
+          "part": "part-137.mp4",
+          "seconds": 102.40699999999924
+        },
+        "end": {
+          "part": "part-137.mp4",
+          "seconds": 377.06666699999914
+        },
+        "endEntryRawSeconds": 12680.806997,
+        "victoriousReturnRawSeconds": 12942.172997,
+        "contiguous": true
+      },
+      "file": "survival-generation3-final-battle.mp4",
+      "subtitleFile": "survival-generation3-final-battle.srt",
+      "kind": "final-battle-excerpt",
+      "speed": 1.5,
+      "audio": false,
+      "outputFps": 30,
+      "perspective": "third-person-behind",
+      "captions": "Japanese, burned into the picture",
+      "maximumRateKbps": 800,
+      "bytes": 4724359,
+      "captionCount": 15,
+      "fullDecodeVerified": true,
+      "sha256": "0c4566d009ab3d66a37edb095b62752bddb6042c99012b477799eaea0df6c84f",
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4"
+    }
+  },
+  "download": {
+    "file": "survival-generation3.mp4",
+    "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4",
+    "bytes": 76107203,
+    "sha256": "4a68205f675710dadef30555f565984e10810198c38f7ed4947c6e0d57f2f848"
+  }
+}

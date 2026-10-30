@@ -4,7 +4,7 @@
 Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サーバーは不要です。
 公式 Minecraft の素材は同梱せず、テクスチャ・アイコン・モデルを手続き生成します。
 
-**[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [旧仕様の三人称プレイ記録をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
+**[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [新仕様の全工程MP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
 
 ![作業台で木のツルハシを作成したサバイバル画面](docs/screenshots/survival-crafting.png)
 
@@ -133,7 +133,17 @@ CPU 代替描画ではモデル・照明を簡略化し、三人称視点を無�
 
 [修正後の新しいワールドを開く](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person) · [修正一覧と検証範囲](docs/SURVIVAL-AUDIT.md) · [独立AIの複数回プレイ](docs/QA-ITERATIONS.md)
 
-以前のセーブは地形を維持します。公開済みの討伐動画は改修前の記録です。旧攻略ドライバーは改修後の通しクリア確認には使用できず、新規仕様での使用を拒否します。
+以前のセーブは地形を維持します。旧動画と旧攻略ドライバーは進行見直し前の記録として保存しています。新しい方式3の実プレイは、別の操作スクリプトと新規プロファイルで完了しました。
+
+## 新仕様での実際の討伐・帰還（2026年10月30日）
+
+所持品ゼロから、自然の素材で道具とネザーゲートを作り、敵からロッドとパールを集め、200HPのドラゴンを倒して卵を持ち帰りました。137録画パート・死亡10回と装備回収を含む全工程です。最終HP17、卵1個。
+
+[全工程MP4をダウンロード（字幕・三人称・約1.5倍速、2時間23分49秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) / [最後のボス戦と帰還だけを見る（3分3秒・約4.7MB）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4)
+
+[高画質の全工程をダウンロード（3分割）](https://temesotejam.github.io/2026_10_24_2/watch/#high-quality)。1本にまとめたMP4は、長時間の映像を収めるため画質を軽量化しています。
+
+自動操作は地形・位置を読み取り、通常のキー・マウス・UIを使います。今回の遺跡への移動には以前観測した地図の座標を使い、アイの投擲は行っていません。敵から集めた材料で作ったアイ11個を、実際の空き枠11個に入れました。本番への検証用データ読み込みはありません。[録画条件・検証記録と旧動画](docs/PLAYTHROUGH.md)。
 
 ## 出典
 
@@ -152,4 +162,4 @@ Mojang / Microsoft の公式製品ではありません。
 
 WebGL版は **F5** で一人称・背後・正面を切り替えられます。[背後視点で始める](https://temesotejam.github.io/2026_10_24_2/?seed=20261025&mode=survival&view=third-person)。壁際ではカメラが近づき、狭い坑道では一人称に近い映像になります。参考資料・検証内容は [三人称カメラ](docs/THIRD-PERSON.md) を参照してください。
 
-[進行見直し前の三人称・字幕付き動画（MP4・約19MB）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-steady-camera.mp4)。所持品ゼロから討伐・帰還まで、約1.5倍速・10分13秒です。
+方式3の全工程と戦闘抜粋は上記から通常のMP4としてダウンロードできます。進行見直し前の短い動画は [旧動画アーカイブ](docs/PLAYTHROUGH.md#旧仕様の動画アーカイブ) にまとめています。
