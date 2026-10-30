@@ -4,7 +4,7 @@ import { stockVillageFood, gatherFlint, craftFlintSteel } from "../lib/modern-re
 import { gatherWood } from "../lib/modern-wood.mjs";
 import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { wait } from "../lib/survival-driver.mjs";
-export async function run({ page, d, a, meta, chapter }) {
+export async function run({ page, d, a, meta, chapter, flush = () => undefined }) {
   const v = meta.village;
   if (
     await page.evaluate(() => {
