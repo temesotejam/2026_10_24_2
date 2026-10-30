@@ -737,8 +737,15 @@ export function createModernHunting(page, d, a, options = {}) {
     }
   }
   async function collectDrops() {
-    for (let i = 0; i < 8 && corpses.length; i++) {
+    const species = currentConfig.collectSpecies ?? options.collectSpecies;
+    const allowed = species === undefined ? null : new Set(species);
+    let visits = 0;
+    while (corpses.length && visits < 8) {
       const drop = corpses.shift();
+      // Discard only the controller's visit request. Native world drops remain
+      // where the creature died and can still be collected by ordinary motion.
+      if (allowed && !allowed.has(drop.species)) continue;
+      visits++;
       const here = (await d.info()).position;
       if (Math.hypot(drop.position.x - here.x, drop.position.z - here.z) > 32) continue;
       await a.surfaceTo({ x: Math.floor(drop.position.x), z: Math.floor(drop.position.z) });
@@ -765,6 +772,12 @@ export function createModernHunting(page, d, a, options = {}) {
       assert.ok(DROPS[item], `unsupported hunting resource ${item}`);
       assert.ok(Number.isInteger(count) && count >= 0, `valid desired total for ${item}`);
     }
+    assert.ok(
+      config.collectSpecies === undefined ||
+        (Array.isArray(config.collectSpecies) &&
+          config.collectSpecies.every((species) => typeof species === "string")),
+      "collectSpecies is an optional list of creature species",
+    );
     active = true;
     currentConfig = config;
     const start = await observe(),
