@@ -143,6 +143,13 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   await d.tunnelTo({ x: meta.netherGate.x, z: meta.netherGate.z + 2 });
   await portal.enterNetherPortal("overworld", meta.netherGate);
   assert.equal((await a.adventure()).dimension, "overworld");
+  if (
+    await page.evaluate(() => {
+      const t = window.__mc.time() % 1200;
+      return t >= 744 || t < 24;
+    })
+  )
+    await restInVillage(page, d, a, meta.village, meta, flush);
   await stockVillageFood(d, page, a, meta.village, { breadTarget: 18, waitForGrowth: true });
   await chapter("ネザーでブレイズロッドを7本集め、通常世界へ帰還", 7);
 }

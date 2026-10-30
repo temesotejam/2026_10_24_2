@@ -15,6 +15,10 @@ assert.equal(metadata.stateMutationAPI, false);
 assert.equal(metadata.final.dragon.defeated, true);
 assert.equal(metadata.final.dimension, "overworld");
 assert.equal(metadata.final.eggCount, 1);
+assert.ok(
+  metadata.parts[0].initial.inventory.every((slot) => slot === null),
+  "start with an empty inventory",
+);
 const output = path.join(directory, "edited");
 mkdirSync(output, { recursive: true });
 const run = (command, args) => {
@@ -121,6 +125,7 @@ for (const [episodeIndex, episode] of plan.episodes.entries()) {
     "+faststart",
     file,
   ]);
+  assert.ok(Math.abs(duration(file) - cursor) < 0.3, "preserve the complete edited episode");
   run("ffmpeg", ["-v", "error", "-xerror", "-i", file, "-f", "null", "-"]);
   writeFileSync(path.join(output, stem + ".srt"), srt(captions));
   outputs.push({
@@ -138,6 +143,18 @@ writeFileSync(
   JSON.stringify(
     {
       sourceRun: metadata.url,
+      sourceStartedAt: metadata.parts[0].startedAt,
+      sourceInitialInventoryEmpty: true,
+      sourceDeathCount: metadata.deaths?.length ?? 0,
+      sourceRecordings: metadata.parts.map((p) => ({
+        file: p.path,
+        startedAt: p.startedAt,
+        finishedAt: p.finishedAt,
+        capture: p.capture,
+        sourceCommit: p.sourceCommit,
+      })),
+      navigation: metadata.endMission?.navigation,
+      bedVisits: metadata.bedVisits ?? [],
       sourceCompleted: metadata.completed,
       sourceFinal: metadata.final,
       plan,
