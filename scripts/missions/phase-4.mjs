@@ -1,3 +1,4 @@
+import { restInVillage } from "../lib/village-rest.mjs";
 import { writeFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { createModernHunting } from "../lib/modern-hunting.mjs";
@@ -10,6 +11,22 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   const v = meta.village,
     events = (meta.huntingEvents ??= []);
   const targets = { enderPearl: 12, string: (await d.count("bow")) ? 0 : 3, ammo: 32 };
+  const resupply = async (options) => {
+    if (
+      await page.evaluate(() => {
+        const t = window.__mc.time() % 1200;
+        return t >= 744 || t < 24;
+      })
+    )
+      await restInVillage(page, d, a, v, meta, flush);
+    if (meta.foodStrategy === "fishing" && (await d.count("fishingRod"))) {
+      const fishing = await import("./phase-4.92.mjs");
+      await fishing.run({ page, d, a, meta, flush, chapter, out });
+      h.activate();
+      return;
+    }
+    return stockVillageFood(d, page, a, v, options);
+  };
 
   const h = createModernHunting(page, d, a, {
     arrowReserve: 0,
@@ -70,7 +87,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
             "dirt",
           ]);
       if ((await carriedFoodUnits(d)) < 20)
-        await stockVillageFood(d, page, a, v, { breadTarget: 8, waitForGrowth: false });
+        await resupply({ breadTarget: 8, waitForGrowth: false });
       // Spend an early daytime interval on real portal construction while
       // waiting for naturally spawning night creatures, using this same input loop.
       if (
@@ -116,7 +133,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     },
     recover: async (target) => {
       if ((await carriedFoodUnits(d)) < 20)
-        await stockVillageFood(d, page, a, v, { breadTarget: 8, waitForGrowth: false });
+        await resupply({ breadTarget: 8, waitForGrowth: false });
       await a.eat();
       await a.recover(target);
     },
@@ -223,11 +240,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     Math.min(36, (await d.count("arrow")) + 4 * (await d.count("feather"))),
   );
   if ((await carriedFoodUnits(d)) < 60) {
-    if (await d.count("fishingRod")) {
-      await a.surfaceTo({ x: v.x - 5, z: v.z - 5 });
-      const fishing = await import("./phase-4.9.mjs");
-      await fishing.run({ page, d, a, meta, flush, chapter, out });
-    } else await stockVillageFood(d, page, a, v, { breadTarget: 9, waitForGrowth: true });
+    await resupply({ breadTarget: 9, waitForGrowth: true });
   }
   flush();
   await chapter("戦闘でエンダーパールと糸を集め、弓と矢を製作", 5);
