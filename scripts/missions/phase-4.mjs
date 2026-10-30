@@ -209,6 +209,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   meta.hunting = await h.gather(targets, {
     timeoutMs: 3000000,
     patrol: false,
+    collectSpecies: ["wanderer", "skeleton", "chicken", "ember"],
     arrowReserve: 0,
     home: meta.huntingCamp.position ?? meta.huntingCamp,
   });
