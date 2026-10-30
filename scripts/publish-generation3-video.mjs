@@ -121,6 +121,7 @@ export function createCompactProof(metadata, download, parts) {
     })),
     parts,
     chapters: metadata.chapters,
+    captionCorrections: metadata.captionCorrections,
     progression: {
       playerBuiltPortal: metadata.portal,
       naturallyMinedObsidianInventoryCount: metadata.obsidianMission.mining.inventoryCount,

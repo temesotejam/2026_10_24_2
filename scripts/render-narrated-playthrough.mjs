@@ -4,10 +4,12 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { narrationCues, ass, srt } from "./lib/narration.mjs";
+import { correctObservedChapters } from "./lib/recording-corrections.mjs";
 
 const directory = path.resolve(process.argv[2]);
 const metadata = JSON.parse(readFileSync(path.join(directory, "recording.json"), "utf8"));
 assert.equal(metadata.completed, true);
+correctObservedChapters(metadata);
 assert.equal(metadata.fixtureImports, false);
 assert.equal(metadata.stateMutationAPI, false);
 assert.ok(metadata.parts[0].initial.inventory.every((slot) => slot === null));
