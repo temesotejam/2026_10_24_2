@@ -4,7 +4,7 @@
 Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サーバーは不要です。
 公式 Minecraft の素材は同梱せず、テクスチャ・アイコン・モデルを手続き生成します。
 
-**[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [新仕様の全工程MP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
+**[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [画質優先版の動画・ダウンロード](https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/survival-generation3-720p/README.md) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
 
 ![作業台で木のツルハシを作成したサバイバル画面](docs/screenshots/survival-crafting.png)
 
@@ -139,9 +139,9 @@ CPU 代替描画ではモデル・照明を簡略化し、三人称視点を無�
 
 所持品ゼロから、自然の素材で道具とネザーゲートを作り、敵からロッドとパールを集め、200HPのドラゴンを倒して卵を持ち帰りました。137録画パート・死亡10回と装備回収を含む全工程です。最終HP17、卵1個。
 
-[全工程MP4をダウンロード（字幕・三人称・約1.5倍速、2時間23分49秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) / [最後のボス戦と帰還だけを見る（3分3秒・約4.7MB）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4)
+[以前の軽量版MP4（字幕・三人称・約1.5倍速、2時間23分49秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) / [以前の圧縮版・最終戦（3分3秒・約4.7MB）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4)
 
-[高画質の全工程をダウンロード（3分割）](https://temesotejam.github.io/2026_10_24_2/watch/#high-quality)。1本にまとめたMP4は、長時間の映像を収めるため画質を軽量化しています。
+[720p・画質優先版の全工程をダウンロード](https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/survival-generation3-720p/README.md) / [最終戦の720p MP4（約14MB）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-battle-720p.mp4)。前の全編と3分割版は圧縮が強すぎたため、CRF18・ビットレート上限なしで作り直しました。画質を保ち、容量に応じてファイルを分割しています。元録画のゲーム描画倍率は0.5です。
 
 自動操作は地形・位置を読み取り、通常のキー・マウス・UIを使います。今回の遺跡への移動には以前観測した地図の座標を使い、アイの投擲は行っていません。敵から集めた材料で作ったアイ11個を、実際の空き枠11個に入れました。本番への検証用データ読み込みはありません。[録画条件・検証記録と旧動画](docs/PLAYTHROUGH.md)。
 

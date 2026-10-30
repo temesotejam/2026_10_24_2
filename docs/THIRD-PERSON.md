@@ -1,5 +1,7 @@
 # 三人称カメラと録画
 
+[720p・画質優先版の動画と全工程ダウンロード](https://temesotejam.github.io/2026_10_24_2/watch/quality.html)。以前の全編・3分割版は圧縮が強すぎたため、元の720p映像からビットレート上限を外して作り直しています。録画時のゲーム描画倍率は0.5です。
+
 ## 新仕様の実際のクリア映像
 
 生成方式3・所持品ゼロから討伐と帰還まで完了しました。[全工程MP4（約2時間24分）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4) / [最後のボス戦と帰還のMP4（3分3秒）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4)。どちらも字幕付き・背後視点・約1.5倍速で、普通の動画ファイルとして保存できます。

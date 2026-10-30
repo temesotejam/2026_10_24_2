@@ -182,13 +182,16 @@ export function renderWatchPage(proof, style) {
     : "";
   const additionalDownloads = proof.export.additionalDownloads ?? [];
   const higherQuality = additionalDownloads.length
-    ? `<section id="high-quality"><h2>高画質・分割版（全3本）</h2>
-      <p>同じ全工程を時系列に3分割し、各動画の画質を上げています。順番に見ると全編を視聴できます。三人称・日本語字幕・1.5倍速です。</p>
-      <nav aria-label="高画質の分割動画">${additionalDownloads.map((item, index) => `<a class="download" href="${escapeHtml(item.url)}" download="${escapeHtml(item.file)}">${index + 1}/3をダウンロード（${lengthLabel(item.duration)}・約${Math.ceil(item.bytes / 1e6)}MB）</a>`).join("\n")}</nav></section>`
+    ? `<section id="high-quality"><h2>以前の軽量・3分割版</h2>
+      <p>同じ全工程を時系列に3分割した圧縮版です。順番に見ると全編を視聴できます。三人称・日本語字幕・1.5倍速です。</p>
+      <nav aria-label="以前の軽量・分割動画">${additionalDownloads.map((item, index) => `<a class="download" href="${escapeHtml(item.url)}" download="${escapeHtml(item.file)}">${index + 1}/3をダウンロード（${lengthLabel(item.duration)}・約${Math.ceil(item.bytes / 1e6)}MB）</a>`).join("\n")}</nav></section>`
     : "";
   const excerpt = proof.export.finalBattleExcerpt;
   const finalBattle = excerpt
     ? `<section><h2>最終戦の抜粋</h2><p>エンド進入直前から、ドラゴンとの戦い・卵の入手・通常世界への帰還までを抜き出した動画です。冒険の全工程は上の全編動画に収録しています。</p><a class="download" href="${escapeHtml(excerpt.url)}" download="${escapeHtml(excerpt.file)}">最終戦の抜粋をダウンロード（${lengthLabel(excerpt.duration)}・約${Math.ceil(excerpt.bytes / 1e6)}MB）</a></section>`
+    : "";
+  const sourceQuality = existsSync(path.join(repository, "public/watch/quality.html"))
+    ? '<section id="source-quality"><h2>画質を見直した720p版</h2><p><a href="./quality.html">720p版の再生・全工程MP4のダウンロード一覧</a></p><p>以下のプレビューと3分割版は、以前の圧縮版です。</p></section>'
     : "";
   return `<!doctype html>
 <html lang="ja">
@@ -202,6 +205,7 @@ export function renderWatchPage(proof, style) {
     <main>
       <a href="../?seed=20261029&amp;mode=survival&amp;view=third-person">← 修正後の新しい冒険へ</a>
       <h1>修正後のサバイバル：所持品ゼロからドラゴン討伐・帰還まで</h1>
+      ${sourceQuality}
       <p>三人称・日本語の実況字幕付き・約1.5倍速・${length}。自然の素材を採掘してネザーゲートを自作し、敵との戦闘で素材を集めてエンドへ進んだ、新しい仕様でのプレイ記録です。</p>
       <p>途中の死亡${proof.deathCount}回と装備の回収、操作の調整、通常保存からの再開も含みます。${proof.recordingPartCount}本の録画パートを順番につなぎ、プレイ映像を途中で切り取らず収録しています。</p>
       ${proof.progression?.endMission?.useKnownEntrance ? "<p>遺跡へは、操作中に読み取った入口の座標を使って移動しました。アイを投げて方向を探す手順は省略し、実際の空枠11個を作成したアイで埋めています。</p>" : ""}
@@ -213,7 +217,7 @@ export function renderWatchPage(proof, style) {
       </video>
       <nav aria-label="動画の再生とダウンロード">
         <button type="button" data-time="0">最初から再生</button>
-        ${additionalDownloads.length ? '<a class="download" href="#high-quality">高画質の全工程をダウンロード（3分割）</a>' : ""}
+        ${additionalDownloads.length ? '<a class="download" href="#high-quality">以前の軽量版をダウンロード（3分割）</a>' : ""}
         <a class="download" href="${rawDownload}" download="survival-generation3-1.5x.mp4">全工程を1本でダウンロード（軽量版・約${megabytes}MB）</a>
         <a class="download" href="./${subtitleName}" download>字幕ファイル</a>
         <a class="download" href="./${proofName}">進行と録画の検証記録</a>

@@ -5,9 +5,16 @@
 所持品ゼロから始めた同じサバイバルワールドで、エンダードラゴン討伐・卵の入手・通常世界への生還を完了しました。最終HP17、ドラゴンHP0、卵1個です。
 
 - [全工程のMP4を1本でダウンロード（軽量版）](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3.mp4)：日本語字幕・背後視点・約1.5倍速、2時間23分49秒。
-- [高画質の全工程をダウンロード（3分割）](https://temesotejam.github.io/2026_10_24_2/watch/#high-quality)：同じ全工程を、時系列に3本へ分けています。
-- [最後のボス戦と帰還のMP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4)：エンド進入前から帰還までの連続した3分3秒・約4.7MB。
+- [720p・画質優先版の全工程をダウンロード](https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/survival-generation3-720p/README.md)：同じ全工程を番号順のMP4に分割しています。
+- [最終戦の720p MP4](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-battle-720p.mp4)：3分3秒・約14MB。
+- [以前の圧縮版・最終戦MP4をダウンロード](https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/public/watch/survival-generation3-final-battle.mp4)：エンド進入前から帰還までの連続した3分3秒・約4.7MB。
 - [全工程の検証記録](../public/watch/generation3-proof.json) / [全工程の字幕SRT](../public/watch/survival-generation3.srt) / [戦闘抜粋の検証記録](../public/watch/generation3-final-battle-proof.json)。
+
+### 画質の修正（2026年10月31日）
+
+最初の全編は約73kbps、3分割版も上限約262kbpsと圧縮しすぎていました。新しい版は元録画の1280×720を保ち、CRF18・ビットレート上限なし・ノイズ除去なしで再出力しています。容量を超える区間は画質を下げずに分割します。ゲームの描画倍率は録画時点で0.5だったため、その時点で失われた細部は復元できません。再撮影やゲーム進行の変更は行っていません。
+
+各ファイルの尺・SHA-256・実際の出力設定は [画質優先版の検証記録](../public/watch/quality-full-proof.json) に記録しています。大きい全工程MP4はPages配信フォルダーの外に保存し、GitHubのraw URLからダウンロードできます。
 
 ### 実際に行った進行
 

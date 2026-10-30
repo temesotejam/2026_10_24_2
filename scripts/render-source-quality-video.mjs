@@ -64,6 +64,8 @@ function render(window, name) {
     "yuv420p",
     "-movflags",
     "+faststart",
+    "-fs",
+    String(91 * 1024 * 1024),
     name + ".mp4",
   ]);
   const file = path.join(out, name + ".mp4"),
@@ -102,13 +104,28 @@ function render(window, name) {
   console.log(JSON.stringify(result));
   return result;
 }
+const resumeOption = process.argv.indexOf("--resume");
+const results =
+  resumeOption >= 0 ? JSON.parse(readFileSync(process.argv[resumeOption + 1], "utf8")) : [];
+assert.ok(full || results.length === 0);
+let resumeEnd = 0;
+for (const item of results) {
+  assert.equal(item.fullDecodeVerified, true);
+  assert.ok(Math.abs(item.rawStart - resumeEnd) < 0.001);
+  assert.equal(
+    createHash("sha256")
+      .update(readFileSync(path.join(out, item.file)))
+      .digest("hex"),
+    item.sha256,
+  );
+  resumeEnd = item.rawEnd;
+}
 const queue = full
   ? Array.from({ length: 12 }, (_, i) => ({
-      rawStart: (rawDuration * i) / 12,
+      rawStart: Math.max(resumeEnd, (rawDuration * i) / 12),
       rawEnd: (rawDuration * (i + 1)) / 12,
-    }))
+    })).filter((window) => window.rawEnd > window.rawStart)
   : [finalBattleWindow(metadata)];
-const results = [];
 while (queue.length) {
   const window = queue.shift();
   const name = full
