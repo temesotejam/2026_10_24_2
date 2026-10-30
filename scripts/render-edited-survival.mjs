@@ -55,6 +55,8 @@ for (const [episodeIndex, episode] of plan.episodes.entries()) {
     previousIndex = part.index;
     previousEnd = clip.end;
     const length = (clip.end - clip.start) / clip.speed;
+    const gamma = clip.gamma ?? 1;
+    assert.ok(gamma >= 1 && gamma <= 1.6, "moderate brightness correction for dark footage");
     const name = `episode-${episodeIndex + 1}-clip-${clipIndex + 1}`;
     const localCues = [{ start: 0, end: Math.min(length, 8), text: clip.text }];
     for (const cue of clip.captions ?? []) {
@@ -73,7 +75,7 @@ for (const [episodeIndex, episode] of plan.episodes.entries()) {
       "-t",
       String(length),
       "-vf",
-      `setpts=(PTS-STARTPTS)/${clip.speed},fps=30,scale=1280:720,ass=${path.join(output, name + ".ass")}:fontsdir=/usr/share/fonts/opentype/noto`,
+      `setpts=(PTS-STARTPTS)/${clip.speed},fps=30,scale=1280:720,eq=gamma=${gamma},ass=${path.join(output, name + ".ass")}:fontsdir=/usr/share/fonts/opentype/noto`,
       "-an",
       "-c:v",
       "libx264",

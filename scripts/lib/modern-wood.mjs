@@ -3,6 +3,12 @@ import assert from "node:assert/strict";
 import { wait } from "./survival-driver.mjs";
 export async function gatherWood(page, d, a, targetPlanks = 48) {
   d.setGoal("弓や矢、予備の道具に使う木材を集めます。");
+  if ((await d.count("log")) || (await d.count("birchLog"))) {
+    await d.open();
+    while (await d.count("log")) await d.make("planks");
+    while (await d.count("birchLog")) await d.make("birch_planks");
+    await d.close();
+  }
   for (let tree = 0; tree < 20 && (await d.count("planks")) < targetPlanks; tree++) {
     const t = await page.evaluate(() => {
       const p = window.__mc.position(),
@@ -33,7 +39,7 @@ export async function gatherWood(page, d, a, targetPlanks = 48) {
           await d.mine({ ...t, y: t.y + dy });
       }
     await wait(800);
-    await a.move(t.x + 0.5, t.z + 0.5);
+    await a.move(t.x + 0.5, t.z + 0.5, (await d.info()).position.y < t.y - 0.1);
     await d.open();
     while (await d.count("log")) await d.make("planks");
     while (await d.count("birchLog")) await d.make("birch_planks");

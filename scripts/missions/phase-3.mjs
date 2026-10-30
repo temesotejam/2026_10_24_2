@@ -1,3 +1,4 @@
+import { restInVillage } from "../lib/village-rest.mjs";
 import assert from "node:assert/strict";
 import { stockVillageFood, gatherFlint, craftFlintSteel } from "../lib/modern-resources.mjs";
 import { gatherWood } from "../lib/modern-wood.mjs";
@@ -5,6 +6,13 @@ import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { wait } from "../lib/survival-driver.mjs";
 export async function run({ page, d, a, meta, chapter }) {
   const v = meta.village;
+  if (
+    await page.evaluate(() => {
+      const t = window.__mc.time() % 1200;
+      return t >= 744 || t < 24;
+    })
+  )
+    await restInVillage(page, d, a, meta.village, meta, flush);
   assert.ok(v);
   if (!(await d.count("diamond_pick"))) {
     d.setThreatHandler(null);

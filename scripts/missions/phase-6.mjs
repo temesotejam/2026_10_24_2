@@ -1,3 +1,4 @@
+import { restInVillage } from "../lib/village-rest.mjs";
 import { wait } from "../lib/survival-driver.mjs";
 import assert from "node:assert/strict";
 import { createModernPortal } from "../lib/modern-portal.mjs";
@@ -8,6 +9,13 @@ export async function run({ page, d, a, meta, flush, chapter }) {
     h = createModernHunting(page, d, a);
   a.setGuard(h.guard);
   if ((await a.adventure()).dimension === "overworld") {
+    if (
+      await page.evaluate(() => {
+        const t = window.__mc.time() % 1200;
+        return t >= 744 || t < 24;
+      })
+    )
+      await restInVillage(page, d, a, meta.village, meta, flush);
     await stockVillageFood(d, page, a, meta.village, { breadTarget: 18, waitForGrowth: true });
     await a.surfaceTo({ x: meta.portal.entry.x, z: meta.portal.entry.z + 2 });
     await portal.enterNetherPortal("nether", meta.portal.entry);
