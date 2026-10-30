@@ -14,7 +14,7 @@ const url = new URL(option("--url", "http://127.0.0.1:4173/2026_10_24_2/"));
 url.searchParams.set("seed", "2026");
 url.searchParams.set("mode", "survival");
 const out = path.resolve(option("--out", "visual-check/dragon-fish-battle"));
-const ammunition=Number(option("--arrows","24"));
+const ammunition = Number(option("--arrows", "24"));
 mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({
   headless: true,

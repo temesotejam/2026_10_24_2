@@ -182,7 +182,7 @@ export function renderWatchPage(proof, style) {
     : "";
   const additionalDownloads = proof.export.additionalDownloads ?? [];
   const higherQuality = additionalDownloads.length
-    ? `<section><h2>高画質・分割版（全3本）</h2>
+    ? `<section id="high-quality"><h2>高画質・分割版（全3本）</h2>
       <p>同じ全工程を時系列に3分割し、各動画の画質を上げています。順番に見ると全編を視聴できます。三人称・日本語字幕・1.5倍速です。</p>
       <nav aria-label="高画質の分割動画">${additionalDownloads.map((item, index) => `<a class="download" href="${escapeHtml(item.url)}" download="${escapeHtml(item.file)}">${index + 1}/3をダウンロード（${lengthLabel(item.duration)}・約${Math.ceil(item.bytes / 1e6)}MB）</a>`).join("\n")}</nav></section>`
     : "";
@@ -213,7 +213,8 @@ export function renderWatchPage(proof, style) {
       </video>
       <nav aria-label="動画の再生とダウンロード">
         <button type="button" data-time="0">最初から再生</button>
-        <a class="download" href="${rawDownload}" download="survival-generation3-1.5x.mp4">全工程のMP4をダウンロード（約${megabytes}MB）</a>
+        ${additionalDownloads.length ? '<a class="download" href="#high-quality">高画質の全工程をダウンロード（3分割）</a>' : ""}
+        <a class="download" href="${rawDownload}" download="survival-generation3-1.5x.mp4">全工程を1本でダウンロード（軽量版・約${megabytes}MB）</a>
         <a class="download" href="./${subtitleName}" download>字幕ファイル</a>
         <a class="download" href="./${proofName}">進行と録画の検証記録</a>
       </nav>
