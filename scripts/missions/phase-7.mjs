@@ -48,11 +48,10 @@ async function enterByContact(page, d, a, destination, target, jump = false) {
 
 export async function run({ page, d, a, meta, flush = () => undefined, chapter, out }) {
   const mission = (meta.endMission ??= {});
-  // The controller has already read this seed's entrance from the permitted
-  // read-only navigation map. Eleven earned eyes fill its eleven empty frames;
-  // no ceremonial direction throw or fabricated throw history is needed.
-  mission.useKnownEntrance = true;
-  mission.requiredEyes = 11;
+  // A new run can spend an earned eye on the native direction throw.
+  // Older recordings retain their disclosed known-entrance route.
+  mission.useKnownEntrance = !meta.directionalNavigation;
+  mission.requiredEyes = mission.useKnownEntrance ? 11 : 12;
   let state = await a.adventure();
   assert.ok(state.generator >= 3, "complete the new survival progression");
   // A resumed ordinary save remembers real eye throws even if the previous
@@ -140,6 +139,14 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
         "既に観測した地図の入口座標を利用。方向投げは省略して、実際に集めた11個のアイを枠へ入れます。",
         2,
       );
+      flush();
+    }
+    if (!mission.useKnownEntrance) {
+      mission.navigation = {
+        method: "native-eye-confirmation-with-readonly-map-route",
+        directionThrowSkipped: false,
+      };
+      d.narrate("投げたアイで方向を確認。観測用の地図で道を選び、遺跡へ向かいます。", 2);
       flush();
     }
     const c = (await a.adventure()).stronghold;

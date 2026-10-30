@@ -43,6 +43,7 @@ const meta =
         parts: [],
         chapters: [],
       };
+if (args.includes("--directional-eye")) meta.directionalNavigation = true;
 const part = {
   path: `part-${meta.parts.length + 1}.mp4`,
   resumePhase: resume,
