@@ -6,6 +6,7 @@ import { aabbFromFeetPosition, aabbIntersectsSolid, type Vec3 } from "./physics"
 import type { PlayerController } from "./controller";
 import { raycastVoxels } from "./raycast";
 import type { SurvivalSession } from "../survival/session";
+import { creatureRayDistance } from "../entities/creature-hitbox";
 
 export interface ChunkVisualUpdater {
   updateChunk(cx: number, cz: number): void;
@@ -94,15 +95,9 @@ export class BlockInteraction {
     let closest = block?.distance ?? 3;
     let target: number | null = null;
     for (const m of this.session.data.creatures) {
-      const delta = new THREE.Vector3(
-        m.position.x - origin.x,
-        m.position.y + 0.7 - origin.y,
-        m.position.z - origin.z,
-      );
-      const along = delta.dot(direction);
-      if (along < 0 || along > closest) continue;
-      if (delta.lengthSq() - along * along < 0.55 ** 2) {
-        closest = along;
+      const distance = creatureRayDistance(m, origin, direction);
+      if (distance !== null && distance < closest) {
+        closest = distance;
         target = m.id;
       }
     }

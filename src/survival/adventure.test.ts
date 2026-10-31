@@ -416,3 +416,44 @@ describe("planned adventure progression", () => {
     );
   });
 });
+
+describe("arrows use the visible mob body", () => {
+  const creature = (species: import("../entities/creatures").Species) => ({
+    id: 1,
+    species,
+    hp: 16,
+    age: 1,
+    cooldown: 0,
+    intent: 0,
+    love: 0,
+    position: { x: 0.5, y: 34, z: 4.5 },
+    velocity: { x: 0, y: 0, z: 0 },
+    onGround: true,
+  });
+  it("hits the head of a tall enemy", () => {
+    const { data, adventure } = fixture();
+    data.creatures = [creature("wanderer")];
+    data.nextId = 2;
+    adventure.shots.push({
+      position: { x: 0.5, y: 35.98, z: 3 },
+      velocity: { x: 0, y: 0, z: 10 },
+      age: 0,
+    });
+    adventure.tick(0.2);
+    expect(data.creatures[0]?.hp).toBe(8);
+    expect(adventure.shots).toHaveLength(0);
+  });
+  it("flies over a spider without hitting an invisible human-sized body", () => {
+    const { data, adventure } = fixture();
+    data.creatures = [creature("spider")];
+    data.nextId = 2;
+    adventure.shots.push({
+      position: { x: 0.5, y: 35.2, z: 3 },
+      velocity: { x: 0, y: 0, z: 10 },
+      age: 0,
+    });
+    adventure.tick(0.4);
+    expect(data.creatures[0]?.hp).toBe(16);
+    expect(adventure.shots).toHaveLength(1);
+  });
+});

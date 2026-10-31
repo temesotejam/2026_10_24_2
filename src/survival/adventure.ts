@@ -1,3 +1,4 @@
+import { creatureContainsPoint } from "../entities/creature-hitbox";
 import { meleeDamage } from "./melee-damage";
 import { must } from "../core/assert";
 import { ITEMS, stack, type Stack } from "../items/catalog";
@@ -150,8 +151,7 @@ export class Adventure {
         } else if (isSolid(block)) shot.age = 3;
         else if (
           this.session.data.creatures.some((m) => {
-            if (Math.hypot(m.position.x - p.x, m.position.y + 1 - p.y, m.position.z - p.z) > 0.7)
-              return false;
+            if (!creatureContainsPoint(m, p)) return false;
             this.session.shootCreature(m.id, 8);
             return true;
           })
