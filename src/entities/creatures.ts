@@ -86,8 +86,9 @@ export function moveCreature(m: Creature, target: Vec3, world: World, dt: number
   }
   if (aggressive || flee) m.intent = yaw;
   if (d > 32) return; // Dormant distant creatures do not run collision or AI.
-  const aheadX = Math.floor(m.position.x - Math.sin(yaw) * 0.7);
-  const aheadZ = Math.floor(m.position.z - Math.cos(yaw) * 0.7);
+  const movementSign = Math.sign(forward);
+  const aheadX = Math.floor(m.position.x - Math.sin(yaw) * 0.7 * movementSign);
+  const aheadZ = Math.floor(m.position.z - Math.cos(yaw) * 0.7 * movementSign);
   const next = stepPhysics(
     m,
     {
