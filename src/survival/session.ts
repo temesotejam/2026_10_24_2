@@ -300,7 +300,12 @@ export class SurvivalSession {
     if (this.isNight) {
       if (
         this.data.creatures.some(
-          (m) => hostile(m) && Math.hypot(m.position.x - x, m.position.z - z) < 8,
+          (m) =>
+            m.hp > 0 &&
+            hostile(m) &&
+            (m.species !== "wanderer" || m.fuse === 2) &&
+            Math.abs(m.position.y - y) < 5 &&
+            Math.hypot(m.position.x - x, m.position.z - z) < 8,
         )
       ) {
         this.notice?.("近くに敵がいます");

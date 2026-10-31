@@ -20,3 +20,9 @@
 [昼のモデル一覧](screenshots/mob-models.png) / [夜のモデル一覧](screenshots/mob-models-night.png) / [子供の動物の表示](screenshots/mob-models-young.png) / [各MOBの特徴・能力](MOBS.md)
 
 再現用のテストは `src/player/creature-target.test.ts`、`src/entities/creature-hitbox.test.ts`、`src/entities/creatures.test.ts`、`src/survival/session.test.ts`、`src/survival/adventure.test.ts` にあります。モデル確認は `scripts/mob-model-check.mjs`、ブラウザー戦闘確認は `scripts/combat-check.mjs` を使用します。
+
+## 追加の実プレイで見つかった睡眠判定
+
+次のサバイバル録画中、地下のベッドが地上の敵に妨げられる問題を確認しました。以前は水平方向だけを調べていたため、上下に離れた敵も対象になっていました。高さの差が5ブロック未満で、水平方向8ブロック未満にいる、生存中で実際に敵対するMOBを調べるよう修正しました。倒れた個体と受動状態のワンダラーは対象から外しています。近くの生きた敵が睡眠を妨げる挙動は維持します。
+
+修正前に3件の不具合を再現し、近い上段の敵が引き続き睡眠を妨げるケースも含めて確認しました。全45ファイル・459件のテストとPages向けビルドが通っています。録画は失敗と死亡を残し、通常保存を引き継いで続行しています。

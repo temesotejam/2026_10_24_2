@@ -327,3 +327,50 @@ describe("mob death at simulation boundaries", () => {
     expect(d.creatures.some((m) => m.age < 0)).toBe(false);
   });
 });
+
+describe("bed threats respect height and actual aggression", () => {
+  function nightBed(species: import("../entities/creatures").Species, enemyY: number, hp = 16) {
+    const f = fixture();
+    f.w.setBlock(7, 1, 7, BlockId.BED);
+    f.d.time = 0;
+    f.d.creatures = [
+      {
+        id: 1,
+        species,
+        hp,
+        age: 1,
+        cooldown: 0,
+        intent: 0,
+        love: 0,
+        position: { x: 7.5, y: enemyY, z: 7.5 },
+        velocity: { x: 0, y: 0, z: 0 },
+        onGround: true,
+      },
+    ];
+    return f;
+  }
+  it("can sleep underground when monsters are far above the bed", () => {
+    const { game } = nightBed("zombie", 12);
+    game.sleep(7, 1, 7);
+    expect(game.isNight).toBe(false);
+  });
+  it("ignores a dead mob awaiting removal", () => {
+    const { game } = nightBed("spider", 1, 0);
+    game.sleep(7, 1, 7);
+    expect(game.isNight).toBe(false);
+  });
+  it("allows a passive wanderer but blocks one already attacking", () => {
+    const { game, d } = nightBed("wanderer", 1);
+    game.sleep(7, 1, 7);
+    expect(game.isNight).toBe(false);
+    d.time = 0;
+    must(d.creatures[0]).fuse = 2;
+    game.sleep(7, 1, 7);
+    expect(game.isNight).toBe(true);
+  });
+  it("still blocks a living hostile on a nearby upper ledge", () => {
+    const { game } = nightBed("skeleton", 4);
+    game.sleep(7, 1, 7);
+    expect(game.isNight).toBe(true);
+  });
+});
