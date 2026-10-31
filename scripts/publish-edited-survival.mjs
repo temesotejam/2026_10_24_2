@@ -1,10 +1,25 @@
 /** Publish only a verified edited recording of a genuinely completed new run. */
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
-import { copyFileSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
+import { playlistPage } from "./lib/video-playlist-page.mjs";
 
 const source = path.resolve(process.argv[2]);
+const collectionAt = process.argv.indexOf("--collection");
+const collection = collectionAt >= 0 ? process.argv[collectionAt + 1] : "edited-survival";
+assert.match(collection, /^[a-z][a-z0-9-]{0,50}$/);
+const watchStem = collection === "edited-survival" ? "edited" : collection;
+const previewFile =
+  collection === "edited-survival" ? "survival-edited-finale.mp4" : `${collection}-finale.mp4`;
 const proof = JSON.parse(readFileSync(path.join(source, "edit-proof.json"), "utf8"));
 assert.equal(proof.sourceCompleted, true);
 assert.equal(proof.sourceInitialInventoryEmpty, true);
@@ -15,16 +30,17 @@ assert.equal(proof.settings.crf, 18);
 assert.equal(proof.settings.bitrateCap, null);
 assert.ok(proof.outputs.length > 0);
 const repository = process.cwd();
-const destination = path.join(repository, "downloads/edited-survival");
+const destination = path.join(repository, "downloads", collection);
 const watch = path.join(repository, "public/watch");
 mkdirSync(destination, { recursive: true });
 mkdirSync(watch, { recursive: true });
-const base =
-  "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/edited-survival/";
+const base = `https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/${collection}/`;
 const escapeHtml = (value) =>
   String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
-const length = (seconds) =>
-  `${Math.floor(seconds / 60)}分${String(Math.round(seconds % 60)).padStart(2, "0")}秒`;
+const length = (seconds) => {
+  const rounded = Math.round(seconds);
+  return `${Math.floor(rounded / 60)}分${String(rounded % 60).padStart(2, "0")}秒`;
+};
 for (const item of proof.outputs) {
   assert.match(item.file, /^survival-edited-\d+\.mp4$/);
   assert.equal(item.fullDecodeVerified, true);
@@ -39,6 +55,37 @@ for (const item of proof.outputs) {
   copyFileSync(path.join(source, item.subtitleFile), path.join(destination, item.subtitleFile));
   item.url = base + item.file;
 }
+const title = proof.plan.title ?? "再挑戦のサバイバル：短く編集した字幕実況";
+const notes =
+  proof.plan.notes ??
+  (collection === "edited-survival"
+    ? [
+        "討伐後に帰還ゲートの不具合が見つかったため、ゲームを修正して同じ通常セーブから帰還を再試行しました。卵・所持品・体力を引き継いで、設定済みのベッド地点へ生還しています。最終章の字幕でも説明しています。",
+      ]
+    : []);
+assert.ok(notes.every((note) => typeof note === "string"));
+const previewPath = path.join(source, "preview.gif");
+if (collection !== "edited-survival")
+  assert.ok(existsSync(previewPath), "provide a looping GitHub preview");
+let previewMarkdown = "";
+if (existsSync(previewPath)) {
+  const gif = readFileSync(previewPath);
+  assert.match(gif.subarray(0, 6).toString(), /^GIF8[79]a$/);
+  assert.ok(gif.includes(Buffer.from("NETSCAPE2.0")), "GIF must include its looping extension");
+  assert.ok(gif.length < 20 * 1024 * 1024, "keep the inline preview small");
+  copyFileSync(previewPath, path.join(destination, "preview.gif"));
+  proof.preview = {
+    file: "preview.gif",
+    bytes: gif.length,
+    sha256: createHash("sha256").update(gif).digest("hex"),
+    loop: true,
+  };
+  previewMarkdown = `[![本編からの短いループプレビュー](./preview.gif)](https://temesotejam.github.io/2026_10_24_2/watch/${watchStem}.html)\n\n上のGIFは本編の抜粋を自動ループします。画像を押すと、ダウンロードせずに本編を連続・ループ再生できます。\n\n`;
+}
+const eventNote =
+  proof.sourceDeathCount > 0
+    ? `途中の死亡${proof.sourceDeathCount}回と装備の回収も含め、`
+    : "採掘・製作・探索・戦闘をつなぎ、";
 const totalDuration = proof.outputs.reduce((sum, item) => sum + item.duration, 0);
 const totalBytes = proof.outputs.reduce((sum, item) => sum + item.bytes, 0);
 const date = new Intl.DateTimeFormat("ja-JP", {
@@ -55,12 +102,13 @@ const rows = proof.outputs
   .join("\n");
 writeFileSync(
   path.join(destination, "README.md"),
-  `# 再挑戦のサバイバル：短く編集した字幕実況\n\n${date}（日本時間）に開始した新規セーブ（シード2026）で、所持品ゼロからドラゴン討伐・卵の入手・通常世界への帰還まで進めたプレイです。途中の死亡${proof.sourceDeathCount}回と装備の回収も含め、流れが分かるよう合計${length(totalDuration)}に編集しました。\n\n**日本語字幕・三人称・720p。番号順に再生してください。** 字幕は焼き込み済みなので、MP4だけで再生できます。採掘・移動・待ち時間にはカットと早送りを使い、主要な戦闘は等速を中心に残しています。\n\n| 順番 | 章 | 時間 | 容量 | ダウンロード |\n| --- | --- | --- | --- | --- |\n${rows}\n\n合計約${Math.ceil(totalBytes / 1e6)}MB。CRF18・ビットレート上限なしで出力し、容量に応じて章を分けています。\n\n[最終章の再生ページ](https://temesotejam.github.io/2026_10_24_2/watch/edited.html) / [編集箇所・クリア結果・各ファイルのSHA-256](./edit-proof.json)\n\n操作スクリプトが、観測用の地図と通常のキー・マウス操作を使ってプレイしています。エンダーアイによる方向確認の後、地図で遺跡までの経路を選んでいます。録画時の描画倍率は100％です。音声はなく、実況は字幕です。\n\n討伐後に帰還ゲートの不具合が見つかったため、ゲームを修正して同じ通常セーブから帰還を再試行しました。卵・所持品・体力を引き継いで、設定済みのベッド地点へ生還しています。最終章の字幕でも説明しています。\n`,
+  `# ${title}\n\n${previewMarkdown}${date}（日本時間）に開始した新規セーブ（シード2026）で、所持品ゼロからドラゴン討伐・卵の入手・通常世界への帰還まで進めたプレイです。${eventNote}流れが分かるよう合計${length(totalDuration)}に編集しました。\n\n**日本語字幕・三人称・720p。番号順に再生してください。** 字幕は焼き込み済みなので、MP4だけで再生できます。採掘・移動・待ち時間にはカットと早送りを使い、主要な戦闘は等速を中心に残しています。\n\n| 順番 | 章 | 時間 | 容量 | ダウンロード |\n| --- | --- | --- | --- | --- |\n${rows}\n\n合計約${Math.ceil(totalBytes / 1e6)}MB。CRF18・ビットレート上限なしで出力し、容量に応じて章を分けています。\n\n[ダウンロードせず再生する](https://temesotejam.github.io/2026_10_24_2/watch/${watchStem}.html) / [編集箇所・クリア結果・各ファイルのSHA-256](./edit-proof.json)\n\n操作スクリプトが、観測用の地図と通常のキー・マウス操作を使ってプレイしています。エンダーアイによる方向確認の後、地図で遺跡までの経路を選んでいます。録画時の描画倍率は100％です。音声はなく、実況は字幕です。\n\n${notes.join("\n\n")}\n`,
 );
 writeFileSync(path.join(destination, "edit-proof.json"), JSON.stringify(proof, null, 2) + "\n");
-writeFileSync(path.join(watch, "edited-proof.json"), JSON.stringify(proof, null, 2) + "\n");
+writeFileSync(path.join(watch, `${watchStem}-proof.json`), JSON.stringify(proof, null, 2) + "\n");
 const finale = proof.outputs.at(-1);
-copyFileSync(path.join(source, finale.file), path.join(watch, "survival-edited-finale.mp4"));
+if (collection === "edited-survival")
+  copyFileSync(path.join(source, finale.file), path.join(watch, previewFile));
 const links = proof.outputs
   .map(
     (item, i) =>
@@ -68,15 +116,23 @@ const links = proof.outputs
   )
   .join("\n");
 writeFileSync(
-  path.join(watch, "edited.html"),
-  `<!doctype html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>再挑戦のサバイバル・短く編集した字幕実況</title><style>body{margin:0;background:#171b22;color:#eee;font:17px/1.7 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:24px}a{color:#9ed2ff}video{display:block;width:100%;height:auto;background:#000}li{margin:16px 0}button{font:inherit;padding:8px 16px}</style></head>
-<body><main><h1>再挑戦のサバイバル：短く編集した字幕実況</h1>
+  path.join(watch, `${watchStem}.html`),
+  collection !== "edited-survival"
+    ? playlistPage({
+        title,
+        outputs: proof.outputs,
+        collection,
+        totalLength: length(totalDuration),
+        notes,
+      })
+    : `<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><style>body{margin:0;background:#171b22;color:#eee;font:17px/1.7 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:24px}a{color:#9ed2ff}video{display:block;width:100%;height:auto;background:#000}li{margin:16px 0}button{font:inherit;padding:8px 16px}</style></head>
+<body><main><h1>${escapeHtml(title)}</h1>
 <p>新規セーブの所持品ゼロから、ドラゴン討伐・卵の入手・生還まで。日本語字幕と三人称視点で、合計${length(totalDuration)}に編集しました。採掘や待ち時間を短縮し、主要な戦闘と失敗からの立て直しを残しています。</p>
 <h2>全${proof.outputs.length}章をダウンロード</h2><p>番号順に再生してください。字幕は動画に入っています。</p><ol>${links}</ol>
-<p>実況は字幕です（音声なし）。討伐後の帰還ゲートの不具合を修正し、同じ通常セーブから帰還を再試行しています。</p>
-<h2>最終章のプレビュー</h2><video controls playsinline preload="metadata"><source src="./survival-edited-finale.mp4" type="video/mp4"></video><p><button data-time="0">最終章を最初から再生</button></p>
-<p><a href="https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/edited-survival/README.md">ダウンロード一覧</a> / <a href="./edited-proof.json">編集とクリアの記録</a> / <a href="../?seed=20261029&amp;mode=survival&amp;view=third-person">ゲームを遊ぶ</a></p></main>
+<p>実況は字幕です（音声なし）。${notes.map(escapeHtml).join("<br>")}</p>
+<h2>最終章のプレビュー</h2><video controls playsinline preload="metadata"><source src="./${previewFile}" type="video/mp4"></video><p><button data-time="0">最終章を最初から再生</button></p>
+<p><a href="https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/${collection}/README.md">ダウンロード一覧</a> / <a href="./${watchStem}-proof.json">編集とクリアの記録</a> / <a href="../?seed=20261029&amp;mode=survival&amp;view=third-person">ゲームを遊ぶ</a></p></main>
 <script>document.querySelector('[data-time="0"]').addEventListener('click',async()=>{const video=document.querySelector('video');video.currentTime=0;await video.play();});</script></body></html>`,
 );
 console.log(
