@@ -297,6 +297,17 @@ export async function gatherFlint(
                 mc.blockAt(x, y + 2, z) === 0 &&
                 !skipped.includes(`${x},${y},${z}`)
               ) {
+                // Surface navigation cannot descend into a buried cave merely
+                // because a gravel block has two air cells above it.
+                let openSky = true;
+                for (let above = y + 3; above < 96; above++) {
+                  const block = mc.blockAt(x, above, z);
+                  if (![0, 5, 16, 22, 23, 25, 31, 33, 40, 43].includes(block)) {
+                    openSky = false;
+                    break;
+                  }
+                }
+                if (!openSky) continue;
                 candidates.push({
                   x,
                   y,
@@ -310,7 +321,14 @@ export async function gatherFlint(
       { radius, skipped },
     );
     assert.ok(gravel, "discover more exposed natural gravel");
-    await a.surfaceTo(gravel);
+    const beforeApproach = await d.info();
+    const alreadyReachable =
+      Math.hypot(
+        gravel.x + 0.5 - beforeApproach.position.x,
+        gravel.y + 0.5 - beforeApproach.position.y - beforeApproach.eye,
+        gravel.z + 0.5 - beforeApproach.position.z,
+      ) <= 4.25;
+    if (!alreadyReachable) await a.surfaceTo(gravel);
     await wait(350);
     const p = await d.info();
     if (

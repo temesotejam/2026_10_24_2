@@ -1,3 +1,4 @@
+import { mobAimHeight } from "./mob-aim.mjs";
 /** Normal-input mob hunting for the generation-3 survival recording.
  * Observations are read-only. No imports, spawns, teleport, time or item setters.
  * Desired quantities are total inventory counts, not an assumed number of kills. */
@@ -69,7 +70,7 @@ export function prioritizeReachableSkeleton(state, candidates, blockAt) {
   if (!nearest) return null;
   const eye = { ...state.position, y: state.position.y + state.eye };
   const reachable = (mob) => {
-    const body = { ...mob.position, y: mob.position.y + 0.7 };
+    const body = { ...mob.position, y: mob.position.y + mobAimHeight(mob) };
     return distance(eye, body) <= 2.95 && clearSight(eye, body, blockAt);
   };
   if (
@@ -259,7 +260,7 @@ export function createModernHunting(page, d, a, options = {}) {
       },
       {
         from: { ...state.position, y: state.position.y + state.eye },
-        to: { ...mob.position, y: mob.position.y + 1 },
+        to: { ...mob.position, y: mob.position.y + mobAimHeight(mob) },
       },
     );
   const chooseWeapon = async (state) => {
@@ -421,7 +422,7 @@ export function createModernHunting(page, d, a, options = {}) {
       t = range / 22;
     const aim = {
       x: mob.position.x + mob.velocity.x * t,
-      y: mob.position.y + 1 + 1.2 * t * t,
+      y: mob.position.y + mobAimHeight(mob) + 1.2 * t * t,
       z: mob.position.z + mob.velocity.z * t,
     };
     await d.aim(aim, 0);
@@ -514,11 +515,11 @@ export function createModernHunting(page, d, a, options = {}) {
           failedSwings < 2 &&
           clearSight(
             { ...state.position, y: state.position.y + state.eye },
-            { ...mob.position, y: mob.position.y + 1 },
+            { ...mob.position, y: mob.position.y + mobAimHeight(mob) },
             blockQuery(state),
           )
         ) {
-          await d.aim({ ...mob.position, y: mob.position.y + 1 }, 0);
+          await d.aim({ ...mob.position, y: mob.position.y + mobAimHeight(mob) }, 0);
           await page.mouse.down();
           await wait(450);
           await d.releaseAttack();
@@ -562,7 +563,10 @@ export function createModernHunting(page, d, a, options = {}) {
                 if (distance(mob.position, latest.position) < 6 && latest.health >= 6) {
                   const currentMob = alive(latest).find((candidate) => candidate.id === mob.id);
                   if (!currentMob) continue;
-                  const body = { ...currentMob.position, y: currentMob.position.y + 0.7 };
+                  const body = {
+                    ...currentMob.position,
+                    y: currentMob.position.y + mobAimHeight(currentMob),
+                  };
                   await d.aim(body, 0);
                   const hit = await page.evaluate(() => window.__mc.target());
                   if (
@@ -904,7 +908,8 @@ export function createModernHunting(page, d, a, options = {}) {
           // One normal arrow turns a passive wanderer hostile. Keep our
           // supported position while it approaches, rather than crossing an
           // entire hillside/coast just to deliver the first melee hit.
-          const reserve = Math.max(12, config.arrowReserve ?? options.arrowReserve ?? 12);
+          const reserve =
+            config.lureReserve ?? Math.max(12, config.arrowReserve ?? options.arrowReserve ?? 12);
           const arrows = latest.inventory
             .filter((stack) => stack?.id === "arrow")
             .reduce((n, stack) => n + stack.count, 0);

@@ -1,3 +1,4 @@
+import { mobAimHeight } from "./mob-aim.mjs";
 import { canMelee, chooseThreat, hostile, safeRetreat, solid } from "./combat-policy.mjs";
 /** Read-only world inspection plus normal keyboard/mouse/UI actions. */
 import assert from "node:assert/strict";
@@ -452,7 +453,7 @@ export function createAdventureDriver(page, d) {
               const pick = s.inventory.findIndex((item) => item?.id === "stone_pick");
               if (pick >= 0) await d.equip("stone_pick");
             }
-            await d.aim({ ...target.position, y: target.position.y + 1 }, 0);
+            await d.aim({ ...target.position, y: target.position.y + mobAimHeight(target) }, 0);
             await page.mouse.down();
             await wait(420);
             await page.mouse.up();
@@ -468,7 +469,7 @@ export function createAdventureDriver(page, d) {
             await d.aim(
               {
                 x: target.position.x + target.velocity.x * t,
-                y: target.position.y + 1 + 1.2 * t * t,
+                y: target.position.y + mobAimHeight(target) + 1.2 * t * t,
                 z: target.position.z + target.velocity.z * t,
               },
               0,
@@ -478,7 +479,7 @@ export function createAdventureDriver(page, d) {
             combatStats.ranged++;
             d.narrate("近接攻撃の届かない敵には、弓を使います。", 1);
           } else {
-            await d.aim({ ...target.position, y: target.position.y + 1 });
+            await d.aim({ ...target.position, y: target.position.y + mobAimHeight(target) });
             const front = await page.evaluate(() => {
               const p = window.__mc.position(),
                 yaw = window.__mc.yaw(),
@@ -591,7 +592,7 @@ export function createAdventureDriver(page, d) {
         )
           continue;
         await d.equip("iron_sword");
-        await d.aim({ ...current.position, y: current.position.y + 1 });
+        await d.aim({ ...current.position, y: current.position.y + mobAimHeight(current) });
         await right();
         if (await page.$('[data-action="sell-wheat"]')) break;
       }

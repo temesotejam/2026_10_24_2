@@ -252,20 +252,30 @@ export function createDriver(page, out) {
             distance < 1.5
               ? Math.floor(z)
               : Math.floor(s.position.z + ((z - s.position.z) / distance) * 0.8);
-          for (
-            let yy = Math.floor(s.position.y + 0.01);
-            yy <= Math.floor(s.position.y + 0.01) + 2;
-            yy++
-          ) {
-            const cell = { x: frontX, y: yy, z: frontZ },
-              id = await block(cell);
-            assert.ok(
-              ![28, 31].includes(id),
-              "route around portal structures instead of clearing their frame or interior",
-            );
-            if ([12, 13, 14, 15, 34, 35, 38, 39].includes(id)) return false;
-            if (id !== 0 && id !== 5 && id !== 8 && (await mine(cell, interrupt)) === false)
-              return false;
+          const columns = [{ x: frontX, z: frontZ }];
+          const feetX = Math.floor(s.position.x),
+            feetZ = Math.floor(s.position.z);
+          // The player's width can catch on the two side cells of a diagonal
+          // corner even when the destination column itself is already empty.
+          if (frontX !== feetX && frontZ !== feetZ) {
+            columns.push({ x: frontX, z: feetZ }, { x: feetX, z: frontZ });
+          }
+          for (const column of columns) {
+            for (
+              let yy = Math.floor(s.position.y + 0.01);
+              yy <= Math.floor(s.position.y + 0.01) + 2;
+              yy++
+            ) {
+              const cell = { ...column, y: yy },
+                id = await block(cell);
+              assert.ok(
+                ![28, 31].includes(id),
+                "route around portal structures instead of clearing their frame or interior",
+              );
+              if ([12, 13, 14, 15, 34, 35, 38, 39].includes(id)) return false;
+              if (id !== 0 && id !== 5 && id !== 8 && (await mine(cell, interrupt)) === false)
+                return false;
+            }
           }
           lastProgress = Date.now();
         }

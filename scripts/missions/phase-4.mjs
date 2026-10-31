@@ -92,7 +92,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       // waiting for naturally spawning night creatures, using this same input loop.
       if (
         !meta.portal &&
-        state.time % 1200 < 240 &&
+        state.time % 1200 < 600 &&
         !state.creatures.some((m) => m.species === "wanderer" && m.hp > 0) &&
         (await d.count("arrow")) + 4 * (await d.count("feather")) >= 36
       ) {
@@ -230,6 +230,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     avoidWaterTargets: true,
     collectSpecies: ["wanderer", "skeleton", "chicken", "ember"],
     arrowReserve: 0,
+    lureReserve: 4,
     home: meta.huntingCamp.position ?? meta.huntingCamp,
   });
   await a.surfaceTo({ x: v.x - 6, z: v.z + 1 });
