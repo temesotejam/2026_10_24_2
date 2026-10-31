@@ -57,6 +57,18 @@ export class AdventureView {
     box(0.2, 0.25, 0.5, 0.85, 0.65, -5.4, 0xcf71e2);
     for (let i = 0; i < 5; i++) box(0.9 - i * 0.12, 0.8 - i * 0.1, 1.5, 0, -0.15 * i, 3 + i * 1.2);
     for (const x of [-1.1, 1.1]) for (const z of [-1.7, 1.7]) box(0.6, 1.6, 0.7, x, -1, z);
+    // Horns, nostrils, a dorsal ridge and claws make the boss readable in flight.
+    for (const side of [-1, 1]) {
+      box(0.28, 0.75, 0.3, side * 0.58, 1.27, -4.65, 0xaaa3ae);
+      box(0.18, 0.16, 0.08, side * 0.43, 0.58, -6.04, 0x0e0d14);
+      box(0.18, 0.2, 0.7, side * 0.52, -0.4, -5.9, 0xb5a7b4);
+      for (const z of [-1.7, 1.7])
+        for (const offset of [-0.18, 0.18])
+          box(0.16, 0.2, 0.48, side * 1.1 + offset, -1.76, z - 0.35, 0xb5a7b4);
+    }
+    for (const z of [-2, -0.8, 0.4, 1.6]) box(0.25, 0.46, 0.5, 0, 1.03, z, 0x8c7899);
+    for (let i = 0; i < 4; i++)
+      box(0.16, 0.3 - i * 0.04, 0.4, 0, 0.35 - i * 0.15, 3.2 + i * 1.2, 0x8c7899);
     for (const side of [-1, 1]) {
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute(
@@ -70,6 +82,21 @@ export class AdventureView {
         geometry,
         new THREE.MeshBasicMaterial({ color: 0x60446e, side: THREE.DoubleSide }),
       );
+      // Wing fingers move with the membrane rather than floating above it.
+      for (const tip of [
+        [side * 8, 0.2, -1],
+        [side * 5, 0, 4],
+        [side * 3, 0, 3],
+      ] as const) {
+        const finger = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, 0.035, -2),
+            new THREE.Vector3(tip[0], tip[1] + 0.035, tip[2]),
+          ]),
+          new THREE.LineBasicMaterial({ color: 0xb19bbf }),
+        );
+        wing.add(finger);
+      }
       wing.position.x = side * 1.1;
       this.wings.push(wing);
       this.dragon.add(wing);
