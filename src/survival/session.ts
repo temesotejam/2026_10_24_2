@@ -10,7 +10,7 @@ import { FixedStepClock } from "../core/fixed-step";
 import { type Vec3 } from "../player/physics";
 import { BlockId, BLOCKS, isSolid } from "../world/blocks";
 import type { World } from "../world/world";
-import { ITEMS, stack, type Stack } from "../items/catalog";
+import { ITEMS, stack, stackLimit, type Stack } from "../items/catalog";
 import {
   addItem,
   emptySlots,
@@ -149,7 +149,7 @@ export class SurvivalSession {
           l.position.y - position.y,
           l.position.z - position.z,
         ) < 1 &&
-        l.stack.count + item.count <= 64,
+        l.stack.count + item.count <= stackLimit(item.id),
     );
     if (same) same.stack.count += item.count;
     else

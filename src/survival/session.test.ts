@@ -5,6 +5,7 @@ import { Chunk } from "../world/chunk";
 import { BlockId } from "../world/blocks";
 import { newSession, SurvivalSession } from "./session";
 import { newVitals, tickVitals } from "./vitals";
+import { validateSave } from "../save/persistence";
 import { stack } from "../items/catalog";
 import { removeItem } from "../items/inventory";
 import { RECIPES, craft } from "../items/recipes";
@@ -108,6 +109,18 @@ describe("survival progression", () => {
     tick(game, 181);
     expect(w.getBlock(6, 1, 5)).toBe(BlockId.RIPE_CROP);
   });
+  it.each(["iron_sword", "fishingRod", "waterBucket"])(
+    "keeps identical unstackable %s drops saveable after death",
+    (id) => {
+      const { d, game } = fixture();
+      d.inventory[0] = stack(id);
+      d.inventory[1] = stack(id);
+      game.hurt(20);
+      expect(d.loot.filter((loot) => loot.stack.id === id)).toHaveLength(2);
+      expect(d.loot.every((loot) => loot.stack.count === 1)).toBe(true);
+      expect(() => validateSave(d)).not.toThrow();
+    },
+  );
   it("drops inventory and crafting contents on death and resets health on respawn", () => {
     const { d, game } = fixture();
     d.inventory[0] = stack("diamond", 2);
