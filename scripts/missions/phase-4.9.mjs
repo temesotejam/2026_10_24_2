@@ -79,7 +79,8 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
   }
   const progress = (meta.fishingFood ??= { caught: 0 });
   const until = Date.now() + 900000;
-  let failures = 0;
+  let failures = 0,
+    repositionAttempts = 0;
   while ((await d.info()).health < 20 || (await d.count("fish")) < fishTarget) {
     assert.ok(Date.now() < until, "finish native fishing within the ordinary recording window");
     await guard();
@@ -128,10 +129,20 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
     progress.lastHealth = state.health;
     progress.fish = await d.count("fish");
     flush();
+    if (!water && meta.fishingSpot && repositionAttempts++ < 3) {
+      d.setGoal("戦闘で釣り場から離れたため、足場を直して井戸の縁へ戻ります。");
+      const spot = meta.fishingSpot;
+      if ((await d.info()).position.y < spot.y - 0.2) await a.pillarTo(Math.round(spot.y));
+      await a.surfaceTo({ x: Math.floor(spot.x), z: Math.floor(spot.z) });
+      await d.center();
+      if ((await d.info()).position.y < spot.y - 0.2) await a.pillarTo(Math.round(spot.y));
+      continue;
+    }
     assert.ok(
       water,
       "checkpoint: no reachable water from safe dry ground; do not enter water blindly",
     );
+    repositionAttempts = 0;
     for (const crop of water.crops) {
       await d.equip("iron_pick");
       await d.mine(crop);

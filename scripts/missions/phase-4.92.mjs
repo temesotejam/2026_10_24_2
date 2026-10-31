@@ -16,6 +16,7 @@ export async function run(context) {
     Math.abs((await d.info()).position.y - meta.village.y) < 0.2,
     "stand on the actual dry well rim",
   );
+  meta.fishingSpot = { ...(await d.info()).position };
   meta.foodStrategy = "fishing";
   flush();
   const fishing = await import("./phase-4.9.mjs");
