@@ -156,6 +156,8 @@ writeFileSync(
       })),
       navigation: metadata.endMission?.navigation,
       bedVisits: metadata.bedVisits ?? [],
+      portableBedVisits: metadata.portableBedVisits ?? [],
+      gearRecoveries: metadata.gearRecoveries ?? [],
       sourceCompleted: metadata.completed,
       sourceFinal: metadata.final,
       plan,

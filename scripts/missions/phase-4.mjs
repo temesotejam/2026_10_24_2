@@ -5,12 +5,16 @@ import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { stashVillage } from "../lib/modern-storage.mjs";
 import { stockVillageFood, carriedFoodUnits } from "../lib/modern-resources.mjs";
 import { chooseHuntingCamp } from "../lib/modern-camp.mjs";
-import { prepareArchery } from "../lib/modern-archery.mjs";
+import { craftArchery, prepareArchery } from "../lib/modern-archery.mjs";
 import { wait } from "../lib/survival-driver.mjs";
-export async function run({ page, d, a, meta, flush, chapter, out }) {
+export async function run({ page, d, a, meta, flush, chapter, out }, desiredTargets = null) {
   const v = meta.village,
     events = (meta.huntingEvents ??= []);
-  const targets = { enderPearl: 12, string: (await d.count("bow")) ? 0 : 3, ammo: 32 };
+  const targets = desiredTargets ?? {
+    enderPearl: 12,
+    string: (await d.count("bow")) ? 0 : 3,
+    ammo: 32,
+  };
   const resupply = async (options) => {
     if (
       await page.evaluate(() => {
@@ -55,6 +59,16 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
       await d.collect("table", 1);
     },
     maintain: async (state) => {
+      // Use a small earned batch now rather than carry feathers through a
+      // dangerous night with no usable arrows until the full target is met.
+      if (
+        (await d.count("arrow")) < 8 &&
+        (await d.count("feather")) > 0 &&
+        (await d.count("flint")) > 0
+      ) {
+        const batches = Math.min(await d.count("feather"), await d.count("flint"), 3);
+        await craftArchery(d, (await d.count("arrow")) + batches * 4);
+      }
       if (
         !state.inventory.some(
           (slot) => slot?.id === "iron_sword" && (slot.durability ?? 0) >= 80,

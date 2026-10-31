@@ -1,6 +1,9 @@
 /** Natural lava expedition and player-built portal, using ordinary inputs only. */
 import assert from "node:assert/strict";
 import { writeFileSync } from "node:fs";
+import { craftPortableBed, restWithPortableBed } from "../lib/portable-bed.mjs";
+import { restInVillage } from "../lib/village-rest.mjs";
+import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { createModernPortal } from "../lib/modern-portal.mjs";
 const solid = (id) => ![0, 5, 16, 22, 23, 25, 26, 31, 33, 40, 42, 43].includes(id);
 const safeBody = (id) =>
@@ -9,6 +12,8 @@ const safeBody = (id) =>
 export async function run({ page, d, a, meta, flush, chapter, out }) {
   const village = meta.village;
   assert.ok(village, "remember the village actually discovered in this survival run");
+  const guard = createModernHunting(page, d, a, { arrowReserve: 0 });
+  guard.activate();
   const modern = createModernPortal(page, d, a);
   const mission = (meta.obsidianMission ??= { staircase: [], notes: [] });
   const record = () => {
@@ -18,6 +23,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   assert.ok((await d.count("diamond_pick")) > 0, "carry the genuinely crafted diamond pickaxe");
   await a.eat();
   await a.recover(20);
+  await craftPortableBed(d);
   const base = { x: village.x, y: village.y, z: village.z + 2 };
   let existingFrame = 0;
   for (let u = 0; u < 4; u++)
@@ -210,6 +216,7 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
     record();
     await page.screenshot({ path: `${out}/natural-obsidian-collected.png` });
   }
+  await restWithPortableBed(page, d, a, meta, flush);
   if ((await d.info()).position.y < village.y - 2) await a.reachSurface();
   await a.surfaceTo({ x: village.x + 2, z: village.z + 1 });
   await a.eat();
@@ -217,5 +224,6 @@ export async function run({ page, d, a, meta, flush, chapter, out }) {
   meta.portal = await modern.buildNetherPortal({ base });
   record();
   await page.screenshot({ path: `${out}/player-built-nether-portal.png` });
+  await restInVillage(page, d, a, village, meta, flush);
   await chapter("自然溶岩を水で冷却して黒曜石10個を採掘し、自分でネザーゲートを建造・点火", 6);
 }

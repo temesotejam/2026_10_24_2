@@ -6,7 +6,7 @@ import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { stockVillageFood } from "../lib/modern-resources.mjs";
 export async function run({ page, d, a, meta, flush, chapter }) {
   const portal = createModernPortal(page, d, a),
-    h = createModernHunting(page, d, a);
+    h = createModernHunting(page, d, a, { arrowReserve: 0 });
   a.setGuard(h.guard);
   if ((await a.adventure()).dimension === "overworld") {
     if (
@@ -121,11 +121,14 @@ export async function run({ page, d, a, meta, flush, chapter }) {
     d.setGoal("ネザーの敵を倒し、エンダーアイに必要なロッドを集めます。");
     meta.netherHunt = await h.collectRods(7, {
       timeoutMs: 1200000,
-      arrowReserve: 12,
+      arrowReserve: 0,
       home: meta.netherCamp ?? meta.netherLanding,
     });
     flush();
   }
+  // Once the earned target is met, leave instead of chasing fresh spawns.
+  a.setGuard(async () => false);
+  await a.eat();
   d.setGoal("必要なロッドを回収できたので、建てたゲートから帰還します。");
   await d.tunnelTo({ x: meta.netherGate.x + 3, z: meta.netherGate.z + 2 });
   await d.center();
@@ -143,6 +146,7 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   await d.tunnelTo({ x: meta.netherGate.x, z: meta.netherGate.z + 2 });
   await portal.enterNetherPortal("overworld", meta.netherGate);
   assert.equal((await a.adventure()).dimension, "overworld");
+  h.activate();
   if (
     await page.evaluate(() => {
       const t = window.__mc.time() % 1200;
