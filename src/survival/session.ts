@@ -515,6 +515,8 @@ export class SurvivalSession {
           }
         if (sky) m.hp -= dt * 2;
       }
+      // A creature killed this tick cannot attack or participate in breeding.
+      if (m.hp <= 0) continue;
       const dist = Math.hypot(
         m.position.x - d.position.x,
         m.position.y - d.position.y,
@@ -588,6 +590,7 @@ export class SurvivalSession {
         const partner = d.creatures.find(
           (other) =>
             other !== m &&
+            other.hp > 0 &&
             other.species === m.species &&
             other.love > 0 &&
             Math.hypot(other.position.x - m.position.x, other.position.z - m.position.z) < 3,

@@ -28,6 +28,9 @@ try {
     const THREE = await import("/node_modules/.vite/deps/three.js");
     const { mobGeometry } = await import("/src/entities/mob-model.ts");
     const { AdventureView } = await import("/src/render/adventure-view.ts");
+    const { skyStateAt } = await import("/src/render/sky.ts");
+    const day = skyStateAt(300);
+    const review = [];
     const entries = [
       ["pig", "ブタ"],
       ["cow", "ウシ"],
@@ -52,8 +55,8 @@ try {
     for (let i = 0; i < entries.length; i++) {
       const [species, label] = entries[i],
         scene = new THREE.Scene();
-      scene.add(new THREE.HemisphereLight(0xe3f3ff, 0x68624b, 2));
-      const light = new THREE.DirectionalLight(0xffe9c7, 2.3);
+      scene.add(new THREE.AmbientLight(0xffffff, day.ambientIntensity));
+      const light = new THREE.DirectionalLight(0xffffff, day.sunIntensity);
       light.position.set(-3, 6, -4);
       scene.add(light);
       let mesh,
@@ -89,6 +92,7 @@ try {
       renderer.setViewport(col * 360, y, 360, 336);
       renderer.setScissor(col * 360, y, 360, 336);
       renderer.render(scene, camera);
+      review.push({ scene, camera, mesh, species, col, y });
       const text = document.createElement("div");
       text.className = "label";
       text.style.left = col * 360 + "px";
@@ -105,6 +109,7 @@ try {
         drawCalls: renderer.info.render.calls,
       });
     }
+    window.__mobReview = { renderer, review, skyStateAt };
     return proof;
   });
   assert.equal(errors.length, 0, errors.join("\n"));
@@ -119,9 +124,33 @@ try {
   mkdirSync("docs/screenshots", { recursive: true });
   mkdirSync("visual-check/mob-models", { recursive: true });
   await page.screenshot({ path: "docs/screenshots/mob-models.png" });
+  for (const condition of ["night", "young-animals"]) {
+    await page.evaluate((condition) => {
+      const { renderer, review, skyStateAt } = window.__mobReview;
+      const lighting = skyStateAt(condition === "night" ? 900 : 300);
+      for (const { scene, camera, mesh, species, col, y } of review) {
+        for (const light of scene.children) {
+          if (light.isAmbientLight) light.intensity = lighting.ambientIntensity;
+          if (light.isDirectionalLight) light.intensity = lighting.sunIntensity;
+        }
+        if (condition === "young-animals" && ["pig", "cow", "sheep", "chicken"].includes(species))
+          mesh.scale.setScalar(0.6);
+        renderer.setViewport(col * 360, y, 360, 336);
+        renderer.setScissor(col * 360, y, 360, 336);
+        renderer.render(scene, camera);
+      }
+    }, condition);
+    await page.screenshot({ path: `visual-check/mob-models/${condition}.png` });
+    assert.equal(await page.evaluate(() => window.__mobReview.renderer.getContext().getError()), 0);
+  }
+  assert.equal(errors.length, 0, errors.join("\n"));
   writeFileSync(
     "visual-check/mob-models/proof.json",
-    JSON.stringify({ models: result, errors }, null, 2),
+    JSON.stringify(
+      { models: result, conditions: ["day", "night", "young-animals"], errors },
+      null,
+      2,
+    ),
   );
   console.log(
     JSON.stringify({

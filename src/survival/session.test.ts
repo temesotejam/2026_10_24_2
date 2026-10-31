@@ -291,3 +291,39 @@ it("an existing animal herd cannot suppress all night enemy spawns", () => {
   expect(d.creatures.some((m) => m.species !== "pig")).toBe(true);
   expect(d.creatures.length).toBeLessThanOrEqual(28);
 });
+
+describe("mob death at simulation boundaries", () => {
+  const creature = (id: number, species: import("../entities/creatures").Species, hp: number) => ({
+    id,
+    species,
+    hp,
+    age: 1,
+    cooldown: 0,
+    intent: 0,
+    love: 0,
+    position: { x: 9.5 + id * 0.2, y: 1, z: 4.5 },
+    velocity: { x: 0, y: 0, z: 0 },
+    onGround: true,
+  });
+  it("a skeleton killed by daylight cannot fire a final arrow", () => {
+    const { d, game } = fixture();
+    d.time = 300;
+    d.creatures = [creature(1, "skeleton", 0.1)];
+    d.nextId = 2;
+    tick(game, 0.2);
+    expect(d.creatures).toHaveLength(0);
+    expect(d.arrows).toHaveLength(0);
+    expect(d.vitals.health).toBe(20);
+  });
+  it("an animal cannot breed with a dead partner waiting to be removed", () => {
+    const { d, game } = fixture();
+    d.creatures = [
+      { ...creature(1, "sheep", 8), love: 30 },
+      { ...creature(2, "sheep", 0), love: 30 },
+    ];
+    d.nextId = 3;
+    tick(game, 0.2);
+    expect(d.creatures).toHaveLength(1);
+    expect(d.creatures.some((m) => m.age < 0)).toBe(false);
+  });
+});
