@@ -5,7 +5,7 @@ import { createModernHunting } from "../lib/modern-hunting.mjs";
 import { hostile } from "../lib/combat-policy.mjs";
 
 export async function run({ page, d, a, meta, flush = () => undefined, chapter }) {
-  const fishTarget = 30;
+  const fishTarget = meta.livingSafe ? (meta.livingFishTarget ?? 2) : 30;
   const h = createModernHunting(page, d, a, { arrowReserve: 24 });
   // Default hunting guard also eats. Invoke it only for an actual nearby enemy,
   // so a quiet fishing cast keeps its rod equipped until the bite is reeled in.
@@ -19,6 +19,7 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
           (mob.species === "skeleton" ? 18 : 9),
     );
     if (danger) {
+      if (meta.livingSafe) throw new Error("Safety checkpoint: hostile mob near the fishing spot");
       flush();
       return await h.guard();
     }
@@ -50,13 +51,16 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
     await page.locator(`[data-area="inventory"][data-slot="${pair[1]}"]`).click();
   }
   await d.close();
-  d.setGoal("近くの本物の水面で釣り、体力を回復しながらエンド用の魚を集めます。");
-  const rodDurability = Math.max(
-    0,
-    ...(await d.info()).inventory
-      .filter((s) => s?.id === "fishingRod")
-      .map((s) => s.durability ?? 0),
+  d.setGoal(
+    meta.livingSafe
+      ? "近くの水面で釣り、次の食事に備えます。"
+      : "近くの本物の水面で釣り、体力を回復しながらエンド用の魚を集めます。",
   );
+  // Several partially worn rods can be used in turn; count their combined
+  // remaining casts before spending materials on a replacement.
+  const rodDurability = (await d.info()).inventory
+    .filter((s) => s?.id === "fishingRod")
+    .reduce((total, s) => total + (s.durability ?? 0), 0);
   if (rodDurability < Math.max(1, fishTarget - (await d.count("fish")) + 2)) {
     assert.ok((await d.count("string")) >= 2, "own actual spider string for the rod");
     const table = await d.station("table");
@@ -143,6 +147,8 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
       "checkpoint: no reachable water from safe dry ground; do not enter water blindly",
     );
     repositionAttempts = 0;
+    if (meta.livingSafe && water.crops.length)
+      throw new Error("Safety checkpoint: fishing would damage planted crops");
     for (const crop of water.crops) {
       await d.equip("iron_pick");
       await d.mine(crop);
@@ -202,5 +208,10 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter }
     "recover by eating genuine fish and normal regeneration",
   );
   await d.equip("iron_pick");
-  await chapter(`実際に釣った魚で全快し、移動とエンド用の生魚${fishTarget}匹を確保`, 4);
+  await chapter(
+    meta.livingSafe
+      ? `釣りで生魚${fishTarget}匹を確保し、体力を回復`
+      : `実際に釣った魚で全快し、移動とエンド用の生魚${fishTarget}匹を確保`,
+    meta.livingSafe ? 9 : 4,
+  );
 }

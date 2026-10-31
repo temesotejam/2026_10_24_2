@@ -133,19 +133,30 @@ export function createDriver(page, out) {
       );
       {
         const inventory = (await info()).inventory;
-        const tools = [1, 2, 4, 9, 32, 44].includes(original)
-          ? ["stone_shovel", "wood_shovel", "diamond_pick", "iron_pick", "stone_pick", "wood_pick"]
-          : [6, 7, 10, 14, 15, 27].includes(original)
+        // Crops and saplings are readily harvested without a tool. Keep the
+        // selected hand/item so routine farming does not wear a valuable pick.
+        const tools = [22, 23, 25].includes(original)
+          ? []
+          : [1, 2, 4, 9, 32, 44].includes(original)
             ? [
-                "iron_axe",
-                "stone_axe",
-                "wood_axe",
+                "stone_shovel",
+                "wood_shovel",
                 "diamond_pick",
                 "iron_pick",
                 "stone_pick",
                 "wood_pick",
               ]
-            : ["diamond_pick", "iron_pick", "stone_pick", "wood_pick"];
+            : [6, 7, 10, 12, 14, 15, 27].includes(original)
+              ? [
+                  "iron_axe",
+                  "stone_axe",
+                  "wood_axe",
+                  "diamond_pick",
+                  "iron_pick",
+                  "stone_pick",
+                  "wood_pick",
+                ]
+              : ["diamond_pick", "iron_pick", "stone_pick", "wood_pick"];
         const tool = tools.find((id) => inventory.some((s) => s?.id === id));
         if (tool) await equip(tool);
       }
