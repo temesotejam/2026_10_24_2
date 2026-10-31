@@ -66,6 +66,7 @@ declare global {
       stop: () => void;
       select: (slot: number) => boolean;
       mine: (x: number, y: number, z: number) => boolean;
+      blockingLeaf: (x: number, y: number, z: number) => { x: number; y: number; z: number } | null;
       place: (x: number, y: number, z: number) => boolean;
       eat: () => boolean;
       attack: (id: number) => boolean;
@@ -857,6 +858,7 @@ async function boot(): Promise<void> {
       },
       select: (slot) => companion.select(slot),
       mine: (x, y, z) => companion.mine(x, y, z),
+      blockingLeaf: (x, y, z) => companion.blockingLeaf(x, y, z),
       place: (x, y, z) => companion.place(x, y, z),
       eat: () => companion.eat(),
       attack: (id) => companion.attack(id),

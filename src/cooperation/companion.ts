@@ -162,6 +162,33 @@ export class CompanionController {
     });
   }
 
+  /** Return a nearby blocking leaf, without changing the world. */
+  blockingLeaf(x: number, y: number, z: number): { x: number; y: number; z: number } | null {
+    if (![x, y, z].every(Number.isInteger)) return null;
+    const p = this.state.position;
+    const origin = { x: p.x, y: p.y + 1.62, z: p.z };
+    const points = [
+      { x: x + 0.5, y: y + 0.5, z: z + 0.5 },
+      {
+        x: Math.max(x + 0.05, Math.min(x + 0.95, p.x)),
+        y: y + 0.5,
+        z: Math.max(z + 0.05, Math.min(z + 0.95, p.z)),
+      },
+    ];
+    for (const point of points) {
+      const direction = { x: point.x - origin.x, y: point.y - origin.y, z: point.z - origin.z };
+      const distance = Math.hypot(direction.x, direction.y, direction.z);
+      if (distance > 4.5) continue;
+      const hit = raycastVoxels(origin, direction, distance, (bx, by, bz) => {
+        const block = this.session.world.getBlock(bx, by, bz);
+        return block !== BlockId.AIR && block !== BlockId.WATER && block !== BlockId.LAVA;
+      });
+      if (hit && this.session.world.getBlock(hit.blockX, hit.blockY, hit.blockZ) === BlockId.LEAVES)
+        return { x: hit.blockX, y: hit.blockY, z: hit.blockZ };
+    }
+    return null;
+  }
+
   mine(x: number, y: number, z: number): boolean {
     if (this.state.vitals.health <= 0 || !this.reachable(x, y, z)) return false;
     const block = this.session.world.getBlock(x, y, z);

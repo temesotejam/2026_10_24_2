@@ -60,6 +60,27 @@ describe("shared-world companion", () => {
     expect(world.getBlock(7, 1, 4)).toBe(BlockId.WOOD);
   });
 
+  it("identifies and clears a leaf blocking a reachable tree", () => {
+    const { world, companion, tick } = setup();
+    world.setBlock(7, 2, 4, BlockId.LEAVES);
+    world.setBlock(8, 2, 4, BlockId.WOOD);
+    expect(companion.mine(8, 2, 4)).toBe(false);
+    expect(companion.blockingLeaf(8, 2, 4)).toEqual({ x: 7, y: 2, z: 4 });
+    expect(companion.mine(7, 2, 4)).toBe(true);
+    tick(1);
+    expect(world.getBlock(7, 2, 4)).toBe(BlockId.AIR);
+    expect(companion.mine(8, 2, 4)).toBe(true);
+  });
+
+  it("plants an owned sapling on supported ground and starts normal growth", () => {
+    const { world, state, data, companion } = setup();
+    state.inventory[0] = stack("sapling");
+    expect(companion.place(7, 1, 4)).toBe(true);
+    expect(world.getBlock(7, 1, 4)).toBe(BlockId.SAPLING);
+    expect(data.growth["7,1,4"]).toBe(0);
+    expect(state.inventory[0]).toBe(null);
+  });
+
   it("mines a real block over time and collects its drop into the nearest inventory", () => {
     const { world, data, state, companion, tick } = setup();
     world.setBlock(7, 1, 4, BlockId.WOOD);

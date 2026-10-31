@@ -7,6 +7,8 @@ import { Worker } from "node:worker_threads";
 import { clearTimeout } from "node:timers";
 import puppeteer from "puppeteer";
 import { createDriver, wait } from "./lib/survival-driver.mjs";
+import { safePath } from "./cooperation/navigation.mjs";
+import { canPlantSapling } from "./cooperation/renewal.mjs";
 
 const args = process.argv.slice(2);
 const option = (name, fallback) => {
@@ -66,6 +68,7 @@ try {
       const o = window.__coop.observe(actor),
         p = o.position,
         wood = [],
+        leaves = [],
         ground = [],
         beds = [];
       for (let x = Math.floor(p.x) - 7; x <= Math.floor(p.x) + 7; x++)
@@ -74,16 +77,18 @@ try {
           const below = window.__coop.block(actor, x, y - 1, z),
             above = window.__coop.block(actor, x, y, z);
           if ([1, 2, 3, 4, 9, 11, 44].includes(below) && above === 0)
-            ground.push({ x, y: y - 1, z });
+            ground.push({ x, y: y - 1, z, support: below });
           for (let by = y - 3; by <= y + 3; by++) {
             const id = window.__coop.block(actor, x, by, z);
             if (id === 6) wood.push({ x, y: by, z });
+            if (id === 7) leaves.push({ x, y: by, z });
             if (id === 15) beds.push({ x, y: by, z });
           }
         }
       const dist = (a) => Math.hypot(a.x + 0.5 - p.x, a.y + 0.5 - p.y, a.z + 0.5 - p.z);
       return {
         wood: wood.sort((a, b) => dist(a) - dist(b)),
+        leaves: leaves.sort((a, b) => dist(a) - dist(b)),
         ground: ground.sort((a, b) => dist(a) - dist(b)),
         beds,
       };
@@ -96,13 +101,13 @@ try {
       seconds > 0.5 ||
       input.forward !== 1 ||
       input.right !== 0 ||
-      input.jump
+      typeof input.jump !== "boolean"
     )
       return false;
     const safe = await page.evaluate(
       ({ actor, input, seconds }) => {
         const p = window.__coop.observe(actor).position,
-          y = Math.floor(p.y);
+          y = Math.round(p.y);
         const dx = -Math.sin(input.yaw) * 4.317 * seconds,
           dz = -Math.cos(input.yaw) * 4.317 * seconds;
         for (const t of [0.25, 0.5, 0.75, 1]) {
@@ -111,8 +116,14 @@ try {
           const below = window.__coop.block(actor, x, y - 1, z),
             feet = window.__coop.block(actor, x, y, z),
             head = window.__coop.block(actor, x, y + 1, z);
-          if (![1, 2, 3, 4, 9, 10, 11, 21, 24, 27, 44].includes(below) || feet !== 0 || head !== 0)
-            return false;
+          const support = [1, 2, 3, 4, 9, 10, 11, 21, 24, 27, 44];
+          const lower = window.__coop.block(actor, x, y - 2, z);
+          const top = window.__coop.block(actor, x, y + 2, z);
+          const level = support.includes(below) && feet === 0 && head === 0;
+          const down = support.includes(lower) && below === 0 && feet === 0 && head === 0;
+          const up = input.jump && support.includes(feet) && head === 0 && top === 0;
+          if (!level && !down && !up) return false;
+          if (input.jump && top !== 0) return false;
         }
         return true;
       },
@@ -133,15 +144,54 @@ try {
       y: p.y + 1.62,
       z: p.z - Math.cos(input.yaw) * 5,
     });
+    if (input.jump) await page.keyboard.down("Space");
     await page.keyboard.down("KeyW");
     try {
       await wait(seconds * 1000);
     } finally {
       await page.keyboard.up("KeyW");
+      if (input.jump) await page.keyboard.up("Space");
     }
     return true;
   }
+  async function navigate(actor, target) {
+    if (!target || ![target.x, target.y, target.z].every(Number.isFinite)) return false;
+    const snapshot = await page.evaluate((actor) => {
+      const p = window.__coop.observe(actor).position,
+        blocks = {},
+        base = Math.round(p.y);
+      for (let x = Math.floor(p.x) - 6; x <= Math.floor(p.x) + 6; x++)
+        for (let z = Math.floor(p.z) - 6; z <= Math.floor(p.z) + 6; z++)
+          for (let y = base - 4; y <= base + 4; y++) {
+            const block = window.__coop.block(actor, x, y, z);
+            if (block !== null) blocks[`${x},${y},${z}`] = block;
+          }
+      return { position: p, blocks, onGround: window.__coop.observe(actor).onGround };
+    }, actor);
+    const route = safePath({ position: snapshot.position, target, blocks: snapshot.blocks });
+    if (!route || route.length < 2 || !snapshot.onGround) return false;
+    const next = route[1],
+      p = snapshot.position;
+    const dx = next.x + 0.5 - p.x,
+      dz = next.z + 0.5 - p.z;
+    const distance = Math.hypot(dx, dz);
+    if (distance < 0.03) return false;
+    const input = { forward: 1, right: 0, jump: next.y > route[0].y, yaw: Math.atan2(-dx, -dz) };
+    return safeMove(actor, input, Math.min(0.25, distance / 4.317));
+  }
   async function place(actor, item, ground) {
+    if (item === "sapling") {
+      const cells = await page.evaluate(
+        ({ actor, ground }) => {
+          const cells = [];
+          for (let y = ground.y; y <= ground.y + 5; y++)
+            cells.push(window.__coop.block(actor, ground.x, y, ground.z));
+          return cells;
+        },
+        { actor, ground },
+      );
+      if (!canPlantSapling(cells)) return false;
+    }
     if (actor === "companion")
       return page.evaluate((g) => window.__coop.place(g.x, g.y + 1, g.z), ground);
     if (!(await observe("player")).inventory.some((s) => s?.id === item)) return false;
@@ -152,8 +202,11 @@ try {
     await page.mouse.down({ button: "right" });
     await page.mouse.up({ button: "right" });
     await wait(160);
+    const expected = item === "sapling" ? 25 : item === "planks" ? 10 : null;
     return (
-      (await page.evaluate((g) => window.__coop.block("player", g.x, g.y + 1, g.z), ground)) === 10
+      expected !== null &&
+      (await page.evaluate((g) => window.__coop.block("player", g.x, g.y + 1, g.z), ground)) ===
+        expected
     );
   }
   async function runAction(actor, method, params) {
@@ -174,6 +227,8 @@ try {
         });
       case "move":
         return safeMove(actor, params[0], params[1]);
+      case "navigate":
+        return navigate(actor, params[0]);
       case "look": {
         if (actor !== "player") return false;
         const target = params[0],
@@ -202,6 +257,11 @@ try {
           actor === "companion" &&
           page.evaluate((p) => window.__coop.mine(p.x, p.y, p.z), params[0])
         );
+      case "blockingLeaf":
+        return (
+          actor === "companion" &&
+          page.evaluate((p) => window.__coop.blockingLeaf(p.x, p.y, p.z), params[0])
+        );
       case "craft":
         return actor === "companion" && page.evaluate((id) => window.__coop.craft(id), params[0]);
       case "give":
@@ -214,6 +274,31 @@ try {
         return place(actor, params[0], params[1]);
       case "attack":
         return actor === "companion" && page.evaluate((id) => window.__coop.attack(id), params[0]);
+      case "sleep": {
+        const bed = params[0];
+        if (actor === "companion")
+          return page.evaluate((p) => window.__coop.sleep(p.x, p.y, p.z), bed);
+        const before = await page.evaluate(() => window.__mc.time());
+        const pos = (await observe("player")).position;
+        const points = [
+          { x: bed.x + 0.5, y: bed.y + 0.5, z: bed.z + 0.5 },
+          {
+            x: Math.max(bed.x + 0.05, Math.min(bed.x + 0.95, pos.x)),
+            y: bed.y + 0.5,
+            z: Math.max(bed.z + 0.05, Math.min(bed.z + 0.95, pos.z)),
+          },
+        ];
+        for (const point of points) {
+          await driver.aim(point);
+          const hit = await page.evaluate(() => window.__mc.target());
+          if (!hit || hit.x !== bed.x || hit.y !== bed.y || hit.z !== bed.z) continue;
+          await page.mouse.down({ button: "right" });
+          await page.mouse.up({ button: "right" });
+          await wait(250);
+          return (await page.evaluate(() => window.__mc.time())) - before > 10;
+        }
+        return false;
+      }
       default:
         throw Error(`Unknown action ${method}`);
     }
@@ -226,7 +311,7 @@ try {
         settled = true;
         reject(Error("cooperative run timed out"));
       }
-    }, 100000);
+    }, 360000);
     for (const actor of ["player", "companion"]) {
       const worker = new Worker(new URL("./cooperation/policy-worker.mjs", import.meta.url), {
         workerData: { actor },
@@ -291,6 +376,20 @@ try {
   assert.ok(events.some((e) => e.actor === "player" && e.method === "place" && e.result));
   assert.ok(events.some((e) => e.actor === "companion" && e.method === "place" && e.result));
   assert.ok(events.some((e) => e.actor === "companion" && e.method === "give" && e.result));
+  const planting = events.find(
+    (e) =>
+      e.method === "say" &&
+      e.result &&
+      typeof e.args?.[0] === "string" &&
+      JSON.parse(e.args[0]).type === "replanted",
+  );
+  assert.ok(planting, "actually plant a replacement sapling before completing");
+  const sapling = JSON.parse(planting.args[0]).position;
+  const planted = await page.evaluate(
+    ({ actor, sapling }) => window.__coop.block(actor, sapling.x, sapling.y, sapling.z),
+    { actor: planting.actor, sapling },
+  );
+  assert.equal(planted, 25, "replacement sapling remains in the shared world");
   await wait(1000);
   await recorder.stop();
   recorder = null;

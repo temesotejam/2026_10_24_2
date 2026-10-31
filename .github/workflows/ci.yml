@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run format
-      - run: node --test scripts/combat-policy.test.mjs scripts/narration.test.mjs scripts/hunting-path.test.mjs scripts/hunting-obstruction.test.mjs scripts/cooperation/safety.test.mjs scripts/cooperation/policy-worker.test.mjs
+      - run: node --test scripts/combat-policy.test.mjs scripts/narration.test.mjs scripts/hunting-path.test.mjs scripts/hunting-obstruction.test.mjs scripts/cooperation/safety.test.mjs scripts/cooperation/policy-worker.test.mjs scripts/cooperation/navigation.test.mjs scripts/cooperation/renewal.test.mjs
       - run: npm test
       - run: npm run build:pages
       - name: Browser checks under the project subdirectory
