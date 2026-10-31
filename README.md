@@ -6,9 +6,9 @@ Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サー
 
 **[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [約30分の字幕実況・全10章](downloads/survival-30min/README.md) · [以前の約15分版](downloads/edited-survival/README.md) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
 
-[![所持品ゼロからドラゴン討伐まで、新しい約30分版からのループ映像](downloads/survival-30min/preview.gif)](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html)
+[![所持品ゼロからドラゴン討伐まで、新しい約30分版からのループ映像](downloads/survival-30min/preview.gif?v=815e01d34d47)](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html)
 
-上のGIFは新しくクリアした約30分版の短い抜粋で、このページ内で自動ループします。[全10章をダウンロードせず連続・ループ再生する](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html)。日本語字幕付き・三人称・720p、合計約30分12秒です。
+上のGIFは新しくクリアした約30分版の短い抜粋で、このページ内で自動ループします。[全10章をダウンロードせず連続・ループ再生する](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html)。日本語字幕付き・三人称・720p、合計約30分11秒です。
 
 ![作業台で木のツルハシを作成したサバイバル画面](docs/screenshots/survival-crafting.png)
 

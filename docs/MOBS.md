@@ -21,9 +21,9 @@
 
 ## 実プレイのループ映像
 
-[![新しいサバイバル実況の短いループ映像](../downloads/survival-30min/preview.gif)](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html)
+[![新しいサバイバル実況の短いループ映像](../downloads/survival-30min/preview.gif?v=815e01d34d47)](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html)
 
-GitHubのこのページ内で自動ループする、本編からの短い抜粋です。[約30分12秒の全編をダウンロードせず連続再生する](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html) / [各章と記録](../downloads/survival-30min/README.md)。日本語字幕・三人称・720pで、所持品ゼロからドラゴン討伐・卵の持ち帰りまで進めています。
+GitHubのこのページ内で自動ループする、本編からの短い抜粋です。[約30分11秒の全編をダウンロードせず連続再生する](https://temesotejam.github.io/2026_10_24_2/watch/survival-30min.html) / [各章と記録](../downloads/survival-30min/README.md)。日本語字幕・三人称・720pで、所持品ゼロからドラゴン討伐・卵の持ち帰りまで進めています。
 
 ## 特殊能力・行動の違い
 

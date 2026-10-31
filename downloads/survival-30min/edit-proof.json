@@ -1820,7 +1820,8 @@
     "notes": [
       "観測用の地図を参照する操作スクリプトでプレイしています。移動・採掘・製作・戦闘は通常のキーとマウス操作です。検証用セーブの読み込み、所持品の追加、テレポートは使っていません。",
       "途中でベッドの敵判定と、同じ道具を複数落とした時の保存不具合を修正し、同じワールドで続行しています。",
-      "死亡時の保存失敗が1回あり、その区間は約8.5秒前の正常な自動保存から再開しています。この死亡した試行も数え、動画内で再開の理由を説明しています。"
+      "死亡時の保存失敗が1回あり、その区間は約8.5秒前の正常な自動保存から再開しています。この死亡した試行も数え、動画内で再開の理由を説明しています。",
+      "最終戦の一部は800×600／1280×632の元映像を、縦横比を保って720pの画面中央に配置しています。"
     ],
     "episodes": [
       {
@@ -2485,12 +2486,16 @@
         "clips": [
           {
             "part": "part-56.mp4",
-            "start": 0,
+            "start": 15,
             "end": 70,
             "speed": 6,
             "text": "準備を終えて遺跡へ。地上の移動と階段の入口までは6倍速にまとめます。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 800,
+              "height": 600
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2505,7 +2510,11 @@
                 "end": 22,
                 "text": "1個は自然に埋まっていた枠です。残りを埋め、開いたゲートからエンドへ。"
               }
-            ]
+            ],
+            "viewport": {
+              "width": 800,
+              "height": 600
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2525,7 +2534,11 @@
                 "end": 42,
                 "text": "塔の反対側にもクリスタルがあるので、回り込んで壊します。"
               }
-            ]
+            ],
+            "viewport": {
+              "width": 800,
+              "height": 600
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2534,7 +2547,11 @@
             "speed": 1,
             "text": "降りてきたところへ剣で攻撃。近づくと、こちらもダメージを受けます。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 800,
+              "height": 600
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2543,16 +2560,24 @@
             "speed": 4,
             "text": "体力が減ったので距離を取り、食事で回復。回復待ちは4倍速です。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 800,
+              "height": 600
+            }
           },
           {
             "part": "part-56.mp4",
-            "start": 194,
+            "start": 195,
             "end": 205,
             "speed": 1,
             "text": "体力を戻して再接近。着地している間に攻撃を重ねます。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 1280,
+              "height": 632
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2561,7 +2586,11 @@
             "speed": 4,
             "text": "欲張らず、もう一度離れて回復します。ここは4倍速です。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 1280,
+              "height": 632
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2570,7 +2599,11 @@
             "speed": 1,
             "text": "次の着地でも剣で攻撃。クリスタルがないので、敵の体力は戻りません。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 1280,
+              "height": 632
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2579,7 +2612,11 @@
             "speed": 4,
             "text": "安全な距離で回復し、次の攻撃に備えます。待ち時間は4倍速です。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 1280,
+              "height": 632
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2588,7 +2625,11 @@
             "speed": 1,
             "text": "再び攻撃を当て、ドラゴンの残り体力を50まで削りました。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 1280,
+              "height": 632
+            }
           },
           {
             "part": "part-56.mp4",
@@ -2597,7 +2638,11 @@
             "speed": 1,
             "text": "いったん離れ、残った矢を使う作戦へ。",
             "gamma": 1,
-            "captions": []
+            "captions": [],
+            "viewport": {
+              "width": 1280,
+              "height": 632
+            }
           },
           {
             "part": "part-57.mp4",
@@ -2612,8 +2657,8 @@
             "part": "part-57.mp4",
             "start": 8,
             "end": 20,
-            "speed": 3,
-            "text": "次の着地を待ちます。残りわずか、ここは3倍速です。",
+            "speed": 2,
+            "text": "次の着地を待ちます。残りわずか、ここは2倍速です。",
             "gamma": 1,
             "captions": []
           },
@@ -2655,8 +2700,8 @@
       },
       {
         "episode": 10,
-        "start": 83,
-        "end": 91
+        "start": 165,
+        "end": 173
       }
     ]
   },
@@ -2669,7 +2714,7 @@
       "bytes": 30464686,
       "sha256": "2bbab9a93a2bf78a9c134e430d731993df869838da32b239921f5470f750c658",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-01.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-01.mp4?v=2bbab9a93a2b"
     },
     {
       "title": "食料の備蓄と、最初の死亡からの回収",
@@ -2679,7 +2724,7 @@
       "bytes": 63755453,
       "sha256": "35e200a04c35e91b9d3b24cabad2bed3f09ee48da7d1ace5183bacd3ecdb35fa",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-02.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-02.mp4?v=35e200a04c35"
     },
     {
       "title": "夜の敵との戦闘と、矢の準備",
@@ -2689,7 +2734,7 @@
       "bytes": 41490809,
       "sha256": "af6afb769a43ad7a94c38b336e3abfb6071a5831f9a60900f71ee04cecb9dd4c",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-03.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-03.mp4?v=af6afb769a43"
     },
     {
       "title": "自然の溶岩から黒曜石へ。地下で見つかった問題",
@@ -2699,7 +2744,7 @@
       "bytes": 26989340,
       "sha256": "a9b427ca3725dac83867c655cdce3179f8c5a8ec681e83d891d009255e8b0db1",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-04.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-04.mp4?v=a9b427ca3725"
     },
     {
       "title": "朝を待って装備回収、自分のゲートを建てる",
@@ -2709,7 +2754,7 @@
       "bytes": 23763711,
       "sha256": "7ddf72f5cc4daa30c3d1af18b074436c796e0bd79c8ee1187bb3ab3b5c2cb35a",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-05.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-05.mp4?v=7ddf72f5cc4d"
     },
     {
       "title": "ネザー遠征と、ロッドを持ち帰るための再挑戦",
@@ -2719,7 +2764,7 @@
       "bytes": 47861234,
       "sha256": "7c896f9ff4dd4e2145303a40c07d379f00a828b1b5f3170e4e49e0956d94b930",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-06.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-06.mp4?v=7c896f9ff4dd"
     },
     {
       "title": "食料の立て直しと装備回収、保存の不具合を修正",
@@ -2729,7 +2774,7 @@
       "bytes": 29333818,
       "sha256": "5e1735cb75075c246c901545148d4c2092e9634a288fa215b078e126409e68ab",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-07.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-07.mp4?v=5e1735cb7507"
     },
     {
       "title": "最後のパール回収と、ベッドで夜を越す再出発",
@@ -2739,7 +2784,7 @@
       "bytes": 32085822,
       "sha256": "b590d0fa8df4c44871903b676ebba97c702d43645c394201719cc8b90229fb0d",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-08.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-08.mp4?v=b590d0fa8df4"
     },
     {
       "title": "遺跡への道、装備を回収して食料を焼く",
@@ -2749,17 +2794,17 @@
       "bytes": 5509700,
       "sha256": "13851f5febcc60c5fe283d3e1658260205f5f195fd0963b76bedf7cd276da9a7",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-09.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-09.mp4?v=13851f5febcc"
     },
     {
       "title": "遺跡のゲートから、ドラゴン討伐・卵を持って生還へ",
       "file": "survival-edited-10.mp4",
       "subtitleFile": "survival-edited-10.srt",
-      "duration": 196.933333,
-      "bytes": 25884240,
-      "sha256": "4b57d0342b3ff9bb5a6c22d5f7a46b5afcc4c26bb5c5100b7846e9f827756f7b",
+      "duration": 195.433333,
+      "bytes": 27582512,
+      "sha256": "d10260a65a09dbdb9856c1b9204597048fb424bf6bd526f1f68b2163406bdcf9",
       "fullDecodeVerified": true,
-      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-10.mp4"
+      "url": "https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/survival-30min/survival-edited-10.mp4?v=d10260a65a09"
     }
   ],
   "settings": {
@@ -2772,8 +2817,8 @@
   },
   "preview": {
     "file": "preview.gif",
-    "bytes": 3074757,
-    "sha256": "bf0b4579dd9f6c2163d17c5777ab7c359bc3f9db75c69160e7192fc8289302b4",
+    "bytes": 3171837,
+    "sha256": "815e01d34d47c01107983759c91548d8e22598f4ea967ca59d113999b221b228",
     "loop": true
   }
 }

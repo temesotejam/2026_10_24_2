@@ -51,7 +51,7 @@ for (const item of proof.outputs) {
   assert.equal(createHash("sha256").update(readFileSync(file)).digest("hex"), item.sha256);
   copyFileSync(file, path.join(destination, item.file));
   copyFileSync(path.join(source, item.subtitleFile), path.join(destination, item.subtitleFile));
-  item.url = base + item.file;
+  item.url = base + item.file + "?v=" + item.sha256.slice(0, 12);
 }
 const title = proof.plan.title ?? "再挑戦のサバイバル：短く編集した字幕実況";
 const notes =
@@ -78,7 +78,7 @@ if (existsSync(previewPath)) {
     sha256: createHash("sha256").update(gif).digest("hex"),
     loop: true,
   };
-  previewMarkdown = `[![本編からの短いループプレビュー](./preview.gif)](https://temesotejam.github.io/2026_10_24_2/watch/${watchStem}.html)\n\n上のGIFは本編の抜粋を自動ループします。画像を押すと、ダウンロードせずに本編を連続・ループ再生できます。\n\n`;
+  previewMarkdown = `[![本編からの短いループプレビュー](./preview.gif?v=${proof.preview.sha256.slice(0, 12)})](https://temesotejam.github.io/2026_10_24_2/watch/${watchStem}.html)\n\n上のGIFは本編の抜粋を自動ループします。画像を押すと、ダウンロードせずに本編を連続・ループ再生できます。\n\n`;
 }
 const viewingInstructions =
   "**日本語字幕・三人称・720p。** 本編ページでは全章を自動で連続再生できます。保存する場合は番号順にご覧ください。字幕は焼き込み済みなので、MP4だけでも再生できます。";

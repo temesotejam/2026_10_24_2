@@ -28,6 +28,13 @@ export function renderEditedClip({ directory, output, clip, name, localCues }) {
     if (saved.key === key && saved.sha256 === hashFile(file)) return { file, reused: true };
   }
   writeFileSync(path.join(output, name + ".ass"), ass(localCues));
+  let framing = "scale=1280:720";
+  if (clip.viewport) {
+    const { width, height } = clip.viewport;
+    assert.ok(Number.isInteger(width) && width > 0 && width <= 1280);
+    assert.ok(Number.isInteger(height) && height > 0 && height <= 720);
+    framing = `crop=${width}:${height}:0:0,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1`;
+  }
   const result = spawnSync(
     "ffmpeg",
     [
@@ -41,7 +48,7 @@ export function renderEditedClip({ directory, output, clip, name, localCues }) {
       "-t",
       String((clip.end - clip.start) / clip.speed),
       "-vf",
-      `setpts=(PTS-STARTPTS)/${clip.speed},fps=30,scale=1280:720,eq=gamma=${clip.gamma ?? 1},ass=${path.join(output, name + ".ass")}:fontsdir=/usr/share/fonts/opentype/noto`,
+      `setpts=(PTS-STARTPTS)/${clip.speed},fps=30,${framing},eq=gamma=${clip.gamma ?? 1},ass=${path.join(output, name + ".ass")}:fontsdir=/usr/share/fonts/opentype/noto`,
       "-an",
       "-c:v",
       "libx264",

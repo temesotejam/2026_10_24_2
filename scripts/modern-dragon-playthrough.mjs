@@ -110,6 +110,17 @@ const startRecording = async () => {
   part.cameraSamples = [];
   cameraSampler = setInterval(async () => {
     try {
+      const viewport = await page.evaluate(() => ({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }));
+      if (viewport.width !== 1280 || viewport.height !== 720) {
+        (part.viewportCorrections ??= []).push({ at: new Date().toISOString(), ...viewport });
+        // Another CDP connection can leave this Page's cached viewport stale.
+        // Synchronize that cache before requesting the recording dimensions.
+        await page.setViewport({ ...viewport, deviceScaleFactor: 1 });
+        await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 1 });
+      }
       part.cameraSamples.push(await page.evaluate(() => window.__mc.cameraView()));
     } catch {
       /* The final sample may overlap browser shutdown. */
