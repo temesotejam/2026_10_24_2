@@ -72,6 +72,7 @@ export class CompanionController {
   private mining: { x: number; y: number; z: number; block: BlockId; remaining: number } | null =
     null;
   private deathHandled = false;
+  private attackAnimation = 0;
   constructor(session: SurvivalSession, state: CompanionState) {
     this.session = session;
     this.state = state;
@@ -110,6 +111,19 @@ export class CompanionController {
   stop(): void {
     this.inputRemaining = 0;
     this.mining = null;
+  }
+
+  get activity(): {
+    mining: { x: number; y: number; z: number } | null;
+    moving: boolean;
+    attacking: boolean;
+  } {
+    const task = this.mining;
+    return {
+      mining: task ? { x: task.x, y: task.y, z: task.z } : null,
+      moving: this.inputRemaining > 0,
+      attacking: task !== null || this.attackAnimation > 0,
+    };
   }
 
   private asCompanion<T>(action: () => T): T {
@@ -194,6 +208,10 @@ export class CompanionController {
     const block = this.session.world.getBlock(x, y, z);
     if (!BLOCKS[block].breakable) return false;
     const remaining = this.asCompanion(() => this.session.duration(block));
+    this.state.yaw = Math.atan2(
+      -(x + 0.5 - this.state.position.x),
+      -(z + 0.5 - this.state.position.z),
+    );
     this.mining = { x, y, z, block, remaining };
     this.inputRemaining = 0;
     return true;
@@ -243,7 +261,12 @@ export class CompanionController {
       isSolid(this.session.world.getBlock(x, y, z)),
     );
     if (obstruction) return false;
-    return this.asCompanion(() => this.session.hitCreature(id, "companion"));
+    const hit = this.asCompanion(() => this.session.hitCreature(id, "companion"));
+    if (hit) {
+      this.state.yaw = Math.atan2(-(mob.position.x - p.x), -(mob.position.z - p.z));
+      this.attackAnimation = 0.35;
+    }
+    return hit;
   }
 
   craft(id: string, table?: { x: number; y: number; z: number }): boolean {
@@ -300,6 +323,7 @@ export class CompanionController {
   update(dt: number): void {
     this.clock.advance(dt, (step) => {
       const s = this.state;
+      this.attackAnimation = Math.max(0, this.attackAnimation - step);
       if (s.vitals.health <= 0) {
         if (!this.deathHandled) {
           for (const item of s.inventory) if (item) this.session.drop(item, s.position);

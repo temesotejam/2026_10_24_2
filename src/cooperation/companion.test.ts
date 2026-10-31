@@ -55,7 +55,9 @@ describe("shared-world companion", () => {
     expect(state.position.x).toBeCloseTo(initial, 4);
     world.setBlock(7, 1, 4, BlockId.WOOD);
     expect(companion.mine(7, 1, 4)).toBe(true);
+    expect(companion.activity.attacking).toBe(true);
     companion.stop();
+    expect(companion.activity.attacking).toBe(false);
     tick(2);
     expect(world.getBlock(7, 1, 4)).toBe(BlockId.WOOD);
   });
@@ -85,9 +87,12 @@ describe("shared-world companion", () => {
     const { world, data, state, companion, tick } = setup();
     world.setBlock(7, 1, 4, BlockId.WOOD);
     expect(companion.mine(7, 1, 4)).toBe(true);
+    expect(state.yaw).toBeCloseTo(-Math.PI / 2);
+    expect(companion.activity.attacking).toBe(true);
     tick(0.5);
     expect(world.getBlock(7, 1, 4)).toBe(BlockId.WOOD);
     tick(1.5);
+    expect(companion.activity.attacking).toBe(false);
     expect(world.getBlock(7, 1, 4)).toBe(BlockId.AIR);
     expect(state.inventory.some((s) => s?.id === "log")).toBe(true);
     expect(data.inventory.every((s) => s === null)).toBe(true);

@@ -9,6 +9,8 @@ import puppeteer from "puppeteer";
 import { createDriver, wait } from "./lib/survival-driver.mjs";
 import { safePath } from "./cooperation/navigation.mjs";
 import { canPlantSapling } from "./cooperation/renewal.mjs";
+import { safetyStop } from "./cooperation/safety.mjs";
+import { hasParallelMining } from "./cooperation/overlap.mjs";
 
 const args = process.argv.slice(2);
 const option = (name, fallback) => {
@@ -46,6 +48,8 @@ try {
   });
   const driver = createDriver(page, out);
   const observe = (actor) => page.evaluate((actor) => window.__coop.observe(actor), actor);
+  let playerMining = false;
+  let playerMiningTarget = null;
   for (const actor of ["player", "companion"]) {
     const s = await observe(actor);
     assert.ok(
@@ -131,11 +135,23 @@ try {
     );
     if (!safe) return false;
     if (actor === "companion") {
+      const start = (await observe(actor)).time;
       const accepted = await page.evaluate(
         ({ input, seconds }) => window.__coop.move(input, seconds),
         { input, seconds },
       );
-      if (accepted) await wait(seconds * 1000 + 180);
+      if (accepted) {
+        try {
+          await page.waitForFunction(
+            (end) => window.__mc.time() >= end,
+            { timeout: 5000 },
+            start + seconds,
+          );
+        } catch {
+          await page.evaluate(() => window.__coop.stop());
+          return false;
+        }
+      }
       return accepted;
     }
     const p = (await observe(actor)).position;
@@ -145,14 +161,85 @@ try {
       z: p.z - Math.cos(input.yaw) * 5,
     });
     if (input.jump) await page.keyboard.down("Space");
+    const start = (await observe(actor)).time;
     await page.keyboard.down("KeyW");
     try {
-      await wait(seconds * 1000);
+      await page.waitForFunction(
+        (end) => window.__mc.time() >= end,
+        { timeout: 5000 },
+        start + seconds,
+      );
+    } catch {
+      return false;
     } finally {
       await page.keyboard.up("KeyW");
       if (input.jump) await page.keyboard.up("Space");
     }
     return true;
+  }
+  async function minePlayerLeaf(target) {
+    if (!target || ![target.x, target.y, target.z].every(Number.isInteger)) return false;
+    if ((await page.evaluate((p) => window.__coop.block("player", p.x, p.y, p.z), target)) !== 7)
+      return false;
+    const p = (await observe("player")).position;
+    const points = [
+      { x: target.x + 0.5, y: target.y + 0.5, z: target.z + 0.5 },
+      {
+        x: Math.max(target.x + 0.05, Math.min(target.x + 0.95, p.x)),
+        y: target.y + 0.5,
+        z: Math.max(target.z + 0.05, Math.min(target.z + 0.95, p.z)),
+      },
+    ];
+    for (const point of points) {
+      await driver.aim(point, 75);
+      const hit = await page.evaluate(() => window.__mc.target());
+      if (!hit || hit.x !== target.x || hit.y !== target.y || hit.z !== target.z) continue;
+      const deadline = Date.now() + 5000;
+      playerMining = true;
+      playerMiningTarget = target;
+      try {
+        await page.mouse.down();
+        const peer = await observe("companion");
+        events.push({
+          actor: "player",
+          method: "mining-start",
+          target,
+          peerActivity: peer.activity,
+          at: new Date().toISOString(),
+        });
+        while (Date.now() < deadline) {
+          if (safetyStop(await observe("player"))) return false;
+          const current = await page.evaluate(() => window.__mc.target());
+          if (
+            !current ||
+            current.x !== target.x ||
+            current.y !== target.y ||
+            current.z !== target.z
+          )
+            return (
+              (await page.evaluate((p) => window.__coop.block("player", p.x, p.y, p.z), target)) ===
+              0
+            );
+          if (
+            (await page.evaluate((p) => window.__coop.block("player", p.x, p.y, p.z), target)) === 0
+          )
+            return true;
+          await wait(60);
+        }
+      } finally {
+        await page.mouse.up();
+        events.push({
+          actor: "player",
+          method: "mining-end",
+          target,
+          at: new Date().toISOString(),
+        });
+        playerMining = false;
+        playerMiningTarget = null;
+      }
+      return false;
+    }
+    return false;
   }
   async function navigate(actor, target) {
     if (!target || ![target.x, target.y, target.z].every(Number.isFinite)) return false;
@@ -181,6 +268,7 @@ try {
   }
   async function place(actor, item, ground) {
     if (item === "sapling") {
+      if (actor === "companion" && playerMining) return false;
       const cells = await page.evaluate(
         ({ actor, ground }) => {
           const cells = [];
@@ -192,6 +280,7 @@ try {
       );
       if (!canPlantSapling(cells)) return false;
     }
+    if (actor === "companion" && item === "sapling" && playerMining) return false;
     if (actor === "companion")
       return page.evaluate((g) => window.__coop.place(g.x, g.y + 1, g.z), ground);
     if (!(await observe("player")).inventory.some((s) => s?.id === item)) return false;
@@ -253,15 +342,19 @@ try {
           actor === "companion" && page.evaluate((slot) => window.__coop.select(slot), params[0])
         );
       case "mine":
-        return (
-          actor === "companion" &&
-          page.evaluate((p) => window.__coop.mine(p.x, p.y, p.z), params[0])
-        );
+        return actor === "companion"
+          ? page.evaluate((p) => window.__coop.mine(p.x, p.y, p.z), params[0])
+          : minePlayerLeaf(params[0]);
       case "blockingLeaf":
         return (
           actor === "companion" &&
           page.evaluate((p) => window.__coop.blockingLeaf(p.x, p.y, p.z), params[0])
         );
+      case "peerBusy": {
+        if (actor !== "companion" || !playerMining) return false;
+        const self = await observe(actor);
+        return self.other !== null;
+      }
       case "craft":
         return actor === "companion" && page.evaluate((id) => window.__coop.craft(id), params[0]);
       case "give":
@@ -320,15 +413,20 @@ try {
       worker.on("message", async (msg) => {
         if (msg.type === "request") {
           try {
+            const startedAt = new Date().toISOString();
             const result = await runAction(actor, msg.method, msg.args);
             if (msg.method === "observe" || msg.method === "scan") {
               events.push({ actor, method: msg.method, result, at: new Date().toISOString() });
-            } else if (msg.method !== "block") {
+            } else if (msg.method !== "block" && msg.method !== "peerBusy") {
               events.push({
                 actor,
                 method: msg.method,
                 args: msg.args,
                 result,
+                startedAt,
+                ...(actor === "companion" && msg.method === "mine"
+                  ? { peerMining: playerMiningTarget }
+                  : {}),
                 at: new Date().toISOString(),
               });
               console.log(actor, msg.method, JSON.stringify({ args: msg.args, result }));
@@ -376,6 +474,9 @@ try {
   assert.ok(events.some((e) => e.actor === "player" && e.method === "place" && e.result));
   assert.ok(events.some((e) => e.actor === "companion" && e.method === "place" && e.result));
   assert.ok(events.some((e) => e.actor === "companion" && e.method === "give" && e.result));
+  const simultaneousMining = hasParallelMining(events);
+  if (args.includes("--require-overlap"))
+    assert.ok(simultaneousMining, "verify that both actors actually work at the same time");
   const planting = events.find(
     (e) =>
       e.method === "say" &&
@@ -401,6 +502,7 @@ try {
         controller: "two separate rule-policy worker threads",
         events,
         final,
+        simultaneousMining,
       },
       null,
       2,
@@ -408,7 +510,11 @@ try {
   );
   console.log(
     "Both independent policies completed",
-    JSON.stringify({ health: [final.player.vitals.health, final.companion.vitals.health], out }),
+    JSON.stringify({
+      health: [final.player.vitals.health, final.companion.vitals.health],
+      simultaneousMining,
+      out,
+    }),
   );
 } catch (error) {
   const final = page

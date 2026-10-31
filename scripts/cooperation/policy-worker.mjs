@@ -43,6 +43,8 @@ async function announce(type, fields = {}) {
     accepted: "共有された木の位置へ向かいます。",
     retarget: "到達しにくいため、別の木を探します。",
     clearing: "邪魔な葉を少し取り除きます。",
+    "scout-leaves": "もう一人も苗木を探します。",
+    "claim-leaf": "こちらの葉を調べます。",
     "need-sapling": "植え直す苗木を探しています。",
     replanted: "手に入れた苗木を植えました。",
     "bed-plan": "夜に備え、２人分のベッドを確認しました。",
@@ -101,6 +103,7 @@ let readyForBed = false;
 let inBed = false;
 let experiencedNight = false;
 let bedtimeMovesFailed = 0;
+let scoutLeaves = 0;
 
 try {
   await announce("ready", { role: actor === "player" ? "探索・建築" : "採取・加工" });
@@ -140,7 +143,7 @@ try {
               await call("stop");
               throw Error("safety stop: no shared bed plan before night");
             }
-            await pause(350);
+            await pause(100);
             continue;
           }
           sleepPlan = { player: plan.player, companion: plan.companion, cycle };
@@ -159,7 +162,7 @@ try {
           await call("stop");
           throw Error("safety stop: no safe route to the assigned bed");
         }
-        await pause(350);
+        await pause(100);
         continue;
       }
       if (!readyForBed) {
@@ -205,7 +208,7 @@ try {
         await call("stop");
         throw Error("safety stop: could not clear the observed obstruction");
       }
-      await pause(350);
+      await pause(100);
       continue;
     }
     const plantedByPeer = message(obs, "replanted");
@@ -228,15 +231,19 @@ try {
       count(obs, "sapling") > 0 &&
       Date.now() >= nextPlantAttempt
     ) {
-      nextPlantAttempt = Date.now() + 3000;
+      nextPlantAttempt = Date.now() + 200;
       const slot = obs.inventory.findIndex((item, index) => index < 9 && item?.id === "sapling");
-      if (actor === "player" || (slot >= 0 && (await call("select", slot)))) {
-        const candidates = scan.ground.filter(
-          (g) =>
-            [1, 2].includes(g.support) &&
-            distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 0.8 &&
-            (!obs.other || distance(obs.other, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 1),
-        );
+      const peerBusy = actor === "companion" && (await call("peerBusy"));
+      if (!peerBusy && (actor === "player" || (slot >= 0 && (await call("select", slot))))) {
+        const candidates = scan.ground
+          .filter(
+            (g) =>
+              [1, 2].includes(g.support) &&
+              distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 0.8 &&
+              distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) < 3.7 &&
+              (!obs.other || distance(obs.other, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 1),
+          )
+          .slice(0, 12);
         for (const ground of candidates) {
           if (await call("place", "sapling", ground)) {
             replanted = true;
@@ -266,12 +273,44 @@ try {
         await announce("need-wood");
         lastRequest = Date.now();
       }
+      if (
+        announced &&
+        target &&
+        !replanted &&
+        count(obs, "sapling") === 0 &&
+        message(obs, "need-sapling") &&
+        scoutLeaves < 4
+      ) {
+        const leaves = (scan.leaves ?? []).filter((leaf) => {
+          const claimed = message(obs, "clearing")?.target;
+          return (
+            Math.hypot(leaf.x - target.x, leaf.y - target.y, leaf.z - target.z) <= 4.5 &&
+            (!claimed || claimed.x !== leaf.x || claimed.y !== leaf.y || claimed.z !== leaf.z)
+          );
+        });
+        let worked = false;
+        for (const leaf of leaves.slice(0, 8)) {
+          if ((await call("block", leaf.x, leaf.y, leaf.z)) !== 7) continue;
+          await announce("claim-leaf", { target: leaf });
+          if (await call("mine", leaf)) {
+            scoutLeaves++;
+            await announce("scout-leaves", { target: leaf });
+            worked = true;
+            break;
+          }
+        }
+        if (!worked && leaves.length && distance(obs.position, leaves[0]) > 2.5)
+          await call("navigate", { x: leaves[0].x + 0.5, y: obs.position.y, z: leaves[0].z + 0.5 });
+      }
       if (!placed && count(obs, "planks") > 0) {
-        const candidates = scan.ground.filter(
-          (g) =>
-            distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 0.8 &&
-            (!obs.other || distance(obs.other, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 1),
-        );
+        const candidates = scan.ground
+          .filter(
+            (g) =>
+              distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 0.8 &&
+              distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) < 3.7 &&
+              (!obs.other || distance(obs.other, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 1),
+          )
+          .slice(0, 12);
         for (const ground of candidates) {
           if (await call("place", "planks", ground)) {
             placed = true;
@@ -308,14 +347,14 @@ try {
           throw Error("safety stop: replacement sapling could not be planted");
         }
         if (count(obs, "sapling") > 0) {
-          await pause(350);
+          await pause(100);
           continue;
         }
         const dropped = obs.loot.find((item) => item.stack.id === "sapling");
         if (dropped) {
           if (distance(obs.position, dropped.position) > 1.2)
             await moveToward(obs.position, dropped.position, 0.2);
-          await pause(350);
+          await pause(100);
           continue;
         }
         if (clearedLeaves >= 8) {
@@ -323,9 +362,13 @@ try {
           await call("stop");
           throw Error("safety stop: no replacement sapling after eight leaves");
         }
-        const candidates = (scan.leaves ?? []).filter(
-          (leaf) => Math.hypot(leaf.x - target.x, leaf.y - target.y, leaf.z - target.z) <= 4.5,
-        );
+        const candidates = (scan.leaves ?? []).filter((leaf) => {
+          const claimed = message(obs, "claim-leaf")?.target;
+          return (
+            Math.hypot(leaf.x - target.x, leaf.y - target.y, leaf.z - target.z) <= 4.5 &&
+            (!claimed || claimed.x !== leaf.x || claimed.y !== leaf.y || claimed.z !== leaf.z)
+          );
+        });
         let leafStarted = false;
         for (const leaf of candidates) {
           if (await call("mine", leaf)) {
@@ -343,18 +386,21 @@ try {
             { x: target.x + 0.5, y: target.y, z: target.z + 0.5 },
             0.2,
           );
-        await pause(350);
+        await pause(100);
         continue;
       }
       if (!placed && count(obs, "planks") > 0 && shared) {
         const slot = obs.inventory.findIndex((item, index) => index < 9 && item?.id === "planks");
         if (slot >= 0) {
           await call("select", slot);
-          const candidates = scan.ground.filter(
-            (g) =>
-              distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 0.8 &&
-              (!obs.other || distance(obs.other, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 1),
-          );
+          const candidates = scan.ground
+            .filter(
+              (g) =>
+                distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 0.8 &&
+                distance(obs.position, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) < 3.7 &&
+                (!obs.other || distance(obs.other, { x: g.x + 0.5, y: g.y + 1, z: g.z + 0.5 }) > 1),
+            )
+            .slice(0, 12);
           for (const ground of candidates) {
             if (await call("place", "planks", ground)) {
               placed = true;
@@ -397,7 +443,7 @@ try {
           bestTargetDistance = Infinity;
           lastProgress = Date.now();
           await announce("retarget", { target });
-          await pause(350);
+          await pause(100);
           continue;
         }
         if (block === 0) {
@@ -430,7 +476,7 @@ try {
               clearedLeaves++;
               pendingAt = Date.now();
               await announce("clearing", { target: leaf });
-              await pause(350);
+              await pause(100);
               continue;
             }
             const moved = await moveToward(
@@ -464,7 +510,7 @@ try {
       parentPort.postMessage({ type: "complete", actor, elapsedMs: Date.now() - started });
       process.exit(0);
     }
-    await pause(350);
+    await pause(100);
   }
   throw Error("task timed out before both actors finished");
 } catch (error) {

@@ -333,7 +333,8 @@ async function boot(): Promise<void> {
   )
     player.perspective = 1;
   const avatar = entityScene ? new PlayerAvatar(entityScene) : null;
-  const companionAvatar = companion && entityScene ? new PlayerAvatar(entityScene, 0xb36338) : null;
+  const companionAvatar =
+    companion && entityScene ? new PlayerAvatar(entityScene, 0xb36338, false) : null;
   player.canSprint = () => session.creative || data.vitals.hunger > 6;
   const hotbar = new Hotbar(hotbarContainer, session);
   const adventure = new Adventure(session);
@@ -826,6 +827,7 @@ async function boot(): Promise<void> {
           night: session.isNight,
           position: p,
           onGround: actor === "companion" ? companion.state.onGround : player.onGround,
+          activity: actor === "companion" ? companion.activity : null,
           vitals: s.vitals,
           inventory: s.inventory,
           selected: s.selected,
@@ -977,6 +979,7 @@ async function boot(): Promise<void> {
         },
         s.inventory[s.selected] ?? null,
         dt,
+        companion.activity.attacking,
       );
     }
     hand?.update(session.held, player.perspective === 0, player.position);

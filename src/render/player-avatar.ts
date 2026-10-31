@@ -31,7 +31,7 @@ export class PlayerAvatar {
   private swing = 0;
   private attacking = false;
 
-  constructor(scene: THREE.Scene, shirt = 0x3f8f85) {
+  constructor(scene: THREE.Scene, shirt = 0x3f8f85, listenToPointer = true) {
     this.root.add(this.body);
     const box = (
       parent: THREE.Group,
@@ -72,22 +72,24 @@ export class PlayerAvatar {
     }
     this.held.position.set(0, -0.53, -0.13);
     must(this.arms[1]).add(this.held);
-    document.addEventListener("mousedown", (e) => {
-      if (e.button === 0) this.attacking = true;
-    });
-    document.addEventListener("mouseup", () => {
-      this.attacking = false;
-    });
-    document.addEventListener("pointerlockchange", () => {
-      this.attacking = false;
-    });
-    window.addEventListener("blur", () => {
-      this.attacking = false;
-    });
+    if (listenToPointer) {
+      document.addEventListener("mousedown", (e) => {
+        if (e.button === 0) this.attacking = true;
+      });
+      document.addEventListener("mouseup", () => {
+        this.attacking = false;
+      });
+      document.addEventListener("pointerlockchange", () => {
+        this.attacking = false;
+      });
+      window.addEventListener("blur", () => {
+        this.attacking = false;
+      });
+    }
     scene.add(this.root);
   }
 
-  update(player: AvatarPlayer, item: Stack | null, dt: number): void {
+  update(player: AvatarPlayer, item: Stack | null, dt: number, attacking = this.attacking): void {
     const p = player.position;
     const distance = this.previous ? Math.hypot(p.x - this.previous.x, p.z - this.previous.z) : 0;
     this.previous = { x: p.x, z: p.z };
@@ -105,7 +107,7 @@ export class PlayerAvatar {
       must(this.legs[i]).rotation.x = this.swing * sign;
       must(this.arms[i]).rotation.x = -this.swing * sign;
     }
-    if (this.attacking && player.isActive)
+    if (attacking && player.isActive)
       must(this.arms[1]).rotation.x = -0.9 - Math.sin(performance.now() / 90) * 0.55;
     else if (item) must(this.arms[1]).rotation.x -= 0.25;
     const id = item?.id ?? "";
