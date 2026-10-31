@@ -83,6 +83,28 @@ describe("shared-world companion", () => {
     expect(state.inventory[0]).toBe(null);
   });
 
+  it("builds sideways only against a visible face, consuming a real block", () => {
+    const { world, state, companion } = setup();
+    state.inventory[0] = stack("cobble", 2);
+    world.setBlock(8, 2, 4, BlockId.COBBLE);
+    expect(companion.place(7, 2, 4)).toBe(true);
+    expect(world.getBlock(7, 2, 4)).toBe(BlockId.COBBLE);
+    expect(must(state.inventory[0]).count).toBe(1);
+    expect(companion.place(12, 8, 4)).toBe(false);
+    expect(must(state.inventory[0]).count).toBe(1);
+  });
+
+  it("rejects unsupported and occluded placement without consuming items", () => {
+    const { world, state, companion } = setup();
+    state.inventory[0] = stack("cobble", 2);
+    expect(companion.place(7, 3, 6)).toBe(false);
+    world.setBlock(7, 2, 4, BlockId.STONE);
+    world.setBlock(9, 2, 4, BlockId.STONE);
+    expect(companion.place(8, 2, 4)).toBe(false);
+    expect(world.getBlock(8, 2, 4)).toBe(BlockId.AIR);
+    expect(must(state.inventory[0]).count).toBe(2);
+  });
+
   it("mines a real block over time and collects its drop into the nearest inventory", () => {
     const { world, data, state, companion, tick } = setup();
     world.setBlock(7, 1, 4, BlockId.WOOD);

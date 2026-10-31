@@ -217,9 +217,55 @@ export class CompanionController {
     return true;
   }
 
+  private canReachPlacement(x: number, y: number, z: number): boolean {
+    // The target must be the empty cell immediately outside a visible block's
+    // face, just like a normal player's raycast-based placement.
+    const p = this.state.position;
+    const origin = { x: p.x, y: p.y + 1.62, z: p.z };
+    const neighbors = [
+      [0, -1, 0],
+      [1, 0, 0],
+      [-1, 0, 0],
+      [0, 0, 1],
+      [0, 0, -1],
+      [0, 1, 0],
+    ];
+    for (const [dx, dy, dz] of neighbors) {
+      const bx = x + must(dx),
+        by = y + must(dy),
+        bz = z + must(dz);
+      if (!isSolid(this.session.world.getBlock(bx, by, bz))) continue;
+      for (const a of [0.1, 0.5, 0.9])
+        for (const b of [0.1, 0.5, 0.9]) {
+          const point = {
+            x: bx + (dx ? (dx > 0 ? 0.05 : 0.95) : a),
+            y: by + (dy ? (dy > 0 ? 0.05 : 0.95) : dx ? a : b),
+            z: bz + (dz ? (dz > 0 ? 0.05 : 0.95) : b),
+          };
+          const direction = { x: point.x - origin.x, y: point.y - origin.y, z: point.z - origin.z };
+          const distance = Math.hypot(direction.x, direction.y, direction.z);
+          if (distance > 4.5) continue;
+          const hit = raycastVoxels(origin, direction, distance + 0.1, (qx, qy, qz) => {
+            const block = this.session.world.getBlock(qx, qy, qz);
+            return block !== BlockId.AIR && block !== BlockId.WATER && block !== BlockId.LAVA;
+          });
+          if (
+            hit?.blockX === bx &&
+            hit.blockY === by &&
+            hit.blockZ === bz &&
+            hit.placeX === x &&
+            hit.placeY === y &&
+            hit.placeZ === z
+          )
+            return true;
+        }
+    }
+    return false;
+  }
+
   place(x: number, y: number, z: number): boolean {
-    // Placement uses the adjacent, reachable support block, as a player does.
-    if (this.state.vitals.health <= 0 || !this.reachable(x, y - 1, z)) return false;
+    if (this.state.vitals.health <= 0 || ![x, y, z].every(Number.isInteger)) return false;
+    if (!this.canReachPlacement(x, y, z)) return false;
     const body = aabbFromFeetPosition(this.state.position);
     if (
       x < body.max.x &&

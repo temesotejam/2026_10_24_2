@@ -87,6 +87,7 @@ declare global {
         y: number;
         z: number;
       } | null;
+      placementTarget: () => { x: number; y: number; z: number } | null;
       pitch: () => number;
       yaw: () => number;
       eyeHeight: () => number;
@@ -776,6 +777,10 @@ async function boot(): Promise<void> {
     target: () => {
       const hit = interaction.raycastFromCamera();
       return hit ? { x: hit.blockX, y: hit.blockY, z: hit.blockZ } : null;
+    },
+    placementTarget: () => {
+      const hit = interaction.raycastFromCamera();
+      return hit ? { x: hit.placeX, y: hit.placeY, z: hit.placeZ } : null;
     },
     pitch: () => player.eyePitch,
     yaw: () => player.eyeYaw,
