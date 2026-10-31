@@ -6,6 +6,10 @@ Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サー
 
 **[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [新しい約15分の字幕実況・全4章](downloads/edited-survival/README.md) · [以前の全工程・画質優先版](https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/survival-generation3-720p/README.md) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
 
+[![公開済みの約15分の字幕実況からのループ映像](downloads/edited-survival/preview.gif)](https://temesotejam.github.io/2026_10_24_2/watch/edited.html)
+
+上の映像は公開済みの約15分版の抜粋です。[ダウンロードせず全4章を連続・ループ再生する](https://temesotejam.github.io/2026_10_24_2/watch/edited.html)。約30分版は新しくプレイ・収録中です。
+
 ![作業台で木のツルハシを作成したサバイバル画面](docs/screenshots/survival-crafting.png)
 
 ## 遊び方

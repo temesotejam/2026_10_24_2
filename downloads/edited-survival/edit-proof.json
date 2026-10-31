@@ -1120,6 +1120,28 @@
           }
         ]
       }
+    ],
+    "preview": [
+      {
+        "episode": 1,
+        "start": 40,
+        "end": 44
+      },
+      {
+        "episode": 2,
+        "start": 90,
+        "end": 94
+      },
+      {
+        "episode": 3,
+        "start": 125,
+        "end": 129
+      },
+      {
+        "episode": 4,
+        "start": 72,
+        "end": 76
+      }
     ]
   },
   "outputs": [
@@ -1171,5 +1193,11 @@
     "bitrateCap": null,
     "narration": "Japanese subtitles",
     "footageReusedFromPreviousRun": false
+  },
+  "preview": {
+    "file": "preview.gif",
+    "bytes": 4058725,
+    "sha256": "79d5c8215c7f4002df1af1349d65c8a3c5b0e077e7ba5dc4e2a9d3a4f2bc1556",
+    "loop": true
   }
 }

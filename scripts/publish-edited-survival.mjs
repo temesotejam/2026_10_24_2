@@ -35,8 +35,6 @@ const watch = path.join(repository, "public/watch");
 mkdirSync(destination, { recursive: true });
 mkdirSync(watch, { recursive: true });
 const base = `https://github.com/temesotejam/2026_10_24_2/raw/refs/heads/main/downloads/${collection}/`;
-const escapeHtml = (value) =>
-  String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
 const length = (seconds) => {
   const rounded = Math.round(seconds);
   return `${Math.floor(rounded / 60)}分${String(rounded % 60).padStart(2, "0")}秒`;
@@ -82,6 +80,8 @@ if (existsSync(previewPath)) {
   };
   previewMarkdown = `[![本編からの短いループプレビュー](./preview.gif)](https://temesotejam.github.io/2026_10_24_2/watch/${watchStem}.html)\n\n上のGIFは本編の抜粋を自動ループします。画像を押すと、ダウンロードせずに本編を連続・ループ再生できます。\n\n`;
 }
+const viewingInstructions =
+  "**日本語字幕・三人称・720p。** 本編ページでは全章を自動で連続再生できます。保存する場合は番号順にご覧ください。字幕は焼き込み済みなので、MP4だけでも再生できます。";
 const eventNote =
   proof.sourceDeathCount > 0
     ? `途中の死亡${proof.sourceDeathCount}回と装備の回収も含め、`
@@ -102,38 +102,22 @@ const rows = proof.outputs
   .join("\n");
 writeFileSync(
   path.join(destination, "README.md"),
-  `# ${title}\n\n${previewMarkdown}${date}（日本時間）に開始した新規セーブ（シード2026）で、所持品ゼロからドラゴン討伐・卵の入手・通常世界への帰還まで進めたプレイです。${eventNote}流れが分かるよう合計${length(totalDuration)}に編集しました。\n\n**日本語字幕・三人称・720p。番号順に再生してください。** 字幕は焼き込み済みなので、MP4だけで再生できます。採掘・移動・待ち時間にはカットと早送りを使い、主要な戦闘は等速を中心に残しています。\n\n| 順番 | 章 | 時間 | 容量 | ダウンロード |\n| --- | --- | --- | --- | --- |\n${rows}\n\n合計約${Math.ceil(totalBytes / 1e6)}MB。CRF18・ビットレート上限なしで出力し、容量に応じて章を分けています。\n\n[ダウンロードせず再生する](https://temesotejam.github.io/2026_10_24_2/watch/${watchStem}.html) / [編集箇所・クリア結果・各ファイルのSHA-256](./edit-proof.json)\n\n操作スクリプトが、観測用の地図と通常のキー・マウス操作を使ってプレイしています。エンダーアイによる方向確認の後、地図で遺跡までの経路を選んでいます。録画時の描画倍率は100％です。音声はなく、実況は字幕です。\n\n${notes.join("\n\n")}\n`,
+  `# ${title}\n\n${previewMarkdown}${date}（日本時間）に開始した新規セーブ（シード2026）で、所持品ゼロからドラゴン討伐・卵の入手・通常世界への帰還まで進めたプレイです。${eventNote}流れが分かるよう合計${length(totalDuration)}に編集しました。\n\n${viewingInstructions}採掘・移動・待ち時間にはカットと早送りを使い、主要な戦闘は等速を中心に残しています。\n\n| 順番 | 章 | 時間 | 容量 | ダウンロード |\n| --- | --- | --- | --- | --- |\n${rows}\n\n合計約${Math.ceil(totalBytes / 1e6)}MB。CRF18・ビットレート上限なしで出力し、容量に応じて章を分けています。\n\n[ダウンロードせず再生する](https://temesotejam.github.io/2026_10_24_2/watch/${watchStem}.html) / [編集箇所・クリア結果・各ファイルのSHA-256](./edit-proof.json)\n\n操作スクリプトが、観測用の地図と通常のキー・マウス操作を使ってプレイしています。エンダーアイによる方向確認の後、地図で遺跡までの経路を選んでいます。録画時の描画倍率は100％です。音声はなく、実況は字幕です。\n\n${notes.join("\n\n")}\n`,
 );
 writeFileSync(path.join(destination, "edit-proof.json"), JSON.stringify(proof, null, 2) + "\n");
 writeFileSync(path.join(watch, `${watchStem}-proof.json`), JSON.stringify(proof, null, 2) + "\n");
 const finale = proof.outputs.at(-1);
 if (collection === "edited-survival")
   copyFileSync(path.join(source, finale.file), path.join(watch, previewFile));
-const links = proof.outputs
-  .map(
-    (item, i) =>
-      `<li><a href="${item.url}" download>${i + 1}. ${escapeHtml(item.title)}（${length(item.duration)}・約${Math.ceil(item.bytes / 1e6)}MB）をダウンロード</a></li>`,
-  )
-  .join("\n");
 writeFileSync(
   path.join(watch, `${watchStem}.html`),
-  collection !== "edited-survival"
-    ? playlistPage({
-        title,
-        outputs: proof.outputs,
-        collection,
-        totalLength: length(totalDuration),
-        notes,
-      })
-    : `<!doctype html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><style>body{margin:0;background:#171b22;color:#eee;font:17px/1.7 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:24px}a{color:#9ed2ff}video{display:block;width:100%;height:auto;background:#000}li{margin:16px 0}button{font:inherit;padding:8px 16px}</style></head>
-<body><main><h1>${escapeHtml(title)}</h1>
-<p>新規セーブの所持品ゼロから、ドラゴン討伐・卵の入手・生還まで。日本語字幕と三人称視点で、合計${length(totalDuration)}に編集しました。採掘や待ち時間を短縮し、主要な戦闘と失敗からの立て直しを残しています。</p>
-<h2>全${proof.outputs.length}章をダウンロード</h2><p>番号順に再生してください。字幕は動画に入っています。</p><ol>${links}</ol>
-<p>実況は字幕です（音声なし）。${notes.map(escapeHtml).join("<br>")}</p>
-<h2>最終章のプレビュー</h2><video controls playsinline preload="metadata"><source src="./${previewFile}" type="video/mp4"></video><p><button data-time="0">最終章を最初から再生</button></p>
-<p><a href="https://github.com/temesotejam/2026_10_24_2/blob/main/downloads/${collection}/README.md">ダウンロード一覧</a> / <a href="./${watchStem}-proof.json">編集とクリアの記録</a> / <a href="../?seed=20261029&amp;mode=survival&amp;view=third-person">ゲームを遊ぶ</a></p></main>
-<script>document.querySelector('[data-time="0"]').addEventListener('click',async()=>{const video=document.querySelector('video');video.currentTime=0;await video.play();});</script></body></html>`,
+  playlistPage({
+    title,
+    outputs: proof.outputs,
+    collection,
+    totalLength: length(totalDuration),
+    notes,
+  }),
 );
 console.log(
   JSON.stringify({
