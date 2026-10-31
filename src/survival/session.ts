@@ -35,6 +35,7 @@ import {
 } from "../entities/creatures";
 import { DAY_LENGTH_SECONDS, STARTUP_PHASE, isNightAt } from "../render/sky";
 import { deriveSeed, mulberry32 } from "../world/rng";
+import type { CompanionState } from "../cooperation/companion";
 export type GameMode = "survival" | "creative";
 export interface SessionState {
   version: 1;
@@ -61,6 +62,7 @@ export interface SessionState {
   gridSize: 2 | 3;
   edits: Record<string, Record<string, number>>;
   fluidLevels: Record<string, number>;
+  companion?: CompanionState;
 }
 export const blockKey = (x: number, y: number, z: number) => `${x},${y},${z}`;
 export function parseBlockKey(key: string): [number, number, number] {
@@ -113,6 +115,7 @@ export class SurvivalSession {
   private simulationTicks = 0;
   private fallStart: number | null = null;
   private attackCooldown = 0;
+  private companionAttackCooldown = 0;
   onChange: (() => void) | undefined;
   onDeath: (() => void) | undefined;
   notice: ((text: string) => void) | undefined;
@@ -298,6 +301,33 @@ export class SurvivalSession {
     }
     this.data.spawn = { x: x + must(place[0]) + 0.5, y, z: z + must(place[1]) + 0.5 };
     if (this.isNight) {
+      const companion = this.data.companion;
+      if (companion) {
+        const bed = companion.bed;
+        if (
+          !companion.sleeping ||
+          !bed ||
+          companion.vitals.health <= 0 ||
+          this.world.getBlock(bed.x, bed.y, bed.z) !== BlockId.BED ||
+          (bed.x === x && bed.y === y && bed.z === z) ||
+          Math.hypot(
+            companion.position.x - bed.x - 0.5,
+            companion.position.y - bed.y,
+            companion.position.z - bed.z - 0.5,
+          ) > 4.5 ||
+          this.data.creatures.some(
+            (m) =>
+              m.hp > 0 &&
+              hostile(m) &&
+              (m.species !== "wanderer" || m.fuse === 2) &&
+              Math.abs(m.position.y - bed.y) < 5 &&
+              Math.hypot(m.position.x - bed.x, m.position.z - bed.z) < 8,
+          )
+        ) {
+          this.notice?.("もう一人が安全な別のベッドに入るのを待っています");
+          return;
+        }
+      }
       if (
         this.data.creatures.some(
           (m) =>
@@ -314,6 +344,10 @@ export class SurvivalSession {
       this.data.time =
         (Math.floor(this.data.time / DAY_LENGTH_SECONDS) + 1) * DAY_LENGTH_SECONDS +
         DAY_LENGTH_SECONDS * 0.25;
+      if (this.data.companion) {
+        this.data.companion.sleeping = false;
+        delete this.data.companion.bed;
+      }
       this.notice?.("朝になりました。復活地点を設定しました");
     } else this.notice?.("復活地点を設定しました。夜は眠れます");
     this.onChange?.();
@@ -321,18 +355,23 @@ export class SurvivalSession {
   get isNight(): boolean {
     return this.world.dimension === "nether" || isNightAt(this.data.time);
   }
-  hitCreature(id: number): void {
-    if (this.attackCooldown > 0 || this.dead) return;
+  hitCreature(id: number, source: "player" | "companion" = "player"): boolean {
+    if ((source === "player" ? this.attackCooldown : this.companionAttackCooldown) > 0 || this.dead)
+      return false;
     const mob = this.data.creatures.find((m) => m.id === id);
-    if (!mob) return;
+    if (!mob || mob.hp <= 0) return false;
     const item = this.held ? ITEMS[this.held.id] : undefined;
     mob.hp -=
-      (this.data.adventure?.strength ? 4 : 0) + (item?.enchanted ? 2 : 0) + meleeDamage(item);
+      (source === "player" && this.data.adventure?.strength ? 4 : 0) +
+      (item?.enchanted ? 2 : 0) +
+      meleeDamage(item);
     mob.cooldown = 0.7;
     if (mob.species === "wanderer") mob.fuse = 2;
-    this.attackCooldown = 0.4;
+    if (source === "player") this.attackCooldown = 0.4;
+    else this.companionAttackCooldown = 0.4;
     if (!this.creative) wearTool(this.data.inventory, this.data.selected);
     this.removeDead();
+    return true;
   }
   shootCreature(id: number, amount: number): void {
     const mob = this.data.creatures.find((m) => m.id === id);
@@ -431,6 +470,7 @@ export class SurvivalSession {
       if (this.dead) return;
       this.data.time += step;
       this.attackCooldown = Math.max(0, this.attackCooldown - step);
+      this.companionAttackCooldown = Math.max(0, this.companionAttackCooldown - step);
       if (!this.creative) {
         tickVitals(
           this.data.vitals,
@@ -463,11 +503,17 @@ export class SurvivalSession {
         !isSolid(this.world.getBlock(Math.floor(p.x), Math.floor(p.y - 0.1), Math.floor(p.z)))
       )
         loot.position = { ...p, y: p.y - dt * 3 };
-      if (
-        loot.age > 0.4 &&
-        Math.hypot(p.x - d.position.x, p.y - d.position.y, p.z - d.position.z) < 2
-      )
-        loot.stack.count = addItem(d.inventory, loot.stack);
+      const partner = d.companion;
+      const partnerDistance =
+        partner && partner.vitals.health > 0
+          ? Math.hypot(p.x - partner.position.x, p.y - partner.position.y, p.z - partner.position.z)
+          : Infinity;
+      const playerDistance = Math.hypot(p.x - d.position.x, p.y - d.position.y, p.z - d.position.z);
+      if (loot.age > 0.4 && Math.min(playerDistance, partnerDistance) < 2)
+        loot.stack.count = addItem(
+          partner && partnerDistance < playerDistance ? partner.inventory : d.inventory,
+          loot.stack,
+        );
     }
     d.loot = d.loot.filter((l) => l.stack.count > 0 && l.age < 600);
     for (const [key, age] of Object.entries(d.growth)) {
@@ -505,9 +551,24 @@ export class SurvivalSession {
         m.intent = this.random() * Math.PI * 2;
       m.cooldown = Math.max(0, m.cooldown - dt);
       m.love = Math.max(0, m.love - dt);
-      if (Math.hypot(m.position.x - d.position.x, m.position.z - d.position.z) > 48) continue;
+      const partner = d.companion;
+      const partnerNear =
+        partner &&
+        partner.vitals.health > 0 &&
+        Math.hypot(
+          m.position.x - partner.position.x,
+          m.position.y - partner.position.y,
+          m.position.z - partner.position.z,
+        ) <
+          Math.hypot(
+            m.position.x - d.position.x,
+            m.position.y - d.position.y,
+            m.position.z - d.position.z,
+          );
+      const target = partnerNear ? partner.position : d.position;
+      if (Math.hypot(m.position.x - target.x, m.position.z - target.z) > 48) continue;
       // Integrate small substeps even though decisions run at 10 Hz.
-      for (let i = 0; i < 12; i++) moveCreature(m, d.position, this.world, dt / 12);
+      for (let i = 0; i < 12; i++) moveCreature(m, target, this.world, dt / 12);
       if (m.position.y < -8) m.hp = 0;
       if (!this.isNight && (m.species === "zombie" || m.species === "skeleton")) {
         let sky = true;
@@ -523,16 +584,16 @@ export class SurvivalSession {
       // A creature killed this tick cannot attack or participate in breeding.
       if (m.hp <= 0) continue;
       const dist = Math.hypot(
-        m.position.x - d.position.x,
-        m.position.y - d.position.y,
-        m.position.z - d.position.z,
+        m.position.x - target.x,
+        m.position.y - target.y,
+        m.position.z - target.z,
       );
       const visible = () => {
         const origin = { x: m.position.x, y: m.position.y + 1, z: m.position.z };
         const direction = {
-          x: d.position.x - origin.x,
-          y: d.position.y + 1 - origin.y,
-          z: d.position.z - origin.z,
+          x: target.x - origin.x,
+          y: target.y + 1 - origin.y,
+          z: target.z - origin.z,
         };
         const distance = Math.hypot(direction.x, direction.y, direction.z);
         return (
@@ -550,9 +611,9 @@ export class SurvivalSession {
       ) {
         if (m.species === "skeleton" && dist < 14) {
           const delta = {
-            x: d.position.x - m.position.x,
-            y: d.position.y - m.position.y,
-            z: d.position.z - m.position.z,
+            x: target.x - m.position.x,
+            y: target.y - m.position.y,
+            z: target.z - m.position.z,
           };
           d.arrows.push({
             position: { ...m.position, y: m.position.y + 1.2 },
@@ -568,7 +629,8 @@ export class SurvivalSession {
           if (m.species === "mossling") {
             m.fuse = (m.fuse ?? 0) + dt;
             if (m.fuse < 1.5) continue;
-            this.hurt(8);
+            if (partnerNear) damage(partner.vitals, 8);
+            else this.hurt(8);
             m.hp = 0;
             const bx = Math.floor(m.position.x),
               by = Math.floor(m.position.y),
@@ -581,7 +643,8 @@ export class SurvivalSession {
                     if (BLOCKS[b].breakable) this.mine(bx + dx, by + dy, bz + dz);
                   }
           } else {
-            this.hurt(m.species === "spider" ? 2 : 3);
+            if (partnerNear) damage(partner.vitals, m.species === "spider" ? 2 : 3);
+            else this.hurt(m.species === "spider" ? 2 : 3);
             m.cooldown = 1.2;
           }
         }
@@ -623,6 +686,18 @@ export class SurvivalSession {
         }
         if (Math.hypot(a.x - d.position.x, a.y - d.position.y - 0.9, a.z - d.position.z) < 0.65) {
           this.hurt(3);
+          arrow.age = 10;
+          break;
+        }
+        if (
+          d.companion &&
+          Math.hypot(
+            a.x - d.companion.position.x,
+            a.y - d.companion.position.y - 0.9,
+            a.z - d.companion.position.z,
+          ) < 0.65
+        ) {
+          if (!this.creative) damage(d.companion.vitals, 3);
           arrow.age = 10;
           break;
         }

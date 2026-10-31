@@ -3,6 +3,7 @@
 昔の Minecraft を参考にした、PC ブラウザ向けのシングルプレイ・ボクセルゲームです。
 Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サーバーは不要です。
 公式 Minecraft の素材は同梱せず、テクスチャ・アイコン・モデルを手続き生成します。
+同じワールドで２体の自動プログラムを動かす[協調実験モード](docs/COOPERATION.md)も利用できます。
 
 **[修正版を新規ワールドで遊ぶ](https://temesotejam.github.io/2026_10_24_2/?seed=20261029&mode=survival&view=third-person)** · [約30分の字幕実況・全10章](downloads/survival-30min/README.md) · [以前の約15分版](downloads/edited-survival/README.md) · [サバイバル討伐動画の記録](docs/PLAYTHROUGH.md)
 
@@ -56,6 +57,7 @@ Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サー
 
 - `?seed=2026&mode=survival`：通常プレイ
 - `?seed=2026&mode=creative`：ブロックを消費せず建築。E で全アイテムを取得可能
+- `?seed=80&mode=survival&coop=1`：２体による協調動作の実験。保存は１人用と別です。
 
 位置、視点、所持品、体力・空腹、時刻、チェスト、かまど、生物、落下アイテム、
 農作物・流体の状態、地形の変更差分を **IndexedDB** に15秒ごとに保存します。

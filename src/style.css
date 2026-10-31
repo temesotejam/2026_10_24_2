@@ -629,6 +629,25 @@ button:disabled {
   text-shadow: 1px 1px #222;
   pointer-events: none;
 }
+#coop-hud,
+#coop-message {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  color: #fff;
+  background: #161616b8;
+  padding: 5px 8px;
+  max-width: min(500px, 80%);
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  text-shadow: 1px 1px #222;
+}
+#coop-message {
+  top: 42px;
+}
+#coop-message:empty {
+  display: none;
+}
 .adventure-actions {
   display: flex;
   flex-wrap: wrap;

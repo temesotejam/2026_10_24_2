@@ -4,6 +4,17 @@ import type { PlayerController } from "../player/controller";
 import type { Stack } from "../items/catalog";
 import { itemIcon } from "./item-icon";
 
+type AvatarPlayer = Pick<
+  PlayerController,
+  | "position"
+  | "perspective"
+  | "cameraSeparation"
+  | "eyeYaw"
+  | "eyePitch"
+  | "isCrouching"
+  | "isActive"
+>;
+
 /** Original block character. Limb motion follows actual travel, even during
  * automated play; aiming and camera distance never change the physical body. */
 export class PlayerAvatar {
@@ -20,7 +31,7 @@ export class PlayerAvatar {
   private swing = 0;
   private attacking = false;
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, shirt = 0x3f8f85) {
     this.root.add(this.body);
     const box = (
       parent: THREE.Group,
@@ -39,7 +50,7 @@ export class PlayerAvatar {
       mesh.position.set(x, y, z);
       parent.add(mesh);
     };
-    box(this.body, 0.5, 0.65, 0.28, 0, 0.975, 0, 0x3f8f85);
+    box(this.body, 0.5, 0.65, 0.28, 0, 0.975, 0, shirt);
     this.head.position.y = 1.5;
     box(this.head, 0.5, 0.5, 0.5, 0, 0, 0, 0xc8a180);
     box(this.head, 0.51, 0.17, 0.51, 0, 0.19, 0, 0x3f3030);
@@ -53,7 +64,7 @@ export class PlayerAvatar {
         leg = must(this.legs[i]);
       arm.position.set(side * 0.35, 1.28, 0);
       box(arm, 0.2, 0.58, 0.22, 0, -0.29, 0, 0xc8a180);
-      box(arm, 0.21, 0.23, 0.23, 0, -0.105, 0, 0x3f8f85);
+      box(arm, 0.21, 0.23, 0.23, 0, -0.105, 0, shirt);
       leg.position.set(side * 0.14, 0.65, 0);
       box(leg, 0.23, 0.65, 0.26, 0, -0.325, 0, 0x465276);
       box(leg, 0.24, 0.13, 0.28, 0, -0.585, -0.01, 0x303a4b);
@@ -76,7 +87,7 @@ export class PlayerAvatar {
     scene.add(this.root);
   }
 
-  update(player: PlayerController, item: Stack | null, dt: number): void {
+  update(player: AvatarPlayer, item: Stack | null, dt: number): void {
     const p = player.position;
     const distance = this.previous ? Math.hypot(p.x - this.previous.x, p.z - this.previous.z) : 0;
     this.previous = { x: p.x, z: p.z };

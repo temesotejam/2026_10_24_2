@@ -178,9 +178,15 @@ export class BlockInteraction {
       this.onPlace?.({ x: hit.placeX, y: hit.placeY, z: hit.placeZ }, block);
   }
   private overlapsPlayer(x: number, y: number, z: number): boolean {
-    return aabbIntersectsSolid(
-      aabbFromFeetPosition(this.controller.position),
-      (bx, by, bz) => bx === x && by === y && bz === z,
+    const occupies = (bx: number, by: number, bz: number) => bx === x && by === y && bz === z;
+    const partner = this.session.data.companion;
+    return (
+      aabbIntersectsSolid(aabbFromFeetPosition(this.controller.position), occupies) ||
+      !!(
+        partner &&
+        partner.vitals.health > 0 &&
+        aabbIntersectsSolid(aabbFromFeetPosition(partner.position), occupies)
+      )
     );
   }
 }

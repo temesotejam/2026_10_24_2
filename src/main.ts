@@ -1,5 +1,8 @@
 import { respawnCandidate } from "./survival/respawn";
 import { PlayerAvatar } from "./render/player-avatar";
+import { CompanionController, createCompanion } from "./cooperation/companion";
+import { give } from "./cooperation/exchange";
+import type { MoveInput } from "./player/physics";
 import { portalInterior, PortalContact } from "./survival/portal";
 import { dragonPosition, dragonMaxHealth } from "./survival/dragon";
 import { structuresNear, stronghold, strongholdEntrance } from "./world/adventure-terrain";
@@ -56,6 +59,20 @@ const MESH_BUDGET_PER_FRAME = 3;
 // lets an automated browser assert on game state instead of guessing from pixels.
 declare global {
   interface Window {
+    __coop?: {
+      observe: (actor: "player" | "companion") => unknown;
+      block: (actor: "player" | "companion", x: number, y: number, z: number) => number | null;
+      move: (input: MoveInput, seconds: number) => boolean;
+      select: (slot: number) => boolean;
+      mine: (x: number, y: number, z: number) => boolean;
+      place: (x: number, y: number, z: number) => boolean;
+      eat: () => boolean;
+      attack: (id: number) => boolean;
+      craft: (id: string, table?: { x: number; y: number; z: number }) => boolean;
+      give: (actor: "player" | "companion", slot: number, amount: number) => boolean;
+      sleep: (x: number, y: number, z: number) => boolean;
+      say: (actor: "player" | "companion", message: string) => boolean;
+    };
     __mc?: {
       position: () => {
         x: number;
@@ -143,19 +160,21 @@ async function boot(): Promise<void> {
   const SEED = Number.isFinite(parsedSeed) ? parsedSeed | 0 : DEFAULT_SEED;
   const mode =
     new URLSearchParams(location.search).get("mode") === "creative" ? "creative" : "survival";
+  const cooperative = new URLSearchParams(location.search).get("coop") === "1";
+  const saveNamespace = cooperative ? "coop" : "";
   let repository: SaveRepository | null = null;
   let saved: SessionState | null = null;
   let storageWarning = "";
   try {
-    repository = await SaveRepository.open();
+    repository = await SaveRepository.open(saveNamespace);
   } catch {
     storageWarning = "自動保存を利用できません。バックアップを書き出してください";
   }
   if (repository) {
     try {
-      saved = await repository.load(saveKey(SEED, mode));
+      saved = await repository.load(saveKey(SEED, mode, saveNamespace));
     } catch {
-      saved = await repository.load(saveKey(SEED, mode), true);
+      saved = await repository.load(saveKey(SEED, mode, saveNamespace), true);
       if (!saved)
         throw new Error(
           "保存データを読み込めません。既存データを保護するため起動を止めました。別の Seed で開始できます。",
@@ -296,6 +315,10 @@ async function boot(): Promise<void> {
     editStore.record(x, y, z, id);
     for (const c of affectedChunkCoords(x, z)) editedChunks.set(`${c.cx},${c.cz}`, c);
   });
+  const companion = cooperative
+    ? new CompanionController(session, data.companion ?? createCompanion(session, player.position))
+    : null;
+  if (companion) data.companion = companion.state;
   fluids = new FluidSimulator(world, data.fluidLevels, (x, y, z, id) => {
     session.edit(x, y, z, id);
   });
@@ -308,6 +331,7 @@ async function boot(): Promise<void> {
   )
     player.perspective = 1;
   const avatar = entityScene ? new PlayerAvatar(entityScene) : null;
+  const companionAvatar = companion && entityScene ? new PlayerAvatar(entityScene, 0xb36338) : null;
   player.canSprint = () => session.creative || data.vitals.hunger > 6;
   const hotbar = new Hotbar(hotbarContainer, session);
   const adventure = new Adventure(session);
@@ -331,6 +355,13 @@ async function boot(): Promise<void> {
   bossHud.id = "boss-hud";
   bossHud.hidden = true;
   app.append(bossHud);
+  const coopHud = companion ? document.createElement("div") : null;
+  const coopMessage = companion ? document.createElement("div") : null;
+  if (coopHud && coopMessage) {
+    coopHud.id = "coop-hud";
+    coopMessage.id = "coop-message";
+    app.append(coopHud, coopMessage);
+  }
   const toast = must(document.querySelector<HTMLDivElement>("#toast"));
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
   session.notice = (text) => {
@@ -399,6 +430,10 @@ async function boot(): Promise<void> {
   const portalContact = new PortalContact();
   adventure.onTravel = (destination) => {
     if (traveling) return;
+    if (cooperative) {
+      session.notice?.("協力実験では別ディメンションへの移動はまだ使えません");
+      return;
+    }
     if (!repository) {
       session.notice?.("安全な移動には保存機能が必要です");
       return;
@@ -531,6 +566,8 @@ async function boot(): Promise<void> {
       try {
         if (file.size > 10 * 1024 * 1024) throw new Error("10 MB 以下のファイルを選んでください");
         const incoming = parseSave(await file.text());
+        if (!!incoming.companion !== cooperative)
+          throw new Error("１人用と協力実験のセーブは別々に読み込んでください");
         if (!repository) throw new Error("保存機能が使えないため、読み込みを中止しました");
         if (
           !window.confirm(
@@ -542,7 +579,7 @@ async function boot(): Promise<void> {
         if (saveTask) throw new Error("保存中です。完了後に再度読み込んでください");
         restoring = true;
         await repository.save(incoming);
-        location.search = `?seed=${incoming.seed}&mode=${incoming.mode}`;
+        location.search = `?seed=${incoming.seed}&mode=${incoming.mode}${cooperative ? "&coop=1" : ""}`;
       } catch (error) {
         session.notice?.(error instanceof Error ? error.message : "読み込みに失敗しました");
       } finally {
@@ -556,7 +593,7 @@ async function boot(): Promise<void> {
     asyncEvent(async () => {
       if (!repository || saveTask) return;
       try {
-        const prior = await repository.load(saveKey(SEED, mode), true);
+        const prior = await repository.load(saveKey(SEED, mode, saveNamespace), true);
         if (!prior) {
           session.notice?.("前回の保存はまだありません");
           return;
@@ -584,7 +621,7 @@ async function boot(): Promise<void> {
         return;
       }
       if (!(await save()) && repository) return;
-      location.search = `?seed=${seed}&mode=${modeSelect.value}`;
+      location.search = `?seed=${seed}&mode=${modeSelect.value}${cooperative ? "&coop=1" : ""}`;
     }),
   );
   const distanceSelect = must(document.querySelector<HTMLSelectElement>("#view-distance"));
@@ -773,6 +810,81 @@ async function boot(): Promise<void> {
     }),
     seed: SEED,
   };
+  if (companion) {
+    const messages: { from: "player" | "companion"; text: string; time: number }[] = [];
+    const validActor = (actor: unknown): boolean => actor === "player" || actor === "companion";
+    window.__coop = {
+      observe: (actor) => {
+        const s = actor === "companion" ? companion.state : data;
+        const p = actor === "companion" ? companion.state.position : player.position;
+        const other = actor === "companion" ? player.position : companion.state.position;
+        return structuredClone({
+          actor,
+          time: data.time,
+          night: session.isNight,
+          position: p,
+          vitals: s.vitals,
+          inventory: s.inventory,
+          selected: s.selected,
+          other: Math.hypot(other.x - p.x, other.y - p.y, other.z - p.z) <= 24 ? other : null,
+          creatures: data.creatures.filter(
+            (m) =>
+              m.hp > 0 &&
+              Math.hypot(m.position.x - p.x, m.position.y - p.y, m.position.z - p.z) <= 24,
+          ),
+          messages: messages.filter((m) => m.from !== actor).slice(-20),
+        });
+      },
+      block: (actor, x, y, z) => {
+        const p = actor === "companion" ? companion.state.position : player.position;
+        if (
+          ![x, y, z].every(Number.isInteger) ||
+          Math.hypot(x + 0.5 - p.x, y + 0.5 - p.y, z + 0.5 - p.z) > 8 ||
+          !world.hasChunk(Math.floor(x / 16), Math.floor(z / 16))
+        )
+          return null;
+        return world.getBlock(x, y, z);
+      },
+      move: (input, seconds) => companion.move(input, seconds),
+      select: (slot) => companion.select(slot),
+      mine: (x, y, z) => companion.mine(x, y, z),
+      place: (x, y, z) => companion.place(x, y, z),
+      eat: () => companion.eat(),
+      attack: (id) => companion.attack(id),
+      craft: (id, table) => companion.craft(id, table),
+      give: (actor, slot, amount) => {
+        if (!validActor(actor) || data.vitals.health <= 0 || companion.state.vitals.health <= 0)
+          return false;
+        if (actor === "player")
+          return give(
+            data.inventory,
+            companion.state.inventory,
+            slot,
+            amount,
+            player.position,
+            companion.state.position,
+          );
+        return give(
+          companion.state.inventory,
+          data.inventory,
+          slot,
+          amount,
+          companion.state.position,
+          player.position,
+        );
+      },
+      sleep: (x, y, z) => companion.sleep(x, y, z),
+      say: (actor, text) => {
+        if (!validActor(actor) || typeof text !== "string" || !text.trim() || text.length > 200)
+          return false;
+        messages.push({ from: actor, text, time: data.time });
+        if (messages.length > 100) messages.shift();
+        if (coopMessage)
+          coopMessage.textContent = `${actor === "player" ? "プレイヤー１" : "プレイヤー２"}：${text}`;
+        return true;
+      },
+    };
+  }
   let lastTime = performance.now();
   const frame = (time: number): void => {
     const frameDelta = time - lastTime;
@@ -827,6 +939,22 @@ async function boot(): Promise<void> {
     if (avatar) {
       avatar.update(player, session.held, dt);
     }
+    if (companionAvatar && companion) {
+      const s = companion.state;
+      companionAvatar.update(
+        {
+          position: s.position,
+          perspective: 1,
+          cameraSeparation: s.vitals.health > 0 ? 4 : 0,
+          eyeYaw: s.yaw,
+          eyePitch: 0,
+          isCrouching: false,
+          isActive: s.vitals.health > 0,
+        },
+        s.inventory[s.selected] ?? null,
+        dt,
+      );
+    }
     hand?.update(session.held, player.perspective === 0, player.position);
     interaction.update(dt);
     fragments?.update(dt, (x, y, z) => isSolid(world.getBlock(x, y, z)));
@@ -847,6 +975,7 @@ async function boot(): Promise<void> {
       ),
     );
     if (player.isActive || inventory.isOpen) {
+      companion?.update(dt);
       fluids.tick(dt);
       if (
         Math.hypot(player.position.x - lastFluidWake.x, player.position.z - lastFluidWake.z) > 8
@@ -864,6 +993,9 @@ async function boot(): Promise<void> {
       adventure.tick(data.time - beforeTime);
     }
     if (time - lastUi > 100) {
+      if (coopHud && companion) {
+        coopHud.textContent = `２人目 体力 ${Math.ceil(companion.state.vitals.health)}/20 食料 ${Math.ceil(companion.state.vitals.hunger)}/20${companion.state.sleeping ? " 就寝中" : ""}`;
+      }
       dimensionLabel.textContent =
         world.dimension === "nether"
           ? world.revision >= 3

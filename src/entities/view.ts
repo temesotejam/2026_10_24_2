@@ -53,6 +53,17 @@ export class EntityView {
         mob: null,
         age: a.age,
       })),
+      ...(!this.scene && data.companion && data.companion.vitals.health > 0
+        ? [
+            {
+              key: "companion",
+              position: data.companion.position,
+              color: 0xb36338,
+              mob: null,
+              age: 0,
+            },
+          ]
+        : []),
     ];
     for (const object of objects) {
       alive.add(object.key);

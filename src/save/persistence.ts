@@ -55,6 +55,33 @@ export function validateSave(value: unknown): SessionState {
     hazard: 1,
   }))
     assert(numeric(d.vitals[key], 0, max), `vitals.${key}`);
+  if (d.companion !== undefined) {
+    const c = d.companion;
+    assert(
+      record(c) &&
+        position(c.position) &&
+        position(c.velocity) &&
+        typeof c.onGround === "boolean" &&
+        numeric(c.yaw, -1e6, 1e6) &&
+        slots(c.inventory, 36) &&
+        integer(c.selected, 0, 8) &&
+        typeof c.sleeping === "boolean" &&
+        record(c.vitals),
+      "companion",
+    );
+    for (const [key, max] of Object.entries({
+      health: 20,
+      hunger: 20,
+      air: 10,
+      exhaustion: 100,
+      damageCooldown: 1,
+      regen: 4,
+      hazard: 1,
+    }))
+      assert(numeric(c.vitals[key], 0, max), `companion.vitals.${key}`);
+    assert(c.bed === undefined || position(c.bed), "companion.bed");
+    assert(!c.sleeping || c.bed !== undefined, "companion.sleeping bed");
+  }
   assert(record(d.edits) && Object.keys(d.edits).length <= 20000, "edits");
   let editCount = 0;
   for (const [key, cells] of Object.entries(d.edits)) {
@@ -222,20 +249,23 @@ export function encodeSave(data: SessionState): string {
     throw new Error("セーブは 10 MB 以下にしてください");
   return text;
 }
-export const saveKey = (seed: number, mode: string) => `${seed}:${mode}`;
+export const saveKey = (seed: number, mode: string, namespace = "") =>
+  `${seed}:${mode}${namespace ? `:${namespace}` : ""}`;
 export class SaveRepository {
   private db: IDBDatabase;
-  private constructor(db: IDBDatabase) {
+  private namespace: string;
+  private constructor(db: IDBDatabase, namespace: string) {
     this.db = db;
+    this.namespace = namespace;
   }
-  static async open(): Promise<SaveRepository> {
+  static async open(namespace = ""): Promise<SaveRepository> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open("classic-voxel-survival", 1);
       request.onupgradeneeded = () => {
         request.result.createObjectStore("worlds");
       };
       request.onsuccess = () => {
-        resolve(new SaveRepository(request.result));
+        resolve(new SaveRepository(request.result, namespace));
       };
       request.onerror = () => {
         reject(request.error ?? new Error("保存領域を開けません"));
@@ -267,7 +297,7 @@ export class SaveRepository {
     const safe = validateSave(data);
     if (new TextEncoder().encode(JSON.stringify(safe)).byteLength > MAX_SAVE_BYTES)
       throw new Error("セーブは 10 MB 以下にしてください");
-    const key = saveKey(safe.seed, safe.mode);
+    const key = saveKey(safe.seed, safe.mode, this.namespace);
     return new Promise((resolve, reject) => {
       const tx = this.db.transaction("worlds", "readwrite");
       const store = tx.objectStore("worlds");
