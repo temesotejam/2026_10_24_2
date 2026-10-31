@@ -283,7 +283,10 @@ export class CompanionController {
       )
     )
       return false;
-    return this.asCompanion(() => this.session.place(x, y, z));
+    const placed = this.asCompanion(() => this.session.place(x, y, z));
+    const p = this.state.position;
+    if (placed) this.state.yaw = Math.atan2(-(x + 0.5 - p.x), -(z + 0.5 - p.z));
+    return placed;
   }
 
   eat(): boolean {

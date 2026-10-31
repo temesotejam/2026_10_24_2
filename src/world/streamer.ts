@@ -88,43 +88,52 @@ export class ChunkStreamer {
     this.markDirtyWithNeighbors(cx, cz);
   }
 
-  /** Once per frame: keep the loaded set centered on the player. */
-  update(playerX: number, playerZ: number): void {
-    const pcx = worldToChunk(playerX);
-    const pcz = worldToChunk(playerZ);
-
-    // The player's own chunk can never wait on the worker — physics needs it.
-    this.loadSync(pcx, pcz);
-
-    this.requestMissing(pcx, pcz);
-    this.unloadFar(pcx, pcz);
+  /** Keep terrain loaded around every body participating in the shared world. */
+  update(playerX: number, playerZ: number, others: readonly { x: number; z: number }[] = []): void {
+    const centers = [{ x: playerX, z: playerZ }, ...others].map(({ x, z }) => ({
+      cx: worldToChunk(x),
+      cz: worldToChunk(z),
+    }));
+    // Every body's own chunk is needed immediately by physics.
+    for (const { cx, cz } of centers) this.loadSync(cx, cz);
+    this.requestMissing(centers);
+    this.unloadFar(centers);
   }
 
-  private requestMissing(pcx: number, pcz: number): void {
+  private requestMissing(centers: readonly ChunkCoord[]): void {
     if (!this.generator) return;
-    const missing: { cx: number; cz: number; d2: number }[] = [];
-    for (let cx = pcx - this.radius; cx <= pcx + this.radius; cx++) {
-      for (let cz = pcz - this.radius; cz <= pcz + this.radius; cz++) {
-        const key = chunkKey(cx, cz);
-        if (this.world.hasChunk(cx, cz) || this.pending.has(key)) continue;
-        const dx = cx - pcx;
-        const dz = cz - pcz;
-        missing.push({ cx, cz, d2: dx * dx + dz * dz });
+    const missing = new Map<string, { cx: number; cz: number; d2: number }>();
+    for (const { cx: pcx, cz: pcz } of centers) {
+      for (let cx = pcx - this.radius; cx <= pcx + this.radius; cx++) {
+        for (let cz = pcz - this.radius; cz <= pcz + this.radius; cz++) {
+          const key = chunkKey(cx, cz);
+          if (this.world.hasChunk(cx, cz) || this.pending.has(key)) continue;
+          const dx = cx - pcx;
+          const dz = cz - pcz;
+          const d2 = dx * dx + dz * dz;
+          if (d2 < (missing.get(key)?.d2 ?? Infinity)) missing.set(key, { cx, cz, d2 });
+        }
       }
     }
-    missing.sort((a, b) => a.d2 - b.d2);
-    for (const { cx, cz } of missing.slice(0, MAX_REQUESTS_PER_UPDATE)) {
+    const nearest = [...missing.values()].sort((a, b) => a.d2 - b.d2);
+    for (const { cx, cz } of nearest.slice(0, MAX_REQUESTS_PER_UPDATE)) {
       this.pending.add(chunkKey(cx, cz));
       this.generator.request(cx, cz);
     }
   }
 
-  private unloadFar(pcx: number, pcz: number): void {
+  private unloadFar(centers: readonly ChunkCoord[]): void {
     // +1 of hysteresis so pacing back and forth over a border doesn't
     // load/unload the same ring every few steps.
     const dropBeyond = this.radius + 1;
     for (const { cx, cz } of this.world.loadedChunkCoords()) {
-      if (Math.abs(cx - pcx) <= dropBeyond && Math.abs(cz - pcz) <= dropBeyond) continue;
+      if (
+        centers.some(
+          (center) =>
+            Math.abs(cx - center.cx) <= dropBeyond && Math.abs(cz - center.cz) <= dropBeyond,
+        )
+      )
+        continue;
       this.world.removeChunk(cx, cz);
       this.dirtyKeys.delete(chunkKey(cx, cz));
       this.onUnload?.(cx, cz);

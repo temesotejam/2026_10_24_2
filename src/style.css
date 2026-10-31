@@ -672,3 +672,73 @@ button:disabled {
   background: linear-gradient(to right, #ad4bba var(--boss-health), #332537 var(--boss-health))
     bottom / 100% 7px no-repeat;
 }
+
+/* The two views share one rendered frame; HUD controls still belong to player 1. */
+.split-view #hotbar,
+.split-view #survival-hud {
+  left: 25%;
+}
+.split-view #crosshair {
+  display: none;
+}
+.split-view #coop-hud,
+.split-view #coop-message {
+  left: calc(50% + 12px);
+  max-width: calc(50% - 24px);
+}
+.split-view #inventory-panel {
+  right: 50%;
+}
+.split-view #inventory-panel .inventory-card {
+  max-width: 100%;
+}
+.split-view #coop-hud {
+  top: 42px;
+}
+.split-view #coop-message {
+  top: 72px;
+}
+.split-label,
+.split-unavailable {
+  position: absolute;
+  top: 10px;
+  z-index: 6;
+  pointer-events: none;
+  color: white;
+  background: #161616c7;
+  padding: 5px 9px;
+  text-shadow: 1px 1px #222;
+}
+.split-label-left {
+  left: 12px;
+}
+.split-label-right {
+  left: calc(50% + 12px);
+}
+.split-label-right::before {
+  content: "";
+  position: fixed;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100vh;
+  background: #111;
+}
+.record-caption {
+  position: absolute;
+  top: 115px;
+  z-index: 7;
+  color: #fff;
+  background: #161616d9;
+  border-radius: 3px;
+  padding: 7px 12px;
+  text-shadow: 1px 1px #222;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.record-caption-player {
+  left: 25%;
+}
+.record-caption-companion {
+  left: 75%;
+}

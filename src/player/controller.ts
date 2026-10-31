@@ -357,6 +357,10 @@ export class PlayerController {
     return this.state.position;
   }
 
+  get velocity(): PlayerPhysicsState["velocity"] {
+    return this.state.velocity;
+  }
+
   get eyeYaw(): number {
     return this.yaw;
   }

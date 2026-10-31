@@ -13,6 +13,11 @@ export interface GameScene {
   readonly sun: THREE.DirectionalLight;
   readonly ambient: THREE.AmbientLight;
   render: () => void;
+  renderSplit: (
+    left: THREE.PerspectiveCamera,
+    right: THREE.PerspectiveCamera,
+    beforePass: (side: "left" | "right") => void,
+  ) => void;
   resize: (width: number, height: number) => void;
   /** Applies a sky state (see sky.ts) to the background, fog, and lights. */
   applySky: (state: {
@@ -75,6 +80,40 @@ export function createGameScene(parent: HTMLElement): GameScene {
 
   function render(): void {
     renderer.render(scene, camera);
+  }
+
+  function renderSplit(
+    left: THREE.PerspectiveCamera,
+    right: THREE.PerspectiveCamera,
+    beforePass: (side: "left" | "right") => void,
+  ): void {
+    const size = renderer.getSize(new THREE.Vector2());
+    const leftWidth = Math.floor(size.x / 2);
+    const rightWidth = size.x - leftWidth;
+    if (leftWidth < 1 || rightWidth < 1 || size.y < 1) return;
+    left.aspect = leftWidth / size.y;
+    right.aspect = rightWidth / size.y;
+    left.updateProjectionMatrix();
+    right.updateProjectionMatrix();
+    const autoClear = renderer.autoClear;
+    renderer.autoClear = false;
+    renderer.setScissorTest(true);
+    try {
+      for (const [side, x, width, active] of [
+        ["left", 0, leftWidth, left],
+        ["right", leftWidth, rightWidth, right],
+      ] as const) {
+        renderer.setViewport(x, 0, width, size.y);
+        renderer.setScissor(x, 0, width, size.y);
+        renderer.clear();
+        beforePass(side);
+        renderer.render(scene, active);
+      }
+    } finally {
+      renderer.setScissorTest(false);
+      renderer.setViewport(0, 0, size.x, size.y);
+      renderer.autoClear = autoClear;
+    }
   }
 
   const basePixelRatio = Math.min(window.devicePixelRatio, 2);
@@ -148,6 +187,7 @@ export function createGameScene(parent: HTMLElement): GameScene {
     sun,
     ambient,
     render,
+    renderSplit,
     resize,
     applySky,
     tickAdaptive,

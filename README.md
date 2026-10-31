@@ -58,6 +58,7 @@ Three.js + TypeScript + Vite。GitHub Pages で配信でき、ゲーム用サー
 - `?seed=2026&mode=survival`：通常プレイ
 - `?seed=2026&mode=creative`：ブロックを消費せず建築。E で全アイテムを取得可能
 - `?seed=80&mode=survival&coop=1`：２体による協調動作の実験。保存は１人用と別です。
+- `?seed=80&mode=survival&coop=1&split=1`：２人を同じ時刻の左右の三人称画面で観察します（WebGL が必要）。
 
 位置、視点、所持品、体力・空腹、時刻、チェスト、かまど、生物、落下アイテム、
 農作物・流体の状態、地形の変更差分を **IndexedDB** に15秒ごとに保存します。

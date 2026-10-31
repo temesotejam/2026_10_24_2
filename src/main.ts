@@ -2,7 +2,7 @@ import { respawnCandidate } from "./survival/respawn";
 import { PlayerAvatar } from "./render/player-avatar";
 import { CompanionController, createCompanion } from "./cooperation/companion";
 import { give } from "./cooperation/exchange";
-import type { MoveInput } from "./player/physics";
+import { PLAYER_EYE_HEIGHT, type MoveInput } from "./player/physics";
 import { portalInterior, PortalContact } from "./survival/portal";
 import { dragonPosition, dragonMaxHealth } from "./survival/dragon";
 import { structuresNear, stronghold, strongholdEntrance } from "./world/adventure-terrain";
@@ -20,10 +20,12 @@ import { ChunkMeshManager } from "./render/chunk-mesh-manager";
 import { createChunkMaterial, updateChunkMaterial } from "./render/chunk-material";
 import { Clouds } from "./render/clouds";
 import { CpuRenderer } from "./render/cpu-renderer";
-import { createGameScene } from "./render/scene";
+import { createGameScene, type GameScene } from "./render/scene";
 import { skyStateAt } from "./render/sky";
 import { createBlockTextureArray } from "./render/texture-atlas";
 import { PlayerController } from "./player/controller";
+import { ThirdPersonCamera } from "./player/third-person-camera";
+import { observerYaw } from "./player/observer-camera";
 import { BlockInteraction } from "./player/interaction";
 import { Hotbar } from "./ui/hotbar";
 import { Hud } from "./ui/hud";
@@ -103,6 +105,13 @@ declare global {
       time: () => number;
       cameraFov: () => number;
       cameraView: () => { perspective: number; distance: number };
+      splitView: () => {
+        enabled: boolean;
+        playerDistance: number | null;
+        companionDistance: number | null;
+        playerCamera: { x: number; y: number; z: number } | null;
+        companionCamera: { x: number; y: number; z: number } | null;
+      };
       adventure: () => unknown;
       effects: () => {
         fragments: number;
@@ -164,6 +173,7 @@ async function boot(): Promise<void> {
   const mode =
     new URLSearchParams(location.search).get("mode") === "creative" ? "creative" : "survival";
   const cooperative = new URLSearchParams(location.search).get("coop") === "1";
+  const splitRequested = cooperative && new URLSearchParams(location.search).get("split") === "1";
   const saveNamespace = cooperative ? "coop" : "";
   let repository: SaveRepository | null = null;
   let saved: SessionState | null = null;
@@ -191,6 +201,7 @@ async function boot(): Promise<void> {
   let entityScene: THREE.Scene | null = null;
   let terrainMaterial: THREE.ShaderMaterial | null = null;
   let lightDirty = true;
+  let companionLightDirty = true;
   // The renderer: WebGL when the browser can, an in-house CPU raycaster
   // when it can't. Same world, same physics, same controls either way.
   let view: GameView;
@@ -198,9 +209,14 @@ async function boot(): Promise<void> {
   let clouds: Clouds | null = null;
   let highlight: THREE.LineSegments | null = null;
   let cpuView: CpuRenderer | null = null;
+  let webglScene: GameScene | null = null;
+  let splitSkyBodies: SkyBodies | null = null;
+  let splitSky: ReturnType<typeof skyStateAt> | null = null;
   try {
     const gameScene = createGameScene(app);
     const skyBodies = new SkyBodies(gameScene.scene);
+    webglScene = gameScene;
+    splitSkyBodies = skyBodies;
     entityScene = gameScene.scene;
     const chunkMaterial = createChunkMaterial(createBlockTextureArray(SEED));
     terrainMaterial = chunkMaterial;
@@ -213,6 +229,7 @@ async function boot(): Promise<void> {
       },
       resize: gameScene.resize,
       applySky: (state) => {
+        splitSky = state;
         gameScene.applySky(state);
         skyBodies.update(gameScene.camera, state);
         updateChunkMaterial(chunkMaterial, state);
@@ -236,6 +253,12 @@ async function boot(): Promise<void> {
     gameScene.scene.add(highlight);
   } catch (webglError) {
     console.warn("WebGL unavailable, switching to the CPU raycaster:", webglError);
+    webglScene?.dispose();
+    webglScene = null;
+    splitSkyBodies = null;
+    entityScene = null;
+    terrainMaterial = null;
+    chunkMeshes = null;
     const cpu = new CpuRenderer(app, world, SEED);
     cpuView = cpu;
     view = {
@@ -314,6 +337,7 @@ async function boot(): Promise<void> {
     }
     world.setBlock(x, y, z, id);
     lightDirty = true;
+    companionLightDirty = true;
     fluids?.notify(x, y, z);
     editStore.record(x, y, z, id);
     for (const c of affectedChunkCoords(x, z)) editedChunks.set(`${c.cx},${c.cz}`, c);
@@ -322,6 +346,35 @@ async function boot(): Promise<void> {
     ? new CompanionController(session, data.companion ?? createCompanion(session, player.position))
     : null;
   if (companion) data.companion = companion.state;
+  const split = splitRequested && webglScene !== null && companion !== null;
+  const playerObserverCamera = split
+    ? new THREE.PerspectiveCamera(view.camera.fov, 1, view.camera.near, view.camera.far)
+    : null;
+  if (playerObserverCamera) playerObserverCamera.rotation.order = "YXZ";
+  const playerObserverBoom = split ? new ThirdPersonCamera() : null;
+  const companionCamera = split
+    ? new THREE.PerspectiveCamera(view.camera.fov, 1, view.camera.near, view.camera.far)
+    : null;
+  if (companionCamera) companionCamera.rotation.order = "YXZ";
+  const companionCameraBoom = split ? new ThirdPersonCamera() : null;
+  let companionCameraReset = true;
+  if (split) {
+    app.classList.add("split-view");
+    for (const [side, label] of [
+      ["left", "プレイヤー１"],
+      ["right", "プレイヤー２"],
+    ] as const) {
+      const title = document.createElement("div");
+      title.className = `split-label split-label-${side}`;
+      title.textContent = label;
+      app.append(title);
+    }
+  } else if (splitRequested) {
+    const warning = document.createElement("div");
+    warning.className = "split-unavailable";
+    warning.textContent = "２画面表示には WebGL が必要です";
+    app.append(warning);
+  }
   fluids = new FluidSimulator(world, data.fluidLevels, (x, y, z, id) => {
     session.edit(x, y, z, id);
   });
@@ -330,7 +383,7 @@ async function boot(): Promise<void> {
   player.thirdPersonEnabled = view.kind === "webgl";
   if (
     player.thirdPersonEnabled &&
-    new URLSearchParams(location.search).get("view") === "third-person"
+    (split || new URLSearchParams(location.search).get("view") === "third-person")
   )
     player.perspective = 1;
   const avatar = entityScene ? new PlayerAvatar(entityScene) : null;
@@ -583,7 +636,7 @@ async function boot(): Promise<void> {
         if (saveTask) throw new Error("保存中です。完了後に再度読み込んでください");
         restoring = true;
         await repository.save(incoming);
-        location.search = `?seed=${incoming.seed}&mode=${incoming.mode}${cooperative ? "&coop=1" : ""}`;
+        location.search = `?seed=${incoming.seed}&mode=${incoming.mode}${cooperative ? "&coop=1" : ""}${splitRequested ? "&split=1" : ""}`;
       } catch (error) {
         session.notice?.(error instanceof Error ? error.message : "読み込みに失敗しました");
       } finally {
@@ -625,7 +678,7 @@ async function boot(): Promise<void> {
         return;
       }
       if (!(await save()) && repository) return;
-      location.search = `?seed=${seed}&mode=${modeSelect.value}${cooperative ? "&coop=1" : ""}`;
+      location.search = `?seed=${seed}&mode=${modeSelect.value}${cooperative ? "&coop=1" : ""}${splitRequested ? "&split=1" : ""}`;
     }),
   );
   const distanceSelect = must(document.querySelector<HTMLSelectElement>("#view-distance"));
@@ -661,6 +714,11 @@ async function boot(): Promise<void> {
   let lastLight = 0;
   let lightPosition = { x: Infinity, y: Infinity, z: Infinity };
   let lightChunks = -1;
+  let lastCompanionLight = 0;
+  let companionLightPosition = { x: Infinity, y: Infinity, z: Infinity };
+  let companionLightChunks = -1;
+  const playerLightOrigin = new THREE.Vector3();
+  const companionLightOrigin = new THREE.Vector3();
   const lightTexture = terrainMaterial
     ? new THREE.Data3DTexture(
         new Uint8Array(LIGHT_SIZE ** 3 * 2),
@@ -676,6 +734,22 @@ async function boot(): Promise<void> {
     lightTexture.magFilter = THREE.NearestFilter;
     lightTexture.unpackAlignment = 1;
     must(terrainMaterial.uniforms.uLightField).value = lightTexture;
+  }
+  const companionLightTexture =
+    split && lightTexture
+      ? new THREE.Data3DTexture(
+          new Uint8Array(LIGHT_SIZE ** 3 * 2),
+          LIGHT_SIZE,
+          LIGHT_SIZE,
+          LIGHT_SIZE,
+        )
+      : null;
+  if (companionLightTexture) {
+    companionLightTexture.format = THREE.RGFormat;
+    companionLightTexture.type = THREE.UnsignedByteType;
+    companionLightTexture.minFilter = THREE.NearestFilter;
+    companionLightTexture.magFilter = THREE.NearestFilter;
+    companionLightTexture.unpackAlignment = 1;
   }
   const hand = entityScene ? new HeldItemView(view.camera) : null;
   const fragments = entityScene ? new BlockFragments(entityScene) : null;
@@ -797,6 +871,25 @@ async function boot(): Promise<void> {
     time: () => data.time,
     cameraFov: () => view.camera.fov,
     cameraView: () => ({ perspective: player.perspective, distance: player.cameraSeparation }),
+    splitView: () => ({
+      enabled: split,
+      playerDistance: playerObserverBoom?.distance ?? null,
+      companionDistance: companionCameraBoom?.distance ?? null,
+      playerCamera: playerObserverCamera
+        ? {
+            x: playerObserverCamera.position.x,
+            y: playerObserverCamera.position.y,
+            z: playerObserverCamera.position.z,
+          }
+        : null,
+      companionCamera: companionCamera
+        ? {
+            x: companionCamera.position.x,
+            y: companionCamera.position.y,
+            z: companionCamera.position.z,
+          }
+        : null,
+    }),
     adventure: () => ({
       ...structuredClone(adventure.state),
       cast: adventure.cast ? structuredClone(adventure.cast) : null,
@@ -929,7 +1022,11 @@ async function boot(): Promise<void> {
       touchVisible = player.isActive;
       touchControls.setVisible(touchVisible);
     }
-    streamer.update(player.position.x, player.position.z);
+    streamer.update(
+      player.position.x,
+      player.position.z,
+      companion ? [companion.state.position] : [],
+    );
     if (
       lightTexture &&
       terrainMaterial &&
@@ -950,10 +1047,32 @@ async function boot(): Promise<void> {
         field.origin.y,
         field.origin.z,
       );
+      playerLightOrigin.set(field.origin.x, field.origin.y, field.origin.z);
       lightPosition = { ...player.position };
       lightChunks = world.loadedChunkCount;
       lastLight = time;
       lightDirty = false;
+    }
+    if (
+      companion &&
+      companionLightTexture &&
+      (lastCompanionLight === 0 || time - lastCompanionLight > 500) &&
+      (companionLightDirty ||
+        companionLightChunks !== world.loadedChunkCount ||
+        Math.hypot(
+          companion.state.position.x - companionLightPosition.x,
+          companion.state.position.y - companionLightPosition.y,
+          companion.state.position.z - companionLightPosition.z,
+        ) > 6)
+    ) {
+      const field = buildLightField(companion.state.position, (x, y, z) => world.getBlock(x, y, z));
+      must(companionLightTexture.image.data).set(field.data);
+      companionLightTexture.needsUpdate = true;
+      companionLightOrigin.set(field.origin.x, field.origin.y, field.origin.z);
+      companionLightPosition = { ...companion.state.position };
+      companionLightChunks = world.loadedChunkCount;
+      lastCompanionLight = time;
+      companionLightDirty = false;
     }
     player.update(dt);
     if (world.revision >= 3 && !traveling) {
@@ -1101,7 +1220,78 @@ async function boot(): Promise<void> {
       seed: SEED,
       note: view.qualityNote(),
     });
-    view.render(elapsed);
+    if (
+      split &&
+      webglScene &&
+      playerObserverCamera &&
+      playerObserverBoom &&
+      companionCamera &&
+      companionCameraBoom
+    ) {
+      const s = companion.state;
+      const eye = { x: s.position.x, y: s.position.y + PLAYER_EYE_HEIGHT, z: s.position.z };
+      const solid = (x: number, y: number, z: number) => isSolid(world.getBlock(x, y, z));
+      const playerEye = player.eyePosition;
+      const playerCameraYaw = observerYaw(playerEye, player.eyeYaw, playerObserverBoom.yaw, solid);
+      const playerBehind = playerObserverBoom.update(
+        playerEye,
+        player.velocity,
+        playerCameraYaw,
+        -0.18,
+        false,
+        dt,
+        companionCameraReset,
+        solid,
+      );
+      playerObserverCamera.position.set(
+        playerEye.x + playerBehind.x * playerObserverBoom.distance,
+        playerEye.y + playerBehind.y * playerObserverBoom.distance,
+        playerEye.z + playerBehind.z * playerObserverBoom.distance,
+      );
+      playerObserverCamera.rotation.set(playerObserverBoom.pitch, playerObserverBoom.yaw, 0, "YXZ");
+      playerObserverCamera.far = view.camera.far;
+      const cameraYaw = observerYaw(eye, s.yaw, companionCameraBoom.yaw, solid);
+      const behind = companionCameraBoom.update(
+        eye,
+        s.velocity,
+        cameraYaw,
+        -0.18,
+        false,
+        dt,
+        companionCameraReset,
+        solid,
+      );
+      companionCameraReset = false;
+      companionCamera.position.set(
+        eye.x + behind.x * companionCameraBoom.distance,
+        eye.y + behind.y * companionCameraBoom.distance,
+        eye.z + behind.z * companionCameraBoom.distance,
+      );
+      companionCamera.rotation.set(companionCameraBoom.pitch, companionCameraBoom.yaw, 0, "YXZ");
+      companionCamera.far = view.camera.far;
+      webglScene.renderSplit(playerObserverCamera, companionCamera, (side) => {
+        const active = side === "left" ? playerObserverCamera : companionCamera;
+        if (terrainMaterial && lightTexture && companionLightTexture) {
+          must(terrainMaterial.uniforms.uLightField).value =
+            side === "left" ? lightTexture : companionLightTexture;
+          (must(terrainMaterial.uniforms.uLightOrigin).value as THREE.Vector3).copy(
+            side === "left" ? playerLightOrigin : companionLightOrigin,
+          );
+        }
+        if (splitSkyBodies && splitSky) splitSkyBodies.update(active, splitSky);
+        avatar?.setVisible(
+          side === "right"
+            ? data.vitals.health > 0
+            : data.vitals.health > 0 && playerObserverBoom.distance > 0.75,
+        );
+        companionAvatar?.setVisible(
+          side === "left"
+            ? s.vitals.health > 0
+            : s.vitals.health > 0 && companionCameraBoom.distance > 0.75,
+        );
+        if (highlight) highlight.visible = side === "left" && hit !== null;
+      });
+    } else view.render(elapsed);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

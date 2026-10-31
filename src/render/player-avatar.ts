@@ -31,6 +31,10 @@ export class PlayerAvatar {
   private swing = 0;
   private attacking = false;
 
+  setVisible(visible: boolean): void {
+    this.root.visible = visible;
+  }
+
   constructor(scene: THREE.Scene, shirt = 0x3f8f85, listenToPointer = true) {
     this.root.add(this.body);
     const box = (

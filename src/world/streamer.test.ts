@@ -91,6 +91,18 @@ describe("update", () => {
     for (let i = 0; i < 20; i++) streamer.update(8 + 16, 8);
     expect(world.hasChunk(-2, 0)).toBe(true);
   });
+
+  it("loads and retains terrain around both distant players, then releases the old second area", () => {
+    const { world, streamer } = makeStreamer({ radius: 2 });
+    const other = { x: 168, z: 8 };
+    for (let i = 0; i < 30; i++) streamer.update(8, 8, [other]);
+    expect(world.hasChunk(0, 0)).toBe(true);
+    expect(world.hasChunk(10, 0)).toBe(true);
+    expect(world.hasChunk(11, 1)).toBe(true);
+    for (let i = 0; i < 10; i++) streamer.update(8, 8);
+    expect(world.hasChunk(0, 0)).toBe(true);
+    expect(world.hasChunk(10, 0)).toBe(false);
+  });
 });
 
 describe("receive", () => {
