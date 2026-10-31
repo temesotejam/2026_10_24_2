@@ -11,6 +11,9 @@ export async function stashVillage(
   d.setGoal("戦利品をチェストでまとめ、持ち物の空きを作ります。");
   let chest = v.cacheChest ?? { x: v.x - 7, y: v.y, z: v.z + 5 };
   const current = (await d.info()).position;
+  // A surface chest should be approached from the ground, rather than mining
+  // a long horizontal cave tunnel beneath the village.
+  if (current.y < chest.y - 2 && !(await d.count("chest"))) await a.reachSurface();
   if (!v.cacheChest && (await d.count("chest"))) {
     // Use the genuinely crafted camp chest, rather than carrying it full-time.
     chest = { x: Math.floor(current.x) - 1, y: Math.round(current.y), z: Math.floor(current.z) };
@@ -68,6 +71,11 @@ export async function stashVillage(
   }
   await a.useAt(chest);
   await page.waitForSelector('[data-area="chest"]', { timeout: 5000 });
+  await stashOpenChest(page, d, ids);
+}
+
+/** Store through a chest UI that normal interaction has already opened. */
+export async function stashOpenChest(page, d, ids) {
   // Merge matching partial stacks using the same slot clicks as a player.
   for (let pass = 0; pass < 30; pass++) {
     const pair = await page.$$eval('[data-area="chest"]', (els) => {

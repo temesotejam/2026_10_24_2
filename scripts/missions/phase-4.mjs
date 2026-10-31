@@ -7,7 +7,11 @@ import { stockVillageFood, carriedFoodUnits } from "../lib/modern-resources.mjs"
 import { chooseHuntingCamp } from "../lib/modern-camp.mjs";
 import { craftArchery, prepareArchery } from "../lib/modern-archery.mjs";
 import { wait } from "../lib/survival-driver.mjs";
-export async function run({ page, d, a, meta, flush, chapter, out }, desiredTargets = null) {
+export async function run(
+  { page, d, a, meta, flush, chapter, out },
+  desiredTargets = null,
+  huntOptions = {},
+) {
   const v = meta.village,
     events = (meta.huntingEvents ??= []);
   const targets = desiredTargets ?? {
@@ -99,6 +103,9 @@ export async function run({ page, d, a, meta, flush, chapter, out }, desiredTarg
             "bone",
             "powder",
             "dirt",
+            "netherWart",
+            "soulSand",
+            "wheat",
           ]);
       if ((await carriedFoodUnits(d)) < 20)
         await resupply({ breadTarget: 8, waitForGrowth: false });
@@ -198,6 +205,9 @@ export async function run({ page, d, a, meta, flush, chapter, out }, desiredTarg
       "stoneBrick",
       "goldOre",
       "ironOre",
+      "netherWart",
+      "soulSand",
+      "wheat",
     ]);
   flush();
   if (
@@ -241,11 +251,13 @@ export async function run({ page, d, a, meta, flush, chapter, out }, desiredTarg
   meta.hunting = await h.gather(targets, {
     timeoutMs: 3000000,
     patrol: false,
+    returnHomeWhenIdle: true,
     avoidWaterTargets: true,
     collectSpecies: ["wanderer", "skeleton", "chicken", "ember"],
     arrowReserve: 0,
     lureReserve: 4,
     home: meta.huntingCamp.position ?? meta.huntingCamp,
+    ...huntOptions,
   });
   await a.surfaceTo({ x: v.x - 6, z: v.z + 1 });
   await prepareArchery(

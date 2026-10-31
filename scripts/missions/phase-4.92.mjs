@@ -9,6 +9,9 @@ export async function run(context) {
   if ((await d.info()).position.y < meta.village.y - 0.1) await a.pillarTo(meta.village.y);
   await a.surfaceTo({ x: meta.village.x - 1, z: meta.village.z });
   await d.center();
+  // Real explosions can remove the old rim. Rebuild the support under our
+  // feet with carried blocks before starting the native fishing cast.
+  if ((await d.info()).position.y < meta.village.y - 0.2) await a.pillarTo(meta.village.y);
   assert.ok(
     Math.abs((await d.info()).position.y - meta.village.y) < 0.2,
     "stand on the actual dry well rim",

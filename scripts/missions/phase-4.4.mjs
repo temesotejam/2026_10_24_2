@@ -10,9 +10,11 @@ export async function run(ctx) {
   await hunt.run(
     {
       ...ctx,
-      chapter: async () =>
-        chapter(`実際の羽根と火打ち石から矢${await d.count("arrow")}本を用意`, 4),
+      chapter: async (name, phase) =>
+        phase === 5
+          ? chapter(`実際の羽根と火打ち石から矢${await d.count("arrow")}本を用意`, 4)
+          : chapter(name, phase),
     },
-    { enderPearl: await d.count("enderPearl"), string: 0, ammo: 24 },
+    { enderPearl: await d.count("enderPearl"), string: 0, ammo: 36 },
   );
 }

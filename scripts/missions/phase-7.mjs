@@ -51,12 +51,15 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
   // A new run can spend an earned eye on the native direction throw.
   // Older recordings retain their disclosed known-entrance route.
   mission.useKnownEntrance = !meta.directionalNavigation;
-  mission.requiredEyes = mission.useKnownEntrance ? 11 : 12;
+  mission.requiredEyes = mission.useKnownEntrance || mission.directionChecked ? 11 : 12;
   let state = await a.adventure();
   assert.ok(state.generator >= 3, "complete the new survival progression");
   // A resumed ordinary save remembers real eye throws even if the previous
   // recording ended before writing its mission progress metadata.
-  if ((state.eyeThrows ?? 0) > 0) mission.directionChecked = true;
+  if ((state.eyeThrows ?? 0) > 0) {
+    mission.directionChecked = true;
+    mission.requiredEyes = 11;
+  }
   if (state.dimension === "overworld" && !state.dragon.defeated) {
     const bestSword = () =>
       d

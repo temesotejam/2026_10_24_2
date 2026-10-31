@@ -161,15 +161,17 @@ export function createModernHunting(page, d, a, options = {}) {
                 break;
               }
             }
+          const mx = Math.floor(mob.position.x),
+            mz = Math.floor(mob.position.z);
+          let waterTop = Math.floor(mob.position.y + 0.1);
+          const inWater = window.__mc.blockAt(mx, waterTop, mz) === 5;
+          if (inWater)
+            while (waterTop < 95 && window.__mc.blockAt(mx, waterTop + 1, mz) === 5) waterTop++;
           return {
             ...mob,
             visibleToPlayer,
-            inWater:
-              window.__mc.blockAt(
-                Math.floor(mob.position.x),
-                Math.floor(mob.position.y + 0.1),
-                Math.floor(mob.position.z),
-              ) === 5,
+            inWater,
+            shallowWater: inWater && waterTop + 1 - mob.position.y <= 1.25,
           };
         }),
         inventory: window.__mc.inventory(),
@@ -241,7 +243,7 @@ export function createModernHunting(page, d, a, options = {}) {
       .sort((x, y) => distance(x.position, state.position) - distance(y.position, state.position));
     return prioritizeReachableSkeleton(state, candidates, blockQuery(state));
   };
-  const rangedVisible = (state, mob) =>
+  const rangedVisible = (state, mob, aimHeight = mobAimHeight(mob)) =>
     page.evaluate(
       ({ from, to }) => {
         const dx = to.x - from.x,
@@ -260,7 +262,7 @@ export function createModernHunting(page, d, a, options = {}) {
       },
       {
         from: { ...state.position, y: state.position.y + state.eye },
-        to: { ...mob.position, y: mob.position.y + mobAimHeight(mob) },
+        to: { ...mob.position, y: mob.position.y + aimHeight },
       },
     );
   const chooseWeapon = async (state) => {
@@ -409,7 +411,7 @@ export function createModernHunting(page, d, a, options = {}) {
     }
     return !shootingEnemies(await observe()).length;
   }
-  async function shoot(_state, mob) {
+  async function shoot(_state, mob, aimHeight = mobAimHeight(mob)) {
     await release();
     const before = await d.count("arrow");
     await d.equip("bow");
@@ -422,7 +424,7 @@ export function createModernHunting(page, d, a, options = {}) {
       t = range / 22;
     const aim = {
       x: mob.position.x + mob.velocity.x * t,
-      y: mob.position.y + mobAimHeight(mob) + 1.2 * t * t,
+      y: mob.position.y + aimHeight + 1.2 * t * t,
       z: mob.position.z + mob.velocity.z * t,
     };
     await d.aim(aim, 0);
@@ -499,13 +501,21 @@ export function createModernHunting(page, d, a, options = {}) {
           .reduce((n, stack) => n + stack.count, 0);
         const bowReady = state.inventory.some((stack) => stack?.id === "bow") && arrows > reserve;
         const rangedTarget = ["skeleton", "ember"].includes(mob.species);
+        let shootingHeight = mobAimHeight(mob);
+        let shootingClear = bowReady && (await rangedVisible(state, mob, shootingHeight));
+        // Cover can hide the torso while leaving a skeleton's actual head
+        // exposed. Use that real hitbox before trying to dig or abandon cover.
+        if (bowReady && !shootingClear && mob.species === "skeleton") {
+          shootingHeight = 1.65;
+          shootingClear = await rangedVisible(state, mob, shootingHeight);
+        }
         if (
           rangedTarget &&
           (range > 3 || Math.abs(mob.position.y - state.position.y) > 1) &&
           bowReady &&
-          (await rangedVisible(state, mob))
+          shootingClear
         ) {
-          await shoot(state, mob);
+          await shoot(state, mob, shootingHeight);
           lastProgress = Date.now();
           continue;
         }
@@ -796,6 +806,14 @@ export function createModernHunting(page, d, a, options = {}) {
     const expectedDimension =
       config.dimension ??
       (Object.keys(targets).every((k) => k === "blazeRod") ? "nether" : "overworld");
+    const targetAllowedByWater = (mob, state) =>
+      !config.avoidWaterTargets ||
+      !mob.inWater ||
+      (config.allowShallowWaterWanderers &&
+        mob.species === "wanderer" &&
+        mob.shallowWater &&
+        expectedDimension === "overworld" &&
+        !nightAt(state.time));
     const until = Date.now() + (config.timeoutMs ?? options.timeoutMs ?? 1800000);
     let idle = 0,
       patrolIndex = 0;
@@ -851,7 +869,7 @@ export function createModernHunting(page, d, a, options = {}) {
         const latest = await observe();
         const candidates = alive(latest)
           .filter((m) => missing.some((item) => DROPS[item].includes(m.species)))
-          .filter((m) => !config.avoidWaterTargets || !m.inWater)
+          .filter((m) => targetAllowedByWater(m, latest))
           .filter(
             (m) =>
               (ignored.get(m.id) ?? 0) < Date.now() ||
@@ -886,7 +904,7 @@ export function createModernHunting(page, d, a, options = {}) {
                 .filter(
                   (m) =>
                     m.species !== "villager" &&
-                    (!config.avoidWaterTargets || !m.inWater) &&
+                    targetAllowedByWater(m, latest) &&
                     (ignored.get(m.id) ?? 0) < Date.now() &&
                     (night ? !FRIENDLY.includes(m.species) : FRIENDLY.includes(m.species)),
                 )
@@ -1021,6 +1039,19 @@ export function createModernHunting(page, d, a, options = {}) {
         } else {
           idle++;
           stats.waits++;
+          // Pursuing a drop can leave the hunter on a distant shore. Return to
+          // the surveyed camp through ordinary movement before waiting there.
+          if (
+            config.returnHomeWhenIdle &&
+            (distance(latest.position, home) > 12 || latest.position.y < home.y - 2)
+          ) {
+            d.narrate("狩り場の安全な足場へ戻り、次の敵を待ちます。", 1);
+            if (expectedDimension === "overworld" && latest.position.y < home.y - 2)
+              await a.reachSurface();
+            await a.surfaceTo(home);
+            if ((await d.info()).position.y < home.y - 0.2) await a.pillarTo(home.y);
+            continue;
+          }
           const waitingForNight =
             expectedDimension === "overworld" &&
             !nightAt(latest.time) &&
