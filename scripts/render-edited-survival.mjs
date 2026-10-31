@@ -4,7 +4,9 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { ass, srt } from "./lib/narration.mjs";
+import { srt } from "./lib/narration.mjs";
+
+import { renderEditedClip } from "./lib/edited-clip.mjs";
 
 const directory = path.resolve(process.argv[2]);
 const plan = JSON.parse(readFileSync(process.argv[3], "utf8"));
@@ -67,30 +69,7 @@ for (const [episodeIndex, episode] of plan.episodes.entries()) {
       assert.ok(cue.start >= 0 && cue.end <= length && cue.end > cue.start);
       localCues.push(cue);
     }
-    writeFileSync(path.join(output, name + ".ass"), ass(localCues));
-    run("ffmpeg", [
-      "-y",
-      "-v",
-      "error",
-      "-ss",
-      String(clip.start),
-      "-i",
-      path.join(directory, clip.part),
-      "-t",
-      String(length),
-      "-vf",
-      `setpts=(PTS-STARTPTS)/${clip.speed},fps=30,scale=1280:720,eq=gamma=${gamma},ass=${path.join(output, name + ".ass")}:fontsdir=/usr/share/fonts/opentype/noto`,
-      "-an",
-      "-c:v",
-      "libx264",
-      "-preset",
-      "medium",
-      "-crf",
-      "18",
-      "-pix_fmt",
-      "yuv420p",
-      path.join(output, name + ".mp4"),
-    ]);
+    const rendered = renderEditedClip({ directory, output, clip, name, localCues });
     const measured = duration(path.join(output, name + ".mp4"));
     assert.ok(Math.abs(measured - length) < 0.2);
     clips.push(path.join(output, name + ".mp4"));
@@ -99,7 +78,12 @@ for (const [episodeIndex, episode] of plan.episodes.entries()) {
     );
     cursor += measured;
     console.log(
-      JSON.stringify({ episode: episodeIndex + 1, clip: clipIndex + 1, duration: measured }),
+      JSON.stringify({
+        episode: episodeIndex + 1,
+        clip: clipIndex + 1,
+        duration: measured,
+        reused: rendered.reused,
+      }),
     );
   }
   const stem = `survival-edited-${String(episodeIndex + 1).padStart(2, "0")}`;
@@ -146,6 +130,7 @@ writeFileSync(
       sourceStartedAt: metadata.parts[0].startedAt,
       sourceInitialInventoryEmpty: true,
       sourceDeathCount: metadata.deaths?.length ?? 0,
+      sourceAutosaveRecoveries: metadata.autosaveRecoveries ?? [],
       sourceRecordings: metadata.parts.map((p) => ({
         file: p.path,
         startedAt: p.startedAt,
