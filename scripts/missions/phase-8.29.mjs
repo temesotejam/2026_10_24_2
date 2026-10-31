@@ -34,9 +34,27 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   async function breakWithoutPick(cell, held = "stick") {
     await guard();
     await d.equip(held);
-    await d.aim({ x: cell.x + 0.5, y: cell.y + 0.5, z: cell.z + 0.5 }, 0);
-    const hit = await page.evaluate(() => window.__mc.target());
-    if (!hit || hit.x !== cell.x || hit.y !== cell.y || hit.z !== cell.z) return false;
+    // Aim at the nearest side as well as the center: from close range the
+    // center ray to a lower log can intersect the log above it first.
+    const p = (await d.info()).position;
+    const points = [
+      { x: cell.x + 0.5, y: cell.y + 0.5, z: cell.z + 0.5 },
+      {
+        x: Math.max(cell.x + 0.05, Math.min(cell.x + 0.95, p.x)),
+        y: cell.y + 0.5,
+        z: Math.max(cell.z + 0.05, Math.min(cell.z + 0.95, p.z)),
+      },
+    ];
+    let targeted = false;
+    for (const point of points) {
+      await d.aim(point);
+      const hit = await page.evaluate(() => window.__mc.target());
+      if (hit && hit.x === cell.x && hit.y === cell.y && hit.z === cell.z) {
+        targeted = true;
+        break;
+      }
+    }
+    if (!targeted) return false;
     const id = await d.block(cell),
       until = Date.now() + 6000;
     await page.mouse.down();
@@ -115,7 +133,7 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   await wait(250);
   assert.equal(await d.block({ ...site, y: site.y - 1 }), soilBefore, "preserve planting soil");
   await d.equip("sapling");
-  await d.aim({ x: site.x + 0.5, y: site.y - 0.5, z: site.z + 0.5 }, 0);
+  await d.aim({ x: site.x + 0.5, y: site.y - 0.5, z: site.z + 0.5 });
   const soil = await page.evaluate(() => window.__mc.target());
   assert.ok(
     soil && soil.x === site.x && soil.y === site.y - 1 && soil.z === site.z,

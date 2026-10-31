@@ -41,7 +41,7 @@ export async function run({ page, d, a, meta, flush, chapter }) {
     assert.equal(await d.block({ ...c, y: c.y - 1 }), 21, "harvest only renewable farmland");
     await d.walk(c.x + 0.5, c.z + 0.5, false, 0.16, 0);
     await d.equip("stick");
-    await d.aim({ x: c.x + 0.5, y: c.y + 0.5, z: c.z + 0.5 }, 0);
+    await d.aim({ x: c.x + 0.5, y: c.y + 0.5, z: c.z + 0.5 });
     const cropHit = await page.evaluate(() => window.__mc.target());
     assert.ok(
       cropHit && cropHit.x === c.x && cropHit.y === c.y && cropHit.z === c.z,
@@ -52,7 +52,7 @@ export async function run({ page, d, a, meta, flush, chapter }) {
     assert.equal(await d.block(c), 0, "harvest the selected crop");
     harvested++;
     await d.equip("seeds");
-    await d.aim({ x: c.x + 0.5, y: c.y - 0.5, z: c.z + 0.5 }, 0);
+    await d.aim({ x: c.x + 0.5, y: c.y - 0.5, z: c.z + 0.5 });
     const soilHit = await page.evaluate(() => window.__mc.target());
     assert.ok(
       soilHit && soilHit.x === c.x && soilHit.y === c.y - 1 && soilHit.z === c.z,
