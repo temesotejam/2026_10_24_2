@@ -107,6 +107,11 @@ export class CompanionController {
     return true;
   }
 
+  stop(): void {
+    this.inputRemaining = 0;
+    this.mining = null;
+  }
+
   private asCompanion<T>(action: () => T): T {
     const d = this.session.data,
       s = this.state;

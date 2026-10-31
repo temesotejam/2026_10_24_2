@@ -63,6 +63,7 @@ declare global {
       observe: (actor: "player" | "companion") => unknown;
       block: (actor: "player" | "companion", x: number, y: number, z: number) => number | null;
       move: (input: MoveInput, seconds: number) => boolean;
+      stop: () => void;
       select: (slot: number) => boolean;
       mine: (x: number, y: number, z: number) => boolean;
       place: (x: number, y: number, z: number) => boolean;
@@ -823,6 +824,7 @@ async function boot(): Promise<void> {
           time: data.time,
           night: session.isNight,
           position: p,
+          onGround: actor === "companion" ? companion.state.onGround : player.onGround,
           vitals: s.vitals,
           inventory: s.inventory,
           selected: s.selected,
@@ -831,6 +833,10 @@ async function boot(): Promise<void> {
             (m) =>
               m.hp > 0 &&
               Math.hypot(m.position.x - p.x, m.position.y - p.y, m.position.z - p.z) <= 24,
+          ),
+          loot: data.loot.filter(
+            (item) =>
+              Math.hypot(item.position.x - p.x, item.position.y - p.y, item.position.z - p.z) <= 8,
           ),
           messages: messages.filter((m) => m.from !== actor).slice(-20),
         });
@@ -846,6 +852,9 @@ async function boot(): Promise<void> {
         return world.getBlock(x, y, z);
       },
       move: (input, seconds) => companion.move(input, seconds),
+      stop: () => {
+        companion.stop();
+      },
       select: (slot) => companion.select(slot),
       mine: (x, y, z) => companion.mine(x, y, z),
       place: (x, y, z) => companion.place(x, y, z),
@@ -879,8 +888,21 @@ async function boot(): Promise<void> {
           return false;
         messages.push({ from: actor, text, time: data.time });
         if (messages.length > 100) messages.shift();
+        let display = text;
+        try {
+          const message: unknown = JSON.parse(text);
+          if (
+            message &&
+            typeof message === "object" &&
+            "text" in message &&
+            typeof message.text === "string"
+          )
+            display = message.text;
+        } catch {
+          // Plain chat messages are also supported.
+        }
         if (coopMessage)
-          coopMessage.textContent = `${actor === "player" ? "プレイヤー１" : "プレイヤー２"}：${text}`;
+          coopMessage.textContent = `${actor === "player" ? "プレイヤー１" : "プレイヤー２"}：${display}`;
         return true;
       },
     };

@@ -46,6 +46,20 @@ describe("shared-world companion", () => {
     expect(companion.move({ forward: 2, right: 0, jump: false, yaw: 0 }, 1)).toBe(false);
   });
 
+  it("immediately cancels an in-progress movement or mining command", () => {
+    const { world, state, companion, tick } = setup();
+    const initial = state.position.x;
+    expect(companion.move({ forward: 1, right: 0, jump: false, yaw: -Math.PI / 2 }, 1)).toBe(true);
+    companion.stop();
+    tick(0.5);
+    expect(state.position.x).toBeCloseTo(initial, 4);
+    world.setBlock(7, 1, 4, BlockId.WOOD);
+    expect(companion.mine(7, 1, 4)).toBe(true);
+    companion.stop();
+    tick(2);
+    expect(world.getBlock(7, 1, 4)).toBe(BlockId.WOOD);
+  });
+
   it("mines a real block over time and collects its drop into the nearest inventory", () => {
     const { world, data, state, companion, tick } = setup();
     world.setBlock(7, 1, 4, BlockId.WOOD);
