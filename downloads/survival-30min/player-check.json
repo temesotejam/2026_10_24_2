@@ -1,0 +1,10 @@
+{
+  "page": "public/watch/survival-30min.html",
+  "chapters": 10,
+  "validation": "Local Chromium with default autoplay policy, user click to start, and byte-identical published MP4 files; GitHub-style application/octet-stream, nosniff and HTTP Range responses. This check does not claim direct access to the deployed Pages domain.",
+  "videoWidth": 1280,
+  "nativeEndedAdvancesChapter": true,
+  "nativeEndedRepeatsLastToFirst": true,
+  "disablingRepeatStopsAtLastChapter": true,
+  "fullVideoDecode": "All ten files verified by ffmpeg -xerror; SHA-256 values in edit-proof.json."
+}

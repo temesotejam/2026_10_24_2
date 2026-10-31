@@ -15,6 +15,19 @@ export async function run({ page, d, a, meta, flush, chapter }) {
   }
   assert.ok((await d.info()).health > 0, "survive ordinary jump onto the lower tree");
   console.log("Actual descent", JSON.stringify(await d.info()));
+  // The surface route deliberately excludes tree canopies. Step down through
+  // the actual leaves before asking it to navigate on the ground.
+  for (let i = 0; i < 12; i++) {
+    const p = (await d.info()).position;
+    const cell = { x: Math.floor(p.x), y: Math.round(p.y) - 1, z: Math.floor(p.z) };
+    if ((await d.block(cell)) !== 7) break;
+    await d.mine(cell);
+    await page.waitForFunction(
+      (y) => window.__mc.position().y <= y + 0.1,
+      { timeout: 5000 },
+      cell.y,
+    );
+  }
   await a.surfaceTo({ x: Math.floor(g.x), z: Math.floor(g.z) });
   const here = (await d.info()).position;
   console.log("Actual grave approach", JSON.stringify(here));

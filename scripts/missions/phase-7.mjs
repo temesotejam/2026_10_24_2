@@ -156,6 +156,8 @@ export async function run({ page, d, a, meta, flush = () => undefined, chapter, 
     const c = (await a.adventure()).stronghold;
     // Stop outside first: an already activated gate must not interrupt recovery
     // or the remaining preparation after an ordinary-save resume.
+    const approach = (await d.info()).position;
+    if (Math.hypot(approach.x - c.x, approach.z - c.z) > 6) await a.reachSurface();
     await a.enterStronghold({ stopOutside: true });
     await d.light();
     const frames = framePositions(c),

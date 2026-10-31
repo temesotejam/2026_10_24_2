@@ -77,10 +77,17 @@ export function createAdventureDriver(page, d) {
       const p = window.__mc.position(),
         x = Math.floor(p.x),
         z = Math.floor(p.z);
-      for (let y = 94; y > 0; y--)
-        if ([1, 2, 3, 4, 9, 10, 11, 17, 18, 19, 20, 21, 36].includes(window.__mc.blockAt(x, y, z)))
-          return y + 1;
-      return Math.round(p.y);
+      let top = Math.round(p.y);
+      // A dug column can be open above a cave or water. Its current support
+      // alone is not the outdoor surface; inspect nearby natural ground too.
+      for (let xx = x - 2; xx <= x + 2; xx++)
+        for (let zz = z - 2; zz <= z + 2; zz++)
+          for (let y = 94; y > 0; y--)
+            if ([1, 2, 9].includes(window.__mc.blockAt(xx, y, zz))) {
+              top = Math.max(top, y + 1);
+              break;
+            }
+      return top;
     });
     await pillarTo(top);
   }
@@ -668,10 +675,43 @@ export function createAdventureDriver(page, d) {
       await shootCrystal(p);
       await d.report(`Destroyed end crystal at ${p.x},${p.y},${p.z}`);
     }
-    await eat();
-    d.setGoal("クリスタルを6個破壊。降りてきたドラゴンを剣で攻撃します。");
-    await move(0.5, 4);
-    await d.equip("iron_sword");
+    // Spare, genuinely carried crystal arrows can also hit the dragon. Stay
+    // outside its seven-block melee radius and fire only during its real perch.
+    if ((await d.count("arrow")) > 0 && !(await adventure()).dragon.defeated) {
+      await move(0.5, 10);
+      d.setGoal("余った矢を使い、距離を取って降りてきたドラゴンを狙います。");
+      await d.equip("bow");
+      const rangedUntil = Date.now() + 90000;
+      while ((await d.count("arrow")) > 0 && Date.now() < rangedUntil) {
+        const state = await adventure();
+        if (state.dragon.defeated) break;
+        assert.ok((await d.info()).health > 0, "survive actual ranged dragon combat");
+        const cycle = ((state.dragon.phase % 24) + 24) % 24;
+        if (cycle < 12.5 || cycle > 18) {
+          await wait(150);
+          continue;
+        }
+        const s = await d.info(),
+          p = state.dragonPosition;
+        const distance = Math.hypot(p.x - s.position.x, p.z - s.position.z);
+        const dy = p.y - s.position.y - s.eye;
+        const tangent =
+          (22 ** 2 - Math.sqrt(22 ** 4 - 2.4 * (2.4 * distance ** 2 + 2 * dy * 22 ** 2))) /
+          (2.4 * distance);
+        await d.aim({ x: p.x, y: s.position.y + s.eye + tangent * distance, z: p.z }, 0);
+        await right();
+        await page.waitForFunction(() => window.__mc.adventure().shots.length === 0, {
+          timeout: 12000,
+        });
+        await wait(100);
+      }
+    }
+    if (!(await adventure()).dragon.defeated) {
+      await eat();
+      d.setGoal("クリスタルを6個破壊。降りてきたドラゴンを剣で攻撃します。");
+      await move(0.5, 4);
+      await d.equip("iron_sword");
+    }
     const until = Date.now() + timeoutMs;
     while (Date.now() < until) {
       const a = await adventure();
